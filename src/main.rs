@@ -169,8 +169,8 @@ impl Rain {
                             queue!(
                                 stdout,
                                 cursor::MoveTo(x, dy),
-                                //style::SetForegroundColor(style::Color::Rgb{r:0, g:255 - (color_step * idx) as u8, b:0}),
-                                style::SetForegroundColor(style::Color::Rgb { r: 0, g: 255, b: 0 }),
+                                style::SetForegroundColor(style::Color::Rgb{r:0, g:255 - (color_step * idx) as u8, b:0}),
+                                //style::SetForegroundColor(style::Color::Rgb { r: 0, g: 255, b: 0 }),
                                 style::Print(c)
                             )?;
                         }
