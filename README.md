@@ -39,11 +39,14 @@ OPTIONS:
     -s, --shade <shade>         Set Rain shading to fade or stay constant
 ```
 
-Example:
+### Example
 
-using cargo to run
+using cargo to run:
+
 `cargo run --release -- -r 0 -g 139 -b 139 -s 1 -c jap`
-after installing
+
+after installing:
+
 `rusty_rain -r 0 -g 139 -b 139 -s 1 -c jap`
 
 ## Known Bugs
