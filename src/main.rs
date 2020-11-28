@@ -1,6 +1,7 @@
 use clap::{App, Arg};
 use crossterm::{cursor, event, execute, queue, style, terminal, Result};
 use rand::{thread_rng, Rng};
+use buffy::{Line, Cell, Buffer};
 
 use std::char;
 use std::cmp::{max, min};
@@ -227,7 +228,8 @@ impl Rain {
         self.check_time();
     }
 
-    fn draw(&self, stdout: &mut BufWriter<Stdout>) -> Result<()> {
+    fn draw(&mut self, stdout: &mut BufWriter<Stdout>) -> Result<()> {
+        let mut buffer = Buffer::new(self.dim.0 as usize, self.dim.1 as usize, ' ');
         for &idx in &self.drawables {
             let droplet = &self.droplets[idx];
             let (x, y) = droplet.loc;
@@ -235,42 +237,65 @@ impl Rain {
             let color_step_r = self.color.0 as usize / window.len();
             let color_step_g = self.color.1 as usize / window.len();
             let color_step_b = self.color.2 as usize / window.len();
-            for (idx, c) in window.iter().enumerate() {
-                let dy = y - idx as u16;
-                if dy < self.dim.1 {
-                    match idx {
-                        0 => {
-                            queue!(
-                                stdout,
-                                cursor::MoveTo(x, dy),
-                                style::SetForegroundColor(style::Color::Rgb {
-                                    r: 255,
-                                    g: 255,
-                                    b: 255
-                                }),
-                                style::Print(c)
-                            )?;
-                        }
-                        _ => {
-                            let color = if self.shading {
-                                style::SetForegroundColor(style::Color::Rgb {
-                                    r: self.color.0 - (color_step_r * idx) as u8,
-                                    g: self.color.1 - (color_step_g * idx) as u8,
-                                    b: self.color.2 - (color_step_b * idx) as u8,
-                                })
-                            } else {
-                                style::SetForegroundColor(style::Color::Rgb {
-                                    r: self.color.0,
-                                    g: self.color.1,
-                                    b: self.color.2,
-                                })
-                            };
-                            queue!(stdout, cursor::MoveTo(x, dy), color, style::Print(c))?;
-                        }
-                    }
+            let mut line: Vec<Cell> = window.iter().enumerate().map(|(i, c)| {
+                if i == 0 {
+                    (
+                        *c,
+                        Some(style::SetForegroundColor(style::Color::Rgb {
+                            r: 255,
+                            g: 255,
+                            b: 255
+                        }).to_string()),
+                        Some(style::SetForegroundColor(style::Color::Reset).to_string()),
+                        ).into()
+                } else {
+                    (
+                        *c,
+                        Some(style::SetForegroundColor(style::Color::Rgb {
+                            r: self.color.0,
+                            g: self.color.1,
+                            b: self.color.2,
+                        }).to_string()),
+                        Some(style::SetForegroundColor(style::Color::Reset).to_string()),
+                        ).into()
                 }
-            }
+                }).collect();
+            line.reverse();
+            buffer.insert_vline(x, y, &line);
+            // for (idx, c) in window.iter().enumerate() {
+            //     let dy = y - idx as u16;
+            //     if dy < self.dim.1 {
+            //         match idx {
+            //             0 => {
+            //                 queue!(
+            //                     stdout,
+            //                     cursor::MoveTo(x, dy),
+            //                     style::SetForegroundColor(style::Color::Rgb {
+            //                         r: 255,
+            //                         g: 255,
+            //                         b: 255
+            //                     }),
+            //                     style::Print(c)
+            //                 )?;
+            //             }
+            //             _ => {
+            //                 let color = if self.shading {
+            //                     style::SetForegroundColor(style::Color::Rgb {
+            //                     })
+            //                 } else {
+            //                     style::SetForegroundColor(style::Color::Rgb {
+            //                         r: self.color.0,
+            //                         g: self.color.1,
+            //                         b: self.color.2,
+            //                     })
+            //                 };
+            //                 queue!(stdout, cursor::MoveTo(x, dy), color, style::Print(c))?;
+            //             }
+            //         }
+            //     }
+            // }
         }
+        execute!(stdout, cursor::MoveTo(0, 0), style::Print(&buffer))?;
         Ok(())
     }
 }

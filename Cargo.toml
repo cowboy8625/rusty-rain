@@ -8,3 +8,5 @@ version = "0.1.0"
 clap = "*"
 crossterm = "0.18.2"
 rand = "0.7.3"
+buffy = { branch = "main", git = "https://github.com/cowboy8625/buffy.git" }
+
