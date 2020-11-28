@@ -12,10 +12,13 @@ A cross platform matrix rain terminal program that runs well and looks good.
 
 ## To Use
 
-Simply run the following command on windows/mac/linux.
-`git clone https://github.com/cowboy8625/RustyRain.git`
-`cd RustyRain`
-`cargo run --release` or to install do `cargo install --path .`
+Simply run the following command on windows/mac/linux:
+
+```
+git clone https://github.com/cowboy8625/RustyRain.git
+cd RustyRain
+cargo run --release` or to install do `cargo install --path .
+```
 
 ## Command Line Arguments
 
