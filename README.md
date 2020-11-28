@@ -41,13 +41,15 @@ OPTIONS:
 
 Example:
 
-using cargo to run:
+using cargo to run
 `cargo run --release -- -r 0 -g 139 -b 139 -s 1 -c jap`
-after installing:
+after installing
 `rusty_rain -r 0 -g 139 -b 139 -s 1 -c jap`
 
 ## Known Bugs
 
-Yeah so there are some pretty bad bug.   On Mac and Windows Rusty Rain doesnt run smoothly at all.
-But I am working on it.   If you know how to fix this please dont hesitate to send a pull request.
+Yeah so there are some pretty bad bug.
+On Mac and Windows Rusty Rain doesnt run smoothly at all.
+But I am working on it.
+If you know how to fix this please dont hesitate to send a pull request.
 
