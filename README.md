@@ -17,7 +17,15 @@ Simply run the following command on windows/mac/linux:
 ```
 git clone https://github.com/cowboy8625/RustyRain.git
 cd RustyRain
-cargo run --release` or to install do `cargo install --path .
+```
+```
+cargo run --release
+```
+
+or to install:
+
+```
+ cargo install --path .
 ```
 
 ## Command Line Arguments
