@@ -4,14 +4,7 @@ version = "0.1.0"
 authors = ["cowboy8625 <cowboy8625@yahoo.com>"]
 edition = "2018"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-crossterm = "0.17.5"
+clap = "*"
+crossterm = "0.18.2"
 rand = "0.7.3"
-<<<<<<< HEAD
-buffy = { branch = "main", git = "https://github.com/cowboy8625/buffy.git" }
-
-=======
-terminal_size = "0.1.12"
->>>>>>> parent of 45981e4... Add comand line arguments
