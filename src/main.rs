@@ -8,11 +8,15 @@ use std::io::BufWriter;
 use std::io::{stdout, Stdout, Write};
 use std::time::{Duration, Instant};
 
+const VERSION: &str = "0.0.1";
+const AUTHOR: &str = "Cowboy8625 <cowboy8625@protonmail.com>";
+const ABOUT: &str = "A terminal program the makes all your friends think you are a hacker.";
+
 fn cargs() -> ((u8, u8, u8), (u32, u32), bool) {
     let matches = App::new("Matrix Rain")
-        .version("0.0.1")
-        .author("Cowboy8625 <cowboy8625@protonmail.com>")
-        .about("A terminal program the makes all your friends think you are a hacker.")
+        .version(VERSION)
+        .author(AUTHOR)
+        .about(ABOUT)
         .arg(
             Arg::with_name("red")
                 .short("r")
