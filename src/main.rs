@@ -1,101 +1,23 @@
-use clap::{App, Arg};
+// TODO: Shading.
+
 use crossterm::{cursor, event, execute, queue, style, terminal, Result};
 use rand::{thread_rng, Rng};
 use buffy::{Line, Cell, Buffer};
 
 use std::char;
 use std::cmp::{max, min};
-use std::io::BufWriter;
 use std::io::{stdout, Stdout, Write};
 use std::time::{Duration, Instant};
 
-fn cargs() -> ((u8, u8, u8), (u32, u32), bool) {
-    let matches = App::new("Matrix Rain")
-        .version("0.0.1")
-        .author("Cowboy8625 <cowboy8625@protonmail.com>")
-        .about("A terminal program the makes all your friends think you are a hacker.")
-        .arg(
-            Arg::with_name("red")
-                .short("r")
-                .long("red")
-                .help("Set color of characters RED value")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("green")
-                .short("g")
-                .long("green")
-                .help("Set color of characters GREEN value")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("blue")
-                .short("b")
-                .long("blue")
-                .help("set color of characters BLUE value")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("characters")
-                .short("c")
-                .long("chars")
-                .help("Set what kind of characters are printed as rain")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("shade")
-                .short("s")
-                .long("shade")
-                .help("Set Rain shading to fade or stay constant")
-                .takes_value(true),
-        )
-        .get_matches();
-
-    let r = matches
-        .value_of("red")
-        .and_then(|v| {
-            v.parse::<u8>()
-                .map_err(|_| println!("This is not a Valid Red Option"))
-                .ok()
-        })
-        .unwrap_or(0);
-    let g = matches
-        .value_of("green")
-        .and_then(|v| {
-            v.parse::<u8>()
-                .map_err(|_| println!("This is not a Valid Green Option"))
-                .ok()
-        })
-        .unwrap_or(255);
-    let b = matches
-        .value_of("blue")
-        .and_then(|v| {
-            v.parse::<u8>()
-                .map_err(|_| println!("This is not a Valid Blue Option"))
-                .ok()
-        })
-        .unwrap_or(0);
-
-    let characters = match matches.value_of("characters").unwrap_or("01") {
-        "jap" => (65382, 65437),
-        "01" | _ => (48, 50),
-    };
-
-    let shading = match matches.value_of("shade").unwrap_or("0") {
-        "1" => true,
-        "0" | _ => false,
-    };
-
-    ((r, g, b), characters, shading)
-}
-
-fn ran_ch((min, max): (u32, u32)) -> char {
-    let c: u32 = thread_rng().gen_range(min, max);
+fn ran_ch() -> char {
+    // This gets a Jap Char.
+    let c: u32 = thread_rng().gen_range(65382, 65437);
+    //let c: u32 = thread_rng().gen_range(48, 50);
     char::from_u32(c).unwrap()
 }
 
-fn create_drop_chars(height: u16, characters: (u32, u32)) -> Vec<char> {
-    (0..=height).map(|_| ran_ch(characters)).collect()
+fn create_drop_chars(height: u16) -> Vec<char> {
+    (0..=height).map(|_| ran_ch()).collect()
 }
 
 #[derive(Debug)]
@@ -107,9 +29,9 @@ struct Droplets {
 }
 
 impl Droplets {
-    fn new(x: u16, h: u16, characters: (u32, u32)) -> Self {
+    fn new(x: u16, h: u16) -> Self {
         Self {
-            char_list: create_drop_chars(h, characters),
+            char_list: create_drop_chars(h),
             loc: (x, 0),
             length: thread_rng().gen_range(5, h - 9) as i16,
             time: (
@@ -146,8 +68,8 @@ impl Droplets {
         slice
     }
 
-    fn reset(&mut self, characters: (u32, u32)) {
-        self.char_list = create_drop_chars(self.char_list.len() as u16, characters);
+    fn reset(&mut self) {
+        self.char_list = create_drop_chars(self.char_list.len() as u16);
         self.loc.1 = 0;
         self.time = (
             Instant::now(),
@@ -161,23 +83,17 @@ struct Rain {
     droplets: Vec<Droplets>,
     drawables: Vec<usize>,
     removeables: Vec<usize>,
-    color: (u8, u8, u8),
-    characters: (u32, u32),
-    shading: bool,
 }
 
 impl Rain {
-    fn new(color: (u8, u8, u8), characters: (u32, u32), shading: bool) -> Self {
-        let (w, h) = terminal::size().expect("Could not find terminal size");
-        let droplets = (0..w).map(|x| Droplets::new(x, h, characters)).collect();
+    fn new() -> Self {
+        let (w, h) = terminal::size().unwrap();
+        let droplets = (0..w).map(|x| Droplets::new(x, h)).collect();
         Self {
             dim: (w, h),
             droplets,
             drawables: Vec::with_capacity(w as usize),
             removeables: Vec::with_capacity(w as usize),
-            color,
-            characters,
-            shading,
         }
     }
 
@@ -201,7 +117,7 @@ impl Rain {
         // Sorts then removes any droplets that have been off screen.
         self.removeables.sort();
         for idx in &self.removeables {
-            self.droplets[*idx].reset(self.characters);
+            self.droplets[*idx].reset();
         }
     }
 
@@ -228,12 +144,17 @@ impl Rain {
         self.check_time();
     }
 
+<<<<<<< HEAD
     fn draw(&mut self, stdout: &mut BufWriter<Stdout>) -> Result<()> {
         let mut buffer = Buffer::new(self.dim.0 as usize, self.dim.1 as usize, ' ');
+=======
+    fn draw(&self, stdout: &mut Stdout) -> Result<()> {
+>>>>>>> parent of 45981e4... Add comand line arguments
         for &idx in &self.drawables {
             let droplet = &self.droplets[idx];
             let (x, y) = droplet.loc;
             let window = droplet.window();
+<<<<<<< HEAD
             let color_step_r = self.color.0 as usize / window.len();
             let color_step_g = self.color.1 as usize / window.len();
             let color_step_b = self.color.2 as usize / window.len();
@@ -258,6 +179,35 @@ impl Rain {
                         }).to_string()),
                         Some(style::SetForegroundColor(style::Color::Reset).to_string()),
                         ).into()
+=======
+            let color_step = 255 / window.len();
+            for (idx, c) in window.iter().enumerate() {
+                let dy = y - idx as u16;
+                if dy < self.dim.1 {
+                    match idx {
+                        0 => {
+                            queue!(
+                                stdout,
+                                cursor::MoveTo(x, dy),
+                                style::SetForegroundColor(style::Color::Rgb {
+                                    r: 255,
+                                    g: 255,
+                                    b: 255
+                                }),
+                                style::Print(c)
+                            )?;
+                        }
+                        _ => {
+                            queue!(
+                                stdout,
+                                cursor::MoveTo(x, dy),
+                                style::SetForegroundColor(style::Color::Rgb{r:0, g:255 - (color_step * idx) as u8, b:0}),
+                                //style::SetForegroundColor(style::Color::Rgb { r: 0, g: 255, b: 0 }),
+                                style::Print(c)
+                            )?;
+                        }
+                    }
+>>>>>>> parent of 45981e4... Add comand line arguments
                 }
                 }).collect();
             line.reverse();
@@ -301,15 +251,13 @@ impl Rain {
 }
 
 fn main() -> Result<()> {
-    let mut stdout = BufWriter::with_capacity(8_192, stdout());
-    let (color, characters, shading) = cargs();
-    let mut rain = Rain::new(color, characters, shading);
+    let mut stdout = stdout();
+    let mut rain = Rain::new();
 
-    terminal::enable_raw_mode()?;
     execute!(stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
 
     loop {
-        if event::poll(Duration::from_millis(100))? {
+        if event::poll(Duration::from_millis(1))? {
             let event = event::read()?;
             if event == event::Event::Key(event::KeyCode::Esc.into()) {
                 break;
@@ -321,7 +269,6 @@ fn main() -> Result<()> {
     }
 
     execute!(stdout, cursor::Show, terminal::LeaveAlternateScreen)?;
-    terminal::disable_raw_mode()?;
 
     Ok(())
 }
