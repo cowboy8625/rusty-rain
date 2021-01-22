@@ -1,14 +1,22 @@
-# Rusty Rain
+<h1 align="center">
+  <br>
+  <img src="https://user-images.githubusercontent.com/43012445/105452071-411e4880-5c43-11eb-8ae2-4de61f310bf9.gif" alt="GIF" width="800">
+  <br>
+  RustyRain
+  <br>
+  <br>
+</h1>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![lastupdated](https://img.shields.io/github/last-commit/cowboy8625/RustyRain)
-![GitHub repo size](https://img.shields.io/github/repo-size/cowboy8625/RustyRain)
-![issuse](https://img.shields.io/github/issues/cowboy8625/RustyRain)
-![Discord](https://img.shields.io/discord/509849754155614230)
-![Lines of Code](https://tokei.rs/b1/github/cowboy8625/RustyRain)
+<p align="center">
+  <a><img alt="lastupdated" src="https://img.shields.io/github/repo-size/cowboy8625/rust-rain"></a>
+  <a><img alt="GitHub repo size" src="https://img.shields.io/github/last-commit/cowboy8625/rust-rain"></a>
+  <a><img alt="issuse" src="https://img.shields.io/github/issues/cowboy8625/rust-rain"></a>
+  <a><img alt="Lines of Code" src="https://tokei.rs/b1/github/cowboy8625/rust-rain"></a>
+  <a><img alt="License" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
+  <a href="https://discord.gg/KwnGX8P"><img alt="Discord Chat" src="https://img.shields.io/discord/509849754155614230"></a>
+</p>
 
 A cross platform matrix rain terminal program that runs well and looks good.
-![With Shading](snapshots/rain1.png)
 
 ## To Use
 
@@ -34,7 +42,7 @@ or to install:
 A terminal program the makes all your friends think you are a hacker.
 
 USAGE:
-    rusty_rain.exe [OPTIONS]
+    rust-rain.exe [OPTIONS]
 
 FLAGS:
     -h, --help       Prints help information
