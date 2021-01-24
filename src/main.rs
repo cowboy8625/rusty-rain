@@ -3,8 +3,8 @@ use crossterm::{cursor, event, execute, queue, style, terminal, Result};
 use rand::{thread_rng, Rng};
 
 use std::char;
-use std::cmp::{max, min};
-use std::io::BufWriter;
+// use std::cmp::{max, min};
+ use std::io::BufWriter;
 use std::io::{stdout, Stdout, Write};
 use std::time::{Duration, Instant};
 
@@ -92,210 +92,205 @@ fn cargs() -> ((u8, u8, u8), (u32, u32), bool) {
     ((r, g, b), characters, shading)
 }
 
+pub trait Unsigned {}
+impl Unsigned for u8 {}
+impl Unsigned for u16 {}
+impl Unsigned for u32 {}
+impl Unsigned for u64 {}
+impl Unsigned for u128 {}
+impl Unsigned for usize {}
+
 fn ran_ch((min, max): (u32, u32)) -> char {
-    let c: u32 = thread_rng().gen_range(min, max);
+    let c: u32 = thread_rng().gen_range(min..max);
     char::from_u32(c).unwrap()
 }
 
 fn create_drop_chars(height: u16, characters: (u32, u32)) -> Vec<char> {
-    (0..=height).map(|_| ran_ch(characters)).collect()
+    (0..height+1).map(|_| ran_ch(characters)).collect()
 }
 
-#[derive(Debug)]
-struct Droplets {
-    char_list: Vec<char>,
-    loc: (u16, u16),
-    length: i16,
-    time: (Instant, Duration),
+fn gen_charater_vecs(width: usize, height: u16, characters: (u32, u32)) -> Vec<Vec<char>>{
+    let mut ch = Vec::new();
+    for _ in 0..width {
+        ch.push(create_drop_chars(height, characters));
+    }
+    ch
 }
 
-impl Droplets {
-    fn new(x: u16, h: u16, characters: (u32, u32)) -> Self {
-        Self {
-            char_list: create_drop_chars(h, characters),
-            loc: (x, 0),
-            length: thread_rng().gen_range(5, h - 9) as i16,
-            time: (
-                Instant::now(),
-                Duration::from_millis(thread_rng().gen_range(40, 400)),
-            ),
+fn gen_times(width:usize) -> Vec<(Instant, Duration)> {
+    let now = Instant::now();
+    let mut times = Vec::new();
+    let mut rng = thread_rng();
+    for _ in 0..width {
+        times.push(
+            (now,
+            Duration::from_millis(rng.gen_range(40..400))
+            )
+            );
+    }
+    times
+}
+
+fn gen_lengths(width: usize, height: usize) -> Vec<usize> {
+    let mut len = Vec::new();
+    let mut rng = thread_rng();
+    for _ in 0..width {
+        len.push(rng.gen_range(4..height - 10));
+    }
+    len
+}
+
+
+fn usub<T>(x: T, y: T) -> T
+where
+    T: std::ops::Sub<Output = T> + std::cmp::PartialOrd + From<u8> + Unsigned,
+{
+    if y > x {
+        T::from(0)
+    } else {
+        x - y
+    }
+}
+
+fn get_visable_rain<'a>(
+    rain: &'a [char], loc: usize, len: usize
+    ) -> (&'a [char], char) {
+    let start = clamp(usub(loc, len), rain.len(), 0);
+    let end = clamp(loc+1, rain.len(), 1);
+    (&rain[start..end], if loc > len {' '} else {'\0'})
+}
+
+fn clamp(x: usize, mx: usize, mn: usize) -> usize {
+    std::cmp::max(mn, std::cmp::min(x, mx))
+}
+
+fn update_queue(rain: &mut Rain) {
+    rain.queue.clear();
+    let now = Instant::now();
+    for (i, (t, d)) in rain.time.iter_mut().enumerate() {
+        if *t <= now {
+            *t += *d;
+            rain.queue.push(i);
         }
     }
+}
 
-    fn down(&mut self) {
-        if self.loc.1 < self.char_list.len() as u16 + self.length as u16 {
-            self.loc.1 += 1;
+fn draw(w: &mut BufWriter<Stdout>, rain: &Rain) -> Result<()> {
+    let (mut chr, mut loc, mut len);
+    for x in rain.queue.iter() {
+        chr = &rain.charaters[*x];
+        loc = &rain.locations[*x];
+        len = &rain.length[*x];
+        let (slice, tail) = get_visable_rain(&chr, *loc, *len);
+        for (y, c) in slice.iter().rev().chain(vec![tail, tail].iter()).enumerate() {
+            queue!(
+                w,
+                cursor::MoveTo(*x as u16, (loc - y) as u16),
+                style::Print(c),
+                )?;
         }
     }
+    Ok(())
+}
 
-    fn last_char(&self) -> u16 {
-        max(self.loc.1 as i16 - self.length as i16, 0) as u16
+fn update_locations(rain: &mut Rain) {
+    let queue = &rain.queue;
+    for i in queue.iter() {
+        rain.locations[*i] += 1;
     }
+}
 
-    fn window(&self) -> Vec<char> {
-        let left = max((self.loc.1 as isize - self.length as isize) + 1, 0) as usize;
-        let right = min(self.loc.1 as usize, self.char_list.len() - 1);
-        let mut slice = self.char_list[left..=right].to_vec();
-        slice.reverse();
-        if self.loc.1 > self.length as u16 - 1 {
-            slice.push(' ');
+fn update_reset(rain: &mut Rain) {
+    rain.reset.clear();
+    let h = rain.height();
+    for (i, l) in rain.locations.iter().enumerate() {
+        if l > &h {
+            rain.reset.push(i);
         }
-        if self.loc.1 > self.length as u16 && self.loc.1 >= self.char_list.len() as u16 {
-            let spaces = self.loc.1 - self.char_list.len() as u16;
-            for _ in 0..=spaces {
-                slice.insert(0, ' ');
-            }
-        }
-        slice
     }
+}
 
-    fn reset(&mut self, characters: (u32, u32)) {
-        self.char_list = create_drop_chars(self.char_list.len() as u16, characters);
-        self.loc.1 = 0;
-        self.time = (
-            Instant::now(),
-            Duration::from_millis(thread_rng().gen_range(40, 400)),
-        );
+fn reset(rain: &mut Rain, characters: (u32, u32)) {
+    let mut rng = thread_rng();
+    let reset = &rain.reset;
+    let h16 = rain.height() as u16;
+    let hsize = rain.height();
+    let now = Instant::now();
+    for i in reset.iter() {
+        // let length = vec![rng.gen_range(4..h - 2); w];
+        // let _colors = Vec::with_capacity(w);
+        // let time = gen_times(w);
+        rain.charaters[*i] = create_drop_chars(h16, characters);
+        rain.locations[*i] = 0;
+        rain.length[*i] = rng.gen_range(4..hsize - 10);
+        // rain._colors
+        rain.time[*i] = (now, Duration::from_millis(rng.gen_range(40..400)));
     }
 }
 
 struct Rain {
-    dim: (u16, u16),
-    droplets: Vec<Droplets>,
-    drawables: Vec<usize>,
-    removeables: Vec<usize>,
-    color: (u8, u8, u8),
-    characters: (u32, u32),
-    shading: bool,
+    charaters: Vec<Vec<char>>,
+    locations: Vec<usize>,
+    length   : Vec<usize>,
+    _colors  : Vec<Vec<style::Color>>,
+    time     : Vec<(Instant, Duration)>,
+    queue    : Vec<usize>,
+    reset    : Vec<usize>,
 }
 
 impl Rain {
-    fn new(color: (u8, u8, u8), characters: (u32, u32), shading: bool) -> Self {
-        let (w, h) = terminal::size().expect("Could not find terminal size");
-        let droplets = (0..w).map(|x| Droplets::new(x, h, characters)).collect();
+    fn new(width: u16, height: u16, _color: style::Color, characters: (u32, u32), _shading: bool) -> Self {
+        let w = width as usize;
+        let h = height as usize;
+        let charaters = gen_charater_vecs(w, height, characters);
+        let locations = vec![0; w];
+        let length = gen_lengths(w, h);
+        let _colors = Vec::with_capacity(w);
+        let time = gen_times(w);
+        let queue = Vec::with_capacity(w);
+        let reset = Vec::with_capacity(w);
         Self {
-            dim: (w, h),
-            droplets,
-            drawables: Vec::with_capacity(w as usize),
-            removeables: Vec::with_capacity(w as usize),
-            color,
-            characters,
-            shading,
+            charaters,
+            locations,
+            length,
+            _colors,
+            time,
+            queue,
+            reset,
         }
     }
 
-    fn move_drop_down(&mut self) {
-        // Moves droplet down if it had been drawn.
-        for idx in &self.drawables {
-            self.droplets[*idx].down();
-        }
+    fn _width(&self) -> usize {
+        self.charaters[0].len()
     }
 
-    fn check_for_off_screen(&mut self) {
-        // Checks to see if tail of drop is off screen
-        for (idx, droplet) in self.droplets.iter().enumerate() {
-            if droplet.last_char() > self.dim.1 {
-                self.removeables.push(idx);
-            }
-        }
-    }
-
-    fn remove_droplets(&mut self) {
-        // Sorts then removes any droplets that have been off screen.
-        self.removeables.sort();
-        for idx in &self.removeables {
-            self.droplets[*idx].reset(self.characters);
-        }
-    }
-
-    fn check_time(&mut self) {
-        // Checks droplet time to see if it needs to be drawn.
-        let now = Instant::now();
-        for (idx, droplet) in self.droplets.iter_mut().enumerate() {
-            if droplet.time.0 <= now {
-                droplet.time.0 += droplet.time.1;
-                self.drawables.push(idx);
-            }
-        }
-    }
-
-    fn update(&mut self) {
-        self.move_drop_down();
-
-        // clears Vec's
-        self.drawables.clear();
-        self.removeables.clear();
-
-        self.check_for_off_screen();
-        self.remove_droplets();
-        self.check_time();
-    }
-
-    fn draw(&self, stdout: &mut BufWriter<Stdout>) -> Result<()> {
-        for &idx in &self.drawables {
-            let droplet = &self.droplets[idx];
-            let (x, y) = droplet.loc;
-            let window = droplet.window();
-            let color_step_r = self.color.0 as usize / window.len();
-            let color_step_g = self.color.1 as usize / window.len();
-            let color_step_b = self.color.2 as usize / window.len();
-            for (idx, c) in window.iter().enumerate() {
-                let dy = y - idx as u16;
-                if dy < self.dim.1 {
-                    match idx {
-                        0 => {
-                            queue!(
-                                stdout,
-                                cursor::MoveTo(x, dy),
-                                style::SetForegroundColor(style::Color::Rgb {
-                                    r: 255,
-                                    g: 255,
-                                    b: 255
-                                }),
-                                style::Print(c)
-                            )?;
-                        }
-                        _ => {
-                            let color = if self.shading {
-                                style::SetForegroundColor(style::Color::Rgb {
-                                    r: self.color.0 - (color_step_r * idx) as u8,
-                                    g: self.color.1 - (color_step_g * idx) as u8,
-                                    b: self.color.2 - (color_step_b * idx) as u8,
-                                })
-                            } else {
-                                style::SetForegroundColor(style::Color::Rgb {
-                                    r: self.color.0,
-                                    g: self.color.1,
-                                    b: self.color.2,
-                                })
-                            };
-                            queue!(stdout, cursor::MoveTo(x, dy), color, style::Print(c))?;
-                        }
-                    }
-                }
-            }
-        }
-        Ok(())
+    fn height(&self) -> usize {
+        self.charaters.len()
     }
 }
 
 fn main() -> Result<()> {
     let mut stdout = BufWriter::with_capacity(8_192, stdout());
-    let (color, characters, shading) = cargs();
-    let mut rain = Rain::new(color, characters, shading);
+    let ((r, g, b), characters, shading) = cargs();
+    let (width, height) = terminal::size()?;
+    let color = style::Color::Rgb { r, g, b };
+    let mut rain = Rain::new(width, height, color, characters, shading);
 
     terminal::enable_raw_mode()?;
     execute!(stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
 
     loop {
-        if event::poll(Duration::from_millis(1))? {
+        if event::poll(Duration::from_millis(100))? {
             let event = event::read()?;
             if event == event::Event::Key(event::KeyCode::Esc.into()) {
                 break;
             }
         }
-        rain.update();
-        rain.draw(&mut stdout)?;
+        update_reset(&mut rain);
+        reset(&mut rain, characters);
+        update_queue(&mut rain);
+        draw(&mut stdout, &rain)?;
+        update_locations(&mut rain);
         stdout.flush()?;
     }
 
