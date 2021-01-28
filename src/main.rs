@@ -1,96 +1,22 @@
-use clap::{App, Arg};
+use std::io::{BufWriter, stdout, Stdout, Write};
+use std::time::{Duration, Instant};
+use std::char;
 use crossterm::{cursor, event, execute, queue, style, terminal, Result};
 use rand::{thread_rng, Rng};
+mod arguments;
+use arguments::cargs;
 
-use std::char;
-// use std::cmp::{max, min};
- use std::io::BufWriter;
-use std::io::{stdout, Stdout, Write};
-use std::time::{Duration, Instant};
-
-const VERSION: &str = "0.0.1";
-const AUTHOR: &str = "Cowboy8625 <cowboy8625@protonmail.com>";
+const MAXSPEED: u64 = 40;
+const MINSPEED: u64 = 200;
+const VERSION: &str = "0.0.2";
+const AUTHOR: &str = "
+▞▀▖       ▌        ▞▀▖▞▀▖▞▀▖▛▀▘
+▌  ▞▀▖▌  ▌▛▀▖▞▀▖▌ ▌▚▄▘▙▄  ▗▘▙▄
+▌ ▖▌ ▌▐▐▐ ▌ ▌▌ ▌▚▄▌▌ ▌▌ ▌▗▘ ▖ ▌
+▝▀ ▝▀  ▘▘ ▀▀ ▝▀ ▗▄▘▝▀ ▝▀ ▀▀▘▝▀
+Email: cowboy8625@protonmail.com
+";
 const ABOUT: &str = "A terminal program the makes all your friends think you are a hacker.";
-
-fn cargs() -> ((u8, u8, u8), (u32, u32), bool) {
-    let matches = App::new("Matrix Rain")
-        .version(VERSION)
-        .author(AUTHOR)
-        .about(ABOUT)
-        .arg(
-            Arg::with_name("red")
-                .short("r")
-                .long("red")
-                .help("Set color of characters RED value")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("green")
-                .short("g")
-                .long("green")
-                .help("Set color of characters GREEN value")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("blue")
-                .short("b")
-                .long("blue")
-                .help("set color of characters BLUE value")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("characters")
-                .short("c")
-                .long("chars")
-                .help("Set what kind of characters are printed as rain")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("shade")
-                .short("s")
-                .long("shade")
-                .help("Set Rain shading to fade or stay constant")
-                .takes_value(true),
-        )
-        .get_matches();
-
-    let r = matches
-        .value_of("red")
-        .and_then(|v| {
-            v.parse::<u8>()
-                .map_err(|_| println!("This is not a Valid Red Option"))
-                .ok()
-        })
-        .unwrap_or(0);
-    let g = matches
-        .value_of("green")
-        .and_then(|v| {
-            v.parse::<u8>()
-                .map_err(|_| println!("This is not a Valid Green Option"))
-                .ok()
-        })
-        .unwrap_or(255);
-    let b = matches
-        .value_of("blue")
-        .and_then(|v| {
-            v.parse::<u8>()
-                .map_err(|_| println!("This is not a Valid Blue Option"))
-                .ok()
-        })
-        .unwrap_or(0);
-
-    let characters = match matches.value_of("characters").unwrap_or("01") {
-        "jap" => (65382, 65437),
-        "01" | _ => (48, 50),
-    };
-
-    let shading = match matches.value_of("shade").unwrap_or("0") {
-        "1" => true,
-        "0" | _ => false,
-    };
-
-    ((r, g, b), characters, shading)
-}
 
 pub trait Unsigned {}
 impl Unsigned for u8 {}
@@ -124,22 +50,56 @@ fn gen_times(width:usize) -> Vec<(Instant, Duration)> {
     for _ in 0..width {
         times.push(
             (now,
-            Duration::from_millis(rng.gen_range(40..400))
+            Duration::from_millis(rng.gen_range(MAXSPEED..MINSPEED))
             )
             );
     }
     times
 }
 
-fn gen_lengths(width: usize, height: usize) -> Vec<usize> {
+fn gen_lengths(width: usize, _height: usize) -> Vec<usize> {
     let mut len = Vec::new();
-    let mut rng = thread_rng();
+    // Debug
+    let mut _rng = thread_rng();
     for _ in 0..width {
-        len.push(rng.gen_range(4..height - 10));
+        // Debug
+        len.push(15);// rng.gen_range(4..10));
     }
     len
 }
 
+fn gen_colors(width: usize, length: &[usize], bc: style::Color) -> Vec<Vec<style::Color>> {
+    let mut colors = Vec::with_capacity(width);
+    for l in length.iter() {
+        colors.push(create_color(bc, *l as u8));
+    }
+    colors
+}
+
+fn create_color(bc: style::Color, length: u8) -> Vec<style::Color> {
+    let mut c = Vec::with_capacity(length as usize);
+    match bc {
+        style::Color::Rgb{r, g, b} => {
+            let (mut nr,mut ng,mut nb);
+            for i in 0..length {
+                nr = r/length;
+                ng = g/length;
+                nb = b/length;
+                c.push((nr*i, ng*i, nb*i).into());
+            }
+            c.push(style::Color::Rgb{r, g, b});
+        },
+        color => {
+            for _ in 0..length {
+                c.push(color);
+            }
+            c.push(color);
+        }
+    }
+    // assert_eq!(c.len(), length as usize);
+    c.reverse();
+    c
+}
 
 fn usub<T>(x: T, y: T) -> T
 where
@@ -152,41 +112,49 @@ where
     }
 }
 
-fn get_visable_rain<'a>(
-    rain: &'a [char], loc: usize, len: usize
-    ) -> (&'a [char], char) {
-    let start = clamp(usub(loc, len), rain.len(), 0);
-    let end = clamp(loc+1, rain.len(), 1);
-    (&rain[start..end], if loc > len {' '} else {'\0'})
-}
-
 fn clamp(x: usize, mx: usize, mn: usize) -> usize {
     std::cmp::max(mn, std::cmp::min(x, mx))
 }
 
 fn update_queue(rain: &mut Rain) {
     rain.queue.clear();
-    let now = Instant::now();
-    for (i, (t, d)) in rain.time.iter_mut().enumerate() {
-        if *t <= now {
-            *t += *d;
-            rain.queue.push(i);
-        }
+    let _now = Instant::now();
+    for (i, (_t, _d)) in rain.time.iter_mut().enumerate() {
+        // Debug
+        rain.queue.push(i);
+        // if *t <= now {
+        //     *t += *d;
+        //     rain.queue.push(i);
+        // }
     }
 }
 
 fn draw(w: &mut BufWriter<Stdout>, rain: &Rain) -> Result<()> {
-    let (mut chr, mut loc, mut len);
+    let (mut chr, mut loc, mut len, mut clr);
     for x in rain.queue.iter() {
         chr = &rain.charaters[*x];
         loc = &rain.locations[*x];
         len = &rain.length[*x];
-        let (slice, tail) = get_visable_rain(&chr, *loc, *len);
-        for (y, c) in slice.iter().rev().chain(vec![tail, tail].iter()).enumerate() {
+        clr = &rain.colors[*x];
+
+        let start = clamp(usub(*loc, *len), chr.len(), 0);
+        let end = clamp(loc+1, chr.len(), 1);
+
+        let mut color_idx = 0;
+        for (y, ch) in chr[start..end].iter().rev().enumerate() {
             queue!(
                 w,
-                cursor::MoveTo(*x as u16, (loc - y) as u16),
-                style::Print(c),
+                cursor::MoveTo(*x as u16, (*loc - y) as u16),
+                style::SetForegroundColor(clr[color_idx]),
+                style::Print(ch),
+                )?;
+            color_idx += 1;
+        }
+        if loc >= len {
+            queue!(
+                w,
+                cursor::MoveTo(*x as u16, (usub(*loc, *len)) as u16),
+                style::Print(' '),
                 )?;
         }
     }
@@ -198,65 +166,49 @@ fn update_locations(rain: &mut Rain) {
     for i in queue.iter() {
         rain.locations[*i] += 1;
     }
-}
-
-fn update_reset(rain: &mut Rain) {
-    rain.reset.clear();
-    let h = rain.height();
-    for (i, l) in rain.locations.iter().enumerate() {
-        if l > &h {
-            rain.reset.push(i);
+} 
+fn reset(rain: &mut Rain, characters: (u32, u32)) {
+    // let mut rng = thread_rng();
+    let h16 = rain.height() as u16;
+    let hsize = rain.height();
+    // let now = Instant::now();
+    for i in rain.queue.iter() {
+        if rain.locations[*i] > hsize {
+            rain.charaters[*i] = create_drop_chars(h16, characters);
+            rain.locations[*i] = 0;
+            // rain.length[*i] = 15;//rng.gen_range(4..hsize - 10);
+            // rain.time[*i] = (now, Duration::from_millis(rng.gen_range(40..400)));
         }
     }
 }
 
-fn reset(rain: &mut Rain, characters: (u32, u32)) {
-    let mut rng = thread_rng();
-    let reset = &rain.reset;
-    let h16 = rain.height() as u16;
-    let hsize = rain.height();
-    let now = Instant::now();
-    for i in reset.iter() {
-        // let length = vec![rng.gen_range(4..h - 2); w];
-        // let _colors = Vec::with_capacity(w);
-        // let time = gen_times(w);
-        rain.charaters[*i] = create_drop_chars(h16, characters);
-        rain.locations[*i] = 0;
-        rain.length[*i] = rng.gen_range(4..hsize - 10);
-        // rain._colors
-        rain.time[*i] = (now, Duration::from_millis(rng.gen_range(40..400)));
-    }
-}
-
+#[derive(Debug)]
 struct Rain {
     charaters: Vec<Vec<char>>,
     locations: Vec<usize>,
     length   : Vec<usize>,
-    _colors  : Vec<Vec<style::Color>>,
+    colors   : Vec<Vec<style::Color>>,
     time     : Vec<(Instant, Duration)>,
     queue    : Vec<usize>,
-    reset    : Vec<usize>,
 }
 
 impl Rain {
-    fn new(width: u16, height: u16, _color: style::Color, characters: (u32, u32), _shading: bool) -> Self {
+    fn new(width: u16, height: u16, base_color: style::Color, characters: (u32, u32), _shading: bool) -> Self {
         let w = width as usize;
         let h = height as usize;
         let charaters = gen_charater_vecs(w, height, characters);
         let locations = vec![0; w];
-        let length = gen_lengths(w, h);
-        let _colors = Vec::with_capacity(w);
-        let time = gen_times(w);
-        let queue = Vec::with_capacity(w);
-        let reset = Vec::with_capacity(w);
+        let length    = gen_lengths(w, h);
+        let colors    = gen_colors(w, &length, base_color);
+        let time      = gen_times(w);
+        let queue     = Vec::with_capacity(w);
         Self {
             charaters,
             locations,
             length,
-            _colors,
+            colors,
             time,
             queue,
-            reset,
         }
     }
 
@@ -271,29 +223,27 @@ impl Rain {
 
 fn main() -> Result<()> {
     let mut stdout = BufWriter::with_capacity(8_192, stdout());
-    let ((r, g, b), characters, shading) = cargs();
+    let (color, characters, shading) = cargs();
     let (width, height) = terminal::size()?;
-    let color = style::Color::Rgb { r, g, b };
-    let mut rain = Rain::new(width, height, color, characters, shading);
+    let mut rain = Rain::new(width, height, color.into(), characters, shading);
 
     terminal::enable_raw_mode()?;
     execute!(stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
 
     loop {
-        if event::poll(Duration::from_millis(100))? {
-            let event = event::read()?;
+        if event::poll(Duration::from_millis(100))? { let event = event::read()?;
             if event == event::Event::Key(event::KeyCode::Esc.into()) {
                 break;
             }
         }
-        update_reset(&mut rain);
-        reset(&mut rain, characters);
         update_queue(&mut rain);
         draw(&mut stdout, &rain)?;
-        update_locations(&mut rain);
         stdout.flush()?;
+        update_locations(&mut rain);
+        reset(&mut rain, characters);
     }
 
+    std::thread::sleep(Duration::from_secs(1));
     execute!(stdout, cursor::Show, terminal::LeaveAlternateScreen)?;
     terminal::disable_raw_mode()?;
 

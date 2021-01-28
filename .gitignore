@@ -1,5 +1,9 @@
 /target
 /Cargo.lock
-*.lock
 /graphs
 dod.rs
+*.lock
+*.txt
+*.sh
+*.svg
+*.data
