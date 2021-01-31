@@ -39,7 +39,7 @@ or to install:
 ## Command Line Arguments
 
 ```
-A terminal program the makes all your friends think you are a hacker.
+A terminal program that makes all your friends think you are a hacker.
 
 USAGE:
     rust-rain.exe [OPTIONS]
