@@ -66,10 +66,7 @@ after installing:
 
 `rusty_rain -r 0 -g 139 -b 139 -s 1 -c jap`
 
-## Known Bugs
+# Help
 
-Yeah so there are some pretty bad bug.
-On Mac and Windows Rusty Rain doesnt run smoothly at all.
-But I am working on it.
-If you know how to fix this please dont hesitate to send a pull request.
-
+If find any bugs or performance is not up to par please submit a issue so I can better improve
+the project.
