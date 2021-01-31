@@ -1,6 +1,5 @@
-use crate::{AUTHOR, ABOUT, VERSION};
+use crate::{ABOUT, AUTHOR, VERSION};
 use clap::{App, Arg};
-
 
 pub fn cargs() -> ((u8, u8, u8), (u32, u32), bool) {
     let matches = App::new("Matrix Rain")
