@@ -152,12 +152,21 @@ fn draw(w: &mut BufWriter<Stdout>, rain: &Rain) -> Result<()> {
 
         let mut color_idx = 0;
         for (y, ch) in slice.rev().enumerate() {
-            queue!(
-                w,
-                cursor::MoveTo(*x as u16, (*loc.min(&height) - y) as u16),
-                style::SetForegroundColor(color[color_idx]),
-                style::Print(ch),
-            )?;
+            if y > 0 {
+                queue!(
+                    w,
+                    cursor::MoveTo(*x as u16, (*loc.min(&height) - y) as u16),
+                    style::SetForegroundColor(color[color_idx]),
+                    style::Print(ch),
+                )?;
+            } else {
+                queue!(
+                    w,
+                    cursor::MoveTo(*x as u16, (*loc.min(&height) - y) as u16),
+                    style::SetForegroundColor(style::Color::White),
+                    style::Print(ch),
+                )?;
+            }
             color_idx += 1;
         }
         if loc >= len {
