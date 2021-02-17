@@ -23,8 +23,8 @@ A cross platform matrix rain terminal program that runs well and looks good.
 Simply run the following command on windows/mac/linux:
 
 ```
-git clone https://github.com/cowboy8625/RustyRain.git
-cd RustyRain
+git clone https://github.com/cowboy8625/rusty-rain.git
+cd rusty-rain
 ```
 ```
 cargo run --release
