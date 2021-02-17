@@ -42,7 +42,7 @@ or to install:
 A terminal program that makes all your friends think you are a hacker.
 
 USAGE:
-    rust-rain.exe [OPTIONS]
+    rusty-rain.exe [OPTIONS]
 
 FLAGS:
     -h, --help       Prints help information
@@ -64,7 +64,7 @@ using cargo to run:
 
 after installing:
 
-`rusty_rain -r 0 -g 139 -b 139 -s 1 -c jap`
+`rusty-rain -r 0 -g 139 -b 139 -s 1 -c jap`
 
 # Help
 
