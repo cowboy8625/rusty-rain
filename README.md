@@ -2,7 +2,7 @@
   <br>
   <img src="https://user-images.githubusercontent.com/43012445/105452071-411e4880-5c43-11eb-8ae2-4de61f310bf9.gif" alt="GIF" width="800">
   <br>
-  RustyRain
+  Rusty Rain
   <br>
   <br>
 </h1>
@@ -35,6 +35,11 @@ or to install:
 ```
  cargo install --path .
 ```
+
+## Exit
+
+To exit just press `ESC`
+
 
 ## Command Line Arguments
 
