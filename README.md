@@ -47,17 +47,23 @@ To exit just press `ESC`
 A terminal program that makes all your friends think you are a hacker.
 
 USAGE:
-    rusty-rain.exe [OPTIONS]
+    rusty-rain [OPTIONS]
 
 FLAGS:
     -h, --help       Prints help information
     -V, --version    Prints version information
 
 OPTIONS:
-    -b, --blue <blue>           set color of characters BLUE value
     -c, --chars <characters>    Set what kind of characters are printed as rain
-    -g, --green <green>         Set color of characters GREEN value
-    -r, --red <red>             Set color of characters RED value
+    -C, --color <color>         Set color of Rain with color string name or tuple
+                                white,
+                                red,
+                                blue,
+                                green,
+                                "(r, g, b)"
+
+
+    -H, --head <head>           Set the color of the first char in Rain.
     -s, --shade <shade>         Set Rain shading to fade or stay constant
 ```
 
@@ -65,11 +71,11 @@ OPTIONS:
 
 using cargo to run:
 
-`cargo run --release -- -r 0 -g 139 -b 139 -s 1 -c jap`
+`cargo run --release -- -C "(0, 139, 139)" -H "(255, 255, 255)" -s 1 -c jap`
 
 after installing:
 
-`rusty-rain -r 0 -g 139 -b 139 -s 1 -c jap`
+`rusty-rain -C "(0, 139, 139)" -H "(255, 255, 255)" -s 1 -c jap`
 
 # Help
 
