@@ -65,15 +65,16 @@ fn gen_lengths(width: usize, height: usize) -> Vec<usize> {
     len
 }
 
-fn gen_colors<F: Fn(style::Color, u8) -> Vec<style::Color>>(
+fn gen_colors<F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>>(
     create_color: F,
+    head: (u8, u8, u8),
     width: usize,
     length: &[usize],
     bc: style::Color,
 ) -> Vec<Vec<style::Color>> {
     let mut colors = Vec::with_capacity(width);
     for l in length.iter() {
-        colors.push(create_color(bc, *l as u8));
+        colors.push(create_color(bc, head.into(), *l as u8));
     }
     colors
 }
@@ -117,7 +118,12 @@ fn draw(w: &mut BufWriter<Stdout>, rain: &Rain) -> Result<()> {
         let end = clamp(loc + 1, chr.len(), 1);
         let slice = chr[start..end].iter();
 
-        let cstart = clr.len() - slice.len();
+        let cstart = if loc > len {
+            clr.len() - slice.len()
+        } else {
+            0
+        };
+
         let color = &clr[cstart..clr.len()];
 
         let mut color_idx = 0;
@@ -148,8 +154,9 @@ fn update_locations(rain: &mut Rain) {
     }
 }
 
-fn reset<F: Fn(style::Color, u8) -> Vec<style::Color>>(
+fn reset<F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>>(
     create_color: F,
+    head: (u8, u8, u8),
     rain: &mut Rain,
     characters: (u32, u32),
     height: usize,
@@ -164,7 +171,7 @@ fn reset<F: Fn(style::Color, u8) -> Vec<style::Color>>(
             rain.charaters[*i] = create_drop_chars(h16, characters);
             rain.locations[*i] = 0;
             rain.length[*i] = rng.gen_range(4..height - 10);
-            rain.colors[*i] = create_color(bc, rain.length[*i] as u8);
+            rain.colors[*i] = create_color(bc, head.into(), rain.length[*i] as u8);
             rain.time[*i] = (now, Duration::from_millis(rng.gen_range(10..200)));
         }
     }
@@ -181,8 +188,9 @@ struct Rain {
 }
 
 impl Rain {
-    fn new<F: Fn(style::Color, u8) -> Vec<style::Color>>(
+    fn new<F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>>(
         create_color: F,
+        head: (u8, u8, u8),
         width: u16,
         height: u16,
         base_color: style::Color,
@@ -193,7 +201,7 @@ impl Rain {
         let charaters = gen_charater_vecs(w, height, characters);
         let locations = vec![0; w];
         let length = gen_lengths(w, h);
-        let colors = gen_colors(create_color, w, &length, base_color);
+        let colors = gen_colors(create_color, head, w, &length, base_color);
         let time = gen_times(w);
         let queue = Vec::with_capacity(w);
         Self {
@@ -213,15 +221,14 @@ impl Rain {
 
 fn main() -> Result<()> {
     let mut stdout = BufWriter::with_capacity(8_192, stdout());
-    let (color, characters, shading) = cargs();
-    let (width, height) = terminal::size()?;
+    let (color, characters, shading, head) = cargs(); let (width, height) = terminal::size()?;
     let h = height as usize;
 
     // This Creates a closure off of the args
     // given to the program at start that will crates the colors for the rain
     let create_color = match (color, characters, shading) {
         // Creates shading colors
-        (_, (65382, 65437), true) | (_, (48, 50), true) => |bc: style::Color, length: u8| {
+        (_, (65382, 65437), true) | (_, (48, 50), true) => |bc: style::Color, head: style::Color, length: u8| {
             let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
             let (mut nr, mut ng, mut nb);
             if let style::Color::Rgb { r, g, b } = bc {
@@ -231,19 +238,15 @@ fn main() -> Result<()> {
                     nb = b / length;
                     c.push((nr * i, ng * i, nb * i).into());
                 }
-                c.push(style::Color::Rgb {
-                    r: 255,
-                    g: 255,
-                    b: 255,
-                });
+                c.push(head);
                 c.reverse();
             }
             c
         },
         // creates with out color
-        (_, (65382, 65437), false) | (_, (48, 50), false) => |bc: style::Color, length: u8| {
+        (_, (65382, 65437), false) | (_, (48, 50), false) => |bc: style::Color, head: style::Color, length: u8| {
             let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
-            c.push(style::Color::White);
+            c.push(head);
             if let style::Color::Rgb { r, g, b } = bc {
                 for _ in 0..length {
                     c.push((r, g, b).into());
@@ -252,9 +255,9 @@ fn main() -> Result<()> {
             c
         },
         // Same as with out color
-        _ => |bc: style::Color, length: u8| {
+        _ => |bc: style::Color, head: style::Color, length: u8| {
             let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
-            c.push(style::Color::White);
+            c.push(head);
             if let style::Color::Rgb { r, g, b } = bc {
                 for _ in 0..length {
                     c.push((r, g, b).into());
@@ -264,7 +267,7 @@ fn main() -> Result<()> {
         },
     };
 
-    let mut rain = Rain::new(create_color, width, height, color.into(), characters);
+    let mut rain = Rain::new(create_color, head.clone(), width, height, color.into(), characters);
 
     terminal::enable_raw_mode()?;
     execute!(stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
@@ -280,7 +283,7 @@ fn main() -> Result<()> {
         draw(&mut stdout, &rain)?;
         stdout.flush()?;
         update_locations(&mut rain);
-        reset(create_color, &mut rain, characters, h, color.into());
+        reset(create_color, head.clone(), &mut rain, characters, h, color.into());
     }
 
     execute!(stdout, cursor::Show, terminal::LeaveAlternateScreen)?;

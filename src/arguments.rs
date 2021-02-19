@@ -1,30 +1,31 @@
 use crate::{ABOUT, AUTHOR, VERSION};
 use clap::{App, Arg};
 
-pub fn cargs() -> ((u8, u8, u8), (u32, u32), bool) {
+type COLOR = (u8, u8, u8);
+pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
     let matches = App::new("Matrix Rain")
         .version(VERSION)
         .author(AUTHOR)
         .about(ABOUT)
         .arg(
-            Arg::with_name("red")
-                .short("r")
-                .long("red")
-                .help("Set color of characters RED value")
+            Arg::with_name("color")
+                .short("C")
+                .long("color")
+                .help(" Set color of Rain with color string name or tuple
+                white,
+                red,
+                blue,
+                green,
+                \"(r, g, b)\")
+
+                      ")
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("green")
-                .short("g")
-                .long("green")
-                .help("Set color of characters GREEN value")
-                .takes_value(true),
-        )
-        .arg(
-            Arg::with_name("blue")
-                .short("b")
-                .long("blue")
-                .help("set color of characters BLUE value")
+            Arg::with_name("head")
+                .short("H")
+                .long("head")
+                .help("Set the color of the first char in Rain.")
                 .takes_value(true),
         )
         .arg(
@@ -43,30 +44,21 @@ pub fn cargs() -> ((u8, u8, u8), (u32, u32), bool) {
         )
         .get_matches();
 
-    let r = matches
-        .value_of("red")
-        .and_then(|v| {
-            v.parse::<u8>()
-                .map_err(|_| println!("This is not a Valid Red Option"))
-                .ok()
-        })
-        .unwrap_or(0);
-    let g = matches
-        .value_of("green")
-        .and_then(|v| {
-            v.parse::<u8>()
-                .map_err(|_| println!("This is not a Valid Green Option"))
-                .ok()
-        })
-        .unwrap_or(255);
-    let b = matches
-        .value_of("blue")
-        .and_then(|v| {
-            v.parse::<u8>()
-                .map_err(|_| println!("This is not a Valid Blue Option"))
-                .ok()
-        })
-        .unwrap_or(0);
+    let color = match matches.value_of("color").unwrap_or("not a color") {
+        "white" => (255, 255, 255),
+        "red" => (255, 0, 0),
+        "green" => (0, 255, 0),
+        "blue" => (0, 0, 255),
+        a => a.to_string().to_tuple(),
+    };
+
+    let head = match matches.value_of("head").unwrap_or("not a color") {
+        "white" => (255, 255, 255),
+        "red" => (255, 0, 0),
+        "green" => (0, 255, 0),
+        "blue" => (0, 0, 255),
+        a => a.to_string().to_tuple(),
+    };
 
     let characters = match matches.value_of("characters").unwrap_or("01") {
         "jap" => (65382, 65437),
@@ -78,5 +70,26 @@ pub fn cargs() -> ((u8, u8, u8), (u32, u32), bool) {
         "0" | _ => false,
     };
 
-    ((r, g, b), characters, shading)
+    (color, characters, shading, head)
 }
+
+
+impl StrTuple for String {
+    type Tuple = (u8, u8, u8);
+    fn to_tuple(self) -> Self::Tuple {
+        let mut nums = Vec::new();
+        for num in self[1..self.len()-1].split(", ") {
+            nums.push(num.parse::<u8>().expect("Not A number"));
+        }
+        let a = nums[0];
+        let b = nums[1];
+        let c = nums[2];
+        (a, b, c)
+    }
+}
+
+trait StrTuple {
+    type Tuple;
+    fn to_tuple(self) -> Self::Tuple;
+}
+
