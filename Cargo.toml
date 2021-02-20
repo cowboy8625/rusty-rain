@@ -10,7 +10,7 @@ homepage = "https://github.com/cowboy8625/rusty-rain"
 documentation = "https://docs.rs/rusty-rain"
 license-file = "LICENSE"
 keywords = ["matrix", "matrix-rain", "matrix_rain", "cmatrix", "rain"]
-categoriem = ["command-line-utilities"]
+categories = ["command-line-utilities"]
 
 [dependencies]
 clap = "2.33.3"

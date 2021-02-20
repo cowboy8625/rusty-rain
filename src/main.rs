@@ -368,14 +368,7 @@ fn main() -> Result<()> {
         draw(&mut stdout, &rain)?;
         stdout.flush()?;
         update_locations(&mut rain);
-        reset(
-            create_color,
-            head,
-            &mut rain,
-            characters,
-            h,
-            color.into(),
-        );
+        reset(create_color, head, &mut rain, characters, h, color.into());
     }
 
     execute!(stdout, cursor::Show, terminal::LeaveAlternateScreen)?;
