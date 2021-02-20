@@ -44,38 +44,17 @@
 //! ## Command Line Arguments
 //!
 //! ```
-//! A terminal program that makes all your friends think you are a hacker.
-//!
-//! USAGE:
-//!     rusty-rain [OPTIONS]
-//!
-//! FLAGS:
-//!     -h, --help       Prints help information
-//!     -V, --version    Prints version information
-//!
-//! OPTIONS:
-//!     -c, --chars <characters>    Set what kind of characters are printed as rain
-//!     -C, --color <color>         Set color of Rain with color string name or tuple
-//!                                 white,
-//!                                 red,
-//!                                 blue,
-//!                                 green,
-//!                                 "(r, g, b)"
-//!
-//!
-//!     -H, --head <head>           Set the color of the first char in Rain.
-//!     -s, --shade <shade>         Set Rain shading to fade or stay constant
 //! ```
 //!
 //! ### Example
 //!
 //! using cargo to run:
 //!
-//! `cargo run --release -- -C "(0, 139, 139)" -H "(255, 255, 255)" -s 1 -c jap`
+//! `cargo run --release -- -C "(0, 139, 139)" -H "(255, 255, 255)" 1 -c jap -s`
 //!
 //! after installing:
 //!
-//! `rusty-rain -C "(0, 139, 139)" -H "(255, 255, 255)" -s 1 -c jap`
+//! `rusty-rain -C "(0, 139, 139)" -H "(255, 255, 255)" -c jap -s`
 //!
 //! # Help
 //!
@@ -132,9 +111,9 @@ fn gen_times(width: usize) -> Vec<(Instant, Duration)> {
     let mut rng = thread_rng();
     for _ in 0..width {
         times.push((
-                now,
-                Duration::from_millis(rng.gen_range(MAXSPEED..MINSPEED)),
-                ));
+            now,
+            Duration::from_millis(rng.gen_range(MAXSPEED..MINSPEED)),
+        ));
     }
     times
 }
@@ -154,7 +133,7 @@ fn gen_colors<F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>>(
     width: usize,
     length: &[usize],
     bc: style::Color,
-    ) -> Vec<Vec<style::Color>> {
+) -> Vec<Vec<style::Color>> {
     let mut colors = Vec::with_capacity(width);
     for l in length.iter() {
         colors.push(create_color(bc, head.into(), *l as u8));
@@ -164,7 +143,7 @@ fn gen_colors<F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>>(
 
 fn usub<T>(x: T, y: T) -> T
 where
-T: std::ops::Sub<Output = T> + std::cmp::PartialOrd + From<u8> + Unsigned,
+    T: std::ops::Sub<Output = T> + std::cmp::PartialOrd + From<u8> + Unsigned,
 {
     if y > x {
         T::from(0)
@@ -216,7 +195,7 @@ fn draw(w: &mut BufWriter<Stdout>, rain: &Rain) -> Result<()> {
                 cursor::MoveTo(*x as u16, (*loc.min(&height) - y) as u16),
                 style::SetForegroundColor(color[color_idx]),
                 style::Print(ch),
-                )?;
+            )?;
             color_idx += 1;
         }
         if loc >= len {
@@ -224,7 +203,7 @@ fn draw(w: &mut BufWriter<Stdout>, rain: &Rain) -> Result<()> {
                 w,
                 cursor::MoveTo(*x as u16, (usub(*loc, *len)) as u16),
                 style::Print(' '),
-                )?;
+            )?;
         }
     }
     Ok(())
@@ -244,7 +223,7 @@ fn reset<F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>>(
     characters: (u32, u32),
     height: usize,
     bc: style::Color,
-    ) {
+) {
     assert_eq!(height, rain.height());
     let mut rng = thread_rng();
     let h16 = height as u16;
@@ -278,7 +257,7 @@ impl Rain {
         height: u16,
         base_color: style::Color,
         characters: (u32, u32),
-        ) -> Self {
+    ) -> Self {
         let w = width as usize;
         let h = height as usize;
         let charaters = gen_charater_vecs(w, height, characters);
@@ -304,39 +283,44 @@ impl Rain {
 
 fn main() -> Result<()> {
     let mut stdout = BufWriter::with_capacity(8_192, stdout());
-    let (color, characters, shading, head) = cargs(); let (width, height) = terminal::size()?;
+    let (color, characters, shading, head) = cargs();
+    let (width, height) = terminal::size()?;
     let h = height as usize;
 
     // This Creates a closure off of the args
     // given to the program at start that will crates the colors for the rain
     let create_color = match (color, characters, shading) {
         // Creates shading colors
-        (_, (65382, 65437), true) | (_, (48, 50), true) => |bc: style::Color, head: style::Color, length: u8| {
-            let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
-            let (mut nr, mut ng, mut nb);
-            if let style::Color::Rgb { r, g, b } = bc {
-                for i in 0..length {
-                    nr = r / length;
-                    ng = g / length;
-                    nb = b / length;
-                    c.push((nr * i, ng * i, nb * i).into());
+        (_, (65382, 65437), true) | (_, (48, 50), true) => {
+            |bc: style::Color, head: style::Color, length: u8| {
+                let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
+                let (mut nr, mut ng, mut nb);
+                if let style::Color::Rgb { r, g, b } = bc {
+                    for i in 0..length {
+                        nr = r / length;
+                        ng = g / length;
+                        nb = b / length;
+                        c.push((nr * i, ng * i, nb * i).into());
+                    }
+                    c.push(head);
+                    c.reverse();
                 }
-                c.push(head);
-                c.reverse();
+                c
             }
-            c
-        },
+        }
         // creates with out color
-        (_, (65382, 65437), false) | (_, (48, 50), false) => |bc: style::Color, head: style::Color, length: u8| {
-            let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
-            c.push(head);
-            if let style::Color::Rgb { r, g, b } = bc {
-                for _ in 0..length {
-                    c.push((r, g, b).into());
+        (_, (65382, 65437), false) | (_, (48, 50), false) => {
+            |bc: style::Color, head: style::Color, length: u8| {
+                let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
+                c.push(head);
+                if let style::Color::Rgb { r, g, b } = bc {
+                    for _ in 0..length {
+                        c.push((r, g, b).into());
+                    }
                 }
+                c
             }
-            c
-        },
+        }
         // Same as with out color
         _ => |bc: style::Color, head: style::Color, length: u8| {
             let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
@@ -350,23 +334,42 @@ fn main() -> Result<()> {
         },
     };
 
-    let mut rain = Rain::new(create_color, head.clone(), width, height, color.into(), characters);
+    let mut rain = Rain::new(
+        create_color,
+        head.clone(),
+        width,
+        height,
+        color.into(),
+        characters,
+    );
 
     terminal::enable_raw_mode()?;
     execute!(stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
 
     loop {
         if event::poll(Duration::from_millis(50))? {
-            let event = event::read()?;
-            if event == event::Event::Key(event::KeyCode::Esc.into()) {
-                break;
+            if let event::Event::Key(keyevent) = event::read()? {
+                if keyevent
+                    == event::KeyEvent::new(event::KeyCode::Char('c'), event::KeyModifiers::CONTROL)
+                    || keyevent
+                        == event::KeyEvent::new(event::KeyCode::Esc, event::KeyModifiers::NONE)
+                {
+                    break;
+                }
             }
         }
         update_queue(&mut rain);
         draw(&mut stdout, &rain)?;
         stdout.flush()?;
         update_locations(&mut rain);
-        reset(create_color, head.clone(), &mut rain, characters, h, color.into());
+        reset(
+            create_color,
+            head.clone(),
+            &mut rain,
+            characters,
+            h,
+            color.into(),
+        );
     }
 
     execute!(stdout, cursor::Show, terminal::LeaveAlternateScreen)?;
