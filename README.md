@@ -33,7 +33,7 @@ cargo run --release
 or to install:
 
 ```
- cargo install --path .
+ cargo install rusty-rain
 ```
 
 ## Exit
