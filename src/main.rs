@@ -95,7 +95,7 @@ use arguments::cargs;
 
 const MAXSPEED: u64 = 40;
 const MINSPEED: u64 = 200;
-const VERSION: &str = "0.0.2";
+const VERSION: &str = "0.2.0";
 const AUTHOR: &str = "
 ▞▀▖       ▌        ▞▀▖▞▀▖▞▀▖▛▀▘
 ▌  ▞▀▖▌  ▌▛▀▖▞▀▖▌ ▌▚▄▘▙▄  ▗▘▙▄
