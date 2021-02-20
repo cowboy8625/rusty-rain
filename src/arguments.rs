@@ -93,10 +93,11 @@ impl StrTuple for String {
     type Tuple = (u8, u8, u8);
     fn into_tuple(self) -> Self::Tuple {
         let mut nums = Vec::new();
-        for num in self.split(",") {
-            nums.push(num.parse::<u8>().expect(
-                "This is not the correct format, expecting 0,0,0 or name like white",
-            ));
+        for num in self.split(',') {
+            nums.push(
+                num.parse::<u8>()
+                    .expect("This is not the correct format, expecting 0,0,0 or name like white"),
+            );
         }
         let a = nums[0];
         let b = nums[1];
