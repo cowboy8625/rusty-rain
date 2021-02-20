@@ -12,14 +12,12 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
                 .short("C")
                 .long("color")
                 .help(
-                    " Set color of Rain with color string name or tuple
+                    "Set color of Rain with color string name or tuple
                 white,
                 red,
                 blue,
                 green,
-                \"(r, g, b)\"
-
-                      ",
+                \"(r, g, b)\"",
                 )
                 .takes_value(true),
         )
@@ -33,8 +31,7 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
                 red,
                 blue,
                 green,
-                \"(r, g, b)\"
-                      ",
+                \"(r, g, b)\"",
                 )
                 .takes_value(true),
         )
@@ -45,8 +42,7 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
                 .help(
                     "Set what kind of characters are printed as rain.
                 jap - for Japanese characters
-                01  - for binary characters
-                      ",
+                01  - for binary characters",
                 )
                 .takes_value(true),
         )

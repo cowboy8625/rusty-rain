@@ -26,6 +26,39 @@
 //! git clone https://github.com/cowboy8625/rusty-rain.git
 //! cd rusty-rain
 //! ```
+//! Matrix Rain 0.0.2
+//!
+//! ▞▀▖       ▌        ▞▀▖▞▀▖▞▀▖▛▀▘
+//! ▌  ▞▀▖▌  ▌▛▀▖▞▀▖▌ ▌▚▄▘▙▄  ▗▘▙▄
+//! ▌ ▖▌ ▌▐▐▐ ▌ ▌▌ ▌▚▄▌▌ ▌▌ ▌▗▘ ▖ ▌
+//! ▝▀ ▝▀  ▘▘ ▀▀ ▝▀ ▗▄▘▝▀ ▝▀ ▀▀▘▝▀
+//! Email: cowboy8625@protonmail.com
+//! A terminal program the makes all your friends think you are a hacker.
+//!
+//! USAGE:
+//!     rusty-rain.exe [FLAGS] [OPTIONS]
+//!
+//! FLAGS:
+//!     -h, --help       Prints help information
+//!     -s, --shade      Set Rain shading to fade or stay constant
+//!     -V, --version    Prints version information
+//!
+//! OPTIONS:
+//!     -c, --chars <characters>    Set what kind of characters are printed as rain.
+//!                                                 jap - for Japanese characters
+//!                                                 01  - for binary characters
+//!     -C, --color <color>         Set color of Rain with color string name or tuple
+//!                                                 white,
+//!                                                 red,
+//!                                                 blue,
+//!                                                 green,
+//!                                                 "(r, g, b)"
+//!     -H, --head <head>           Set the color of the first char in Rain.
+//!                                                 white,
+//!                                                 red,
+//!                                                 blue,
+//!                                                 green,
+//!                                                 "(r, g, b)"
 //! ```
 //! cargo run --release
 //! ```
