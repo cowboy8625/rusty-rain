@@ -63,24 +63,24 @@ OPTIONS:
                                                 red,
                                                 blue,
                                                 green,
-                                                "(r, g, b)"
+                                                r,g,b
     -H, --head <head>           Set the color of the first char in Rain.
                                                 white,
                                                 red,
                                                 blue,
                                                 green,
-                                                "(r, g, b)"
+                                                r,g,b
 ```
 
 ### Example
 
 using cargo to run:
 
-`cargo run --release -- -C "(0, 139, 139)" -H "(255, 255, 255)" -c jap -s`
+`cargo run --release -- -C 0,139,139 -H 255,255,255 -c jap -s`
 
 after installing:
 
-`rusty-rain -C "(0, 139, 139)" -H "(255, 255, 255)" -c jap -s`
+`rusty-rain -C 0,139,139 -H 255,255,255 -c jap -s`
 
 # Help
 

@@ -17,7 +17,7 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
                 red,
                 blue,
                 green,
-                \"(r, g, b)\"",
+                r,g,b",
                 )
                 .takes_value(true),
         )
@@ -31,7 +31,7 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
                 red,
                 blue,
                 green,
-                \"(r, g, b)\"",
+                r,g,b",
                 )
                 .takes_value(true),
         )
@@ -93,8 +93,10 @@ impl StrTuple for String {
     type Tuple = (u8, u8, u8);
     fn into_tuple(self) -> Self::Tuple {
         let mut nums = Vec::new();
-        for num in self[1..self.len() - 1].split(", ") {
-            nums.push(num.parse::<u8>().expect("Not A number"));
+        for num in self.split(",") {
+            nums.push(num.parse::<u8>().expect(
+                "This is not the correct format, expecting 0,0,0 or name like white",
+            ));
         }
         let a = nums[0];
         let b = nums[1];
