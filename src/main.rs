@@ -167,6 +167,11 @@ fn update_queue(rain: &mut Rain) {
     }
 }
 
+fn clear(w: &mut BufWriter<Stdout>) -> Result<()> {
+    queue!(w, terminal::Clear(terminal::ClearType::All))?;
+    Ok(())
+}
+
 fn draw(w: &mut BufWriter<Stdout>, rain: &Rain) -> Result<()> {
     let (mut chr, mut loc, mut len, mut clr);
     let height = rain.height();
@@ -224,7 +229,7 @@ fn reset<F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>>(
     height: usize,
     bc: style::Color,
 ) {
-    assert_eq!(height, rain.height());
+    // assert_eq!(height, rain.height());
     let mut rng = thread_rng();
     let h16 = height as u16;
     let now = Instant::now();
@@ -334,28 +339,31 @@ fn main() -> Result<()> {
         },
     };
 
-    let mut rain = Rain::new(
-        create_color,
-        head.clone(),
-        width,
-        height,
-        color.into(),
-        characters,
-    );
+    let mut rain = Rain::new(create_color, head, width, height, color.into(), characters);
 
     terminal::enable_raw_mode()?;
     execute!(stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
 
     loop {
         if event::poll(Duration::from_millis(50))? {
-            if let event::Event::Key(keyevent) = event::read()? {
-                if keyevent
-                    == event::KeyEvent::new(event::KeyCode::Char('c'), event::KeyModifiers::CONTROL)
-                    || keyevent
-                        == event::KeyEvent::new(event::KeyCode::Esc, event::KeyModifiers::NONE)
-                {
-                    break;
+            match event::read()? {
+                event::Event::Key(keyevent) => {
+                    if keyevent
+                        == event::KeyEvent::new(
+                            event::KeyCode::Char('c'),
+                            event::KeyModifiers::CONTROL,
+                        )
+                        || keyevent
+                            == event::KeyEvent::new(event::KeyCode::Esc, event::KeyModifiers::NONE)
+                    {
+                        break;
+                    }
                 }
+                event::Event::Resize(w, h) => {
+                    clear(&mut stdout)?;
+                    rain = Rain::new(create_color, head, w, h, color.into(), characters);
+                }
+                _ => {}
             }
         }
         update_queue(&mut rain);
