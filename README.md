@@ -7,8 +7,9 @@
   <br>
 </h1>
 
+[![Crates.io](https://img.shields.io/crates/v/bevy.svg)](https://crates.io/crates/bevy)
 <p align="center">
-  <a><img alt="crates.io" src=""></a>
+  <a href="https://crates.io/crates/rusty-rain"><img alt="crates.io" src="https://img.shields.io/crates/v/rusty-rain.svg"></a>
   <a><img alt="lastupdated" src="https://img.shields.io/github/last-commit/cowboy8625/rusty-rain"></a>
   <a><img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/cowboy8625/rusty-rain"></a>
   <a><img alt="issuse" src="https://img.shields.io/github/issues/cowboy8625/rusty-rain"></a>
@@ -16,7 +17,6 @@
   <a><img alt="License" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
   <a href="https://discord.gg/KwnGX8P"><img alt="Discord Chat" src="https://img.shields.io/discord/509849754155614230"></a>
 </p>
-[![docs][s3]][l3]
 
 A cross platform matrix rain terminal program that runs well and looks good.
 
@@ -87,6 +87,3 @@ after installing:
 
 If find any bugs or performance is not up to par please submit a issue so I can better improve
 the project.
-
-[s3]: https://docs.rs/rusty-rain/badge.svg
-[l3]: https://docs.rs/rusty-rain/
