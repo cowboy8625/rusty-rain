@@ -52,8 +52,11 @@ FLAGS:
 
 OPTIONS:
     -c, --chars <characters>    Set what kind of characters are printed as rain.
-                                                jap - for Japanese characters
-                                                01  - for binary characters
+                                                jap      - for Japanese characters
+                                                bin      - for binary characters
+                                                alphalow - for lowercase characters
+                                                alphaup  - for uppercase characters
+                                                num      - for numbers
     -C, --color <color>         Set color of Rain with color string name or tuple
                                                 white,
                                                 red,

@@ -41,8 +41,11 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
                 .long("chars")
                 .help(
                     "Set what kind of characters are printed as rain.
-                jap - for Japanese characters
-                01  - for binary characters",
+                jap      - for Japanese characters
+                bin      - for binary characters
+                alphalow - for lowercase characters
+                alphaup  - for uppercase characters
+                num      - for numbers",
                 )
                 .takes_value(true),
         )
@@ -71,8 +74,13 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
         a => a.to_string().into_tuple(),
     };
 
-    let characters = match matches.value_of("characters").unwrap_or("01") {
+    let characters = match matches.value_of("characters").unwrap_or("bin") {
         "jap" => (65382, 65437),
+        "bin" => (48, 50),
+        "alphalow" => (97, 122),
+        "alphaup" => (65, 90),
+        "num" => (48, 57),
+        "alphanumsim" => (33, 127),
         _ => (48, 50),
     };
 
