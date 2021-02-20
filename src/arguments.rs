@@ -16,7 +16,7 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
                 red,
                 blue,
                 green,
-                \"(r, g, b)\")
+                \"(r, g, b)\"
 
                       ")
                 .takes_value(true),
@@ -25,7 +25,13 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
             Arg::with_name("head")
                 .short("H")
                 .long("head")
-                .help("Set the color of the first char in Rain.")
+                .help("Set the color of the first char in Rain.
+                white,
+                red,
+                blue,
+                green,
+                \"(r, g, b)\"
+                      ")
                 .takes_value(true),
         )
         .arg(
@@ -44,7 +50,7 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
         )
         .get_matches();
 
-    let color = match matches.value_of("color").unwrap_or("not a color") {
+    let color = match matches.value_of("color").unwrap_or("green") {
         "white" => (255, 255, 255),
         "red" => (255, 0, 0),
         "green" => (0, 255, 0),
@@ -52,7 +58,7 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
         a => a.to_string().to_tuple(),
     };
 
-    let head = match matches.value_of("head").unwrap_or("not a color") {
+    let head = match matches.value_of("head").unwrap_or("white") {
         "white" => (255, 255, 255),
         "red" => (255, 0, 0),
         "green" => (0, 255, 0),
@@ -66,8 +72,8 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
     };
 
     let shading = match matches.value_of("shade").unwrap_or("0") {
-        "1" => true,
-        "0" | _ => false,
+        "1" | "true" => true,
+        "0" | "false" | _ => false,
     };
 
     (color, characters, shading, head)
