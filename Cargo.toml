@@ -9,7 +9,7 @@ repository = "https://github.com/cowboy8625/rusty-rain"
 homepage = "https://github.com/cowboy8625/rusty-rain"
 documentation = "https://docs.rs/rusty-rain"
 license-file = "LICENSE"
-keywords = ["matrix", "matrix rain", "cmatrix"]
+keywords = ["matrix", "matrix-rain", "matrix_rain", "cmatrix", "rain"]
 categoriem = ["command-line-utilities"]
 
 [dependencies]
