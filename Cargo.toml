@@ -8,7 +8,6 @@ readme = "README.md"
 repository = "https://github.com/cowboy8625/rusty-rain"
 homepage = "https://github.com/cowboy8625/rusty-rain"
 documentation = "https://docs.rs/rusty-rain"
-license = "Apache-2.0"
 license-file = "LICENSE"
 keywords = ["matrix", "matrix rain", "cmatrix"]
 categoriem = ["command-line-utilities"]
