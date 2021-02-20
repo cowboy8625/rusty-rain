@@ -11,34 +11,43 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
             Arg::with_name("color")
                 .short("C")
                 .long("color")
-                .help(" Set color of Rain with color string name or tuple
+                .help(
+                    " Set color of Rain with color string name or tuple
                 white,
                 red,
                 blue,
                 green,
                 \"(r, g, b)\"
 
-                      ")
+                      ",
+                )
                 .takes_value(true),
         )
         .arg(
             Arg::with_name("head")
                 .short("H")
                 .long("head")
-                .help("Set the color of the first char in Rain.
+                .help(
+                    "Set the color of the first char in Rain.
                 white,
                 red,
                 blue,
                 green,
                 \"(r, g, b)\"
-                      ")
+                      ",
+                )
                 .takes_value(true),
         )
         .arg(
             Arg::with_name("characters")
                 .short("c")
                 .long("chars")
-                .help("Set what kind of characters are printed as rain")
+                .help(
+                    "Set what kind of characters are printed as rain.
+                jap - for Japanese characters
+                01  - for binary characters
+                      ",
+                )
                 .takes_value(true),
         )
         .arg(
@@ -46,7 +55,7 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
                 .short("s")
                 .long("shade")
                 .help("Set Rain shading to fade or stay constant")
-                .takes_value(true),
+                .takes_value(false),
         )
         .get_matches();
 
@@ -71,20 +80,16 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
         "01" | _ => (48, 50),
     };
 
-    let shading = match matches.value_of("shade").unwrap_or("0") {
-        "1" | "true" => true,
-        "0" | "false" | _ => false,
-    };
+    let shading = matches.is_present("shade");
 
     (color, characters, shading, head)
 }
-
 
 impl StrTuple for String {
     type Tuple = (u8, u8, u8);
     fn to_tuple(self) -> Self::Tuple {
         let mut nums = Vec::new();
-        for num in self[1..self.len()-1].split(", ") {
+        for num in self[1..self.len() - 1].split(", ") {
             nums.push(num.parse::<u8>().expect("Not A number"));
         }
         let a = nums[0];
@@ -98,4 +103,3 @@ trait StrTuple {
     type Tuple;
     fn to_tuple(self) -> Self::Tuple;
 }
-
