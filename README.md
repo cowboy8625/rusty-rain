@@ -7,7 +7,6 @@
   <br>
 </h1>
 
-[![Crates.io](https://img.shields.io/crates/v/bevy.svg)](https://crates.io/crates/bevy)
 <p align="center">
   <a href="https://crates.io/crates/rusty-rain"><img alt="crates.io" src="https://img.shields.io/crates/v/rusty-rain.svg"></a>
   <a><img alt="lastupdated" src="https://img.shields.io/github/last-commit/cowboy8625/rusty-rain"></a>
