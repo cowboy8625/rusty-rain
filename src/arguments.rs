@@ -64,7 +64,7 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
         "red" => (255, 0, 0),
         "green" => (0, 255, 0),
         "blue" => (0, 0, 255),
-        a => a.to_string().to_tuple(),
+        a => a.to_string().into_tuple(),
     };
 
     let head = match matches.value_of("head").unwrap_or("white") {
@@ -72,12 +72,12 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
         "red" => (255, 0, 0),
         "green" => (0, 255, 0),
         "blue" => (0, 0, 255),
-        a => a.to_string().to_tuple(),
+        a => a.to_string().into_tuple(),
     };
 
     let characters = match matches.value_of("characters").unwrap_or("01") {
         "jap" => (65382, 65437),
-        "01" | _ => (48, 50),
+        _ => (48, 50),
     };
 
     let shading = matches.is_present("shade");
@@ -87,7 +87,7 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
 
 impl StrTuple for String {
     type Tuple = (u8, u8, u8);
-    fn to_tuple(self) -> Self::Tuple {
+    fn into_tuple(self) -> Self::Tuple {
         let mut nums = Vec::new();
         for num in self[1..self.len() - 1].split(", ") {
             nums.push(num.parse::<u8>().expect("Not A number"));
@@ -101,5 +101,5 @@ impl StrTuple for String {
 
 trait StrTuple {
     type Tuple;
-    fn to_tuple(self) -> Self::Tuple;
+    fn into_tuple(self) -> Self::Tuple;
 }

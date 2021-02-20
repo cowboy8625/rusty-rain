@@ -193,15 +193,13 @@ fn draw(w: &mut BufWriter<Stdout>, rain: &Rain) -> Result<()> {
 
         let color = &clr[cstart..clr.len()];
 
-        let mut color_idx = 0;
         for (y, ch) in slice.rev().enumerate() {
             queue!(
                 w,
                 cursor::MoveTo(*x as u16, (*loc.min(&height) - y) as u16),
-                style::SetForegroundColor(color[color_idx]),
+                style::SetForegroundColor(color[y]),
                 style::Print(ch),
             )?;
-            color_idx += 1;
         }
         if loc >= len {
             queue!(
@@ -372,7 +370,7 @@ fn main() -> Result<()> {
         update_locations(&mut rain);
         reset(
             create_color,
-            head.clone(),
+            head,
             &mut rain,
             characters,
             h,
