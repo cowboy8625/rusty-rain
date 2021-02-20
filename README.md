@@ -44,18 +44,7 @@ To exit just press `ESC` or `Ctrl + C`
 ## Command Line Arguments
 
 ```
-Matrix Rain 0.0.2
-
-▞▀▖       ▌        ▞▀▖▞▀▖▞▀▖▛▀▘
-▌  ▞▀▖▌  ▌▛▀▖▞▀▖▌ ▌▚▄▘▙▄  ▗▘▙▄
-▌ ▖▌ ▌▐▐▐ ▌ ▌▌ ▌▚▄▌▌ ▌▌ ▌▗▘ ▖ ▌
-▝▀ ▝▀  ▘▘ ▀▀ ▝▀ ▗▄▘▝▀ ▝▀ ▀▀▘▝▀
-Email: cowboy8625@protonmail.com
-A terminal program the makes all your friends think you are a hacker.
-
-USAGE:
-    rusty-rain.exe [FLAGS] [OPTIONS]
-
+Rusty Rain 0.2.0
 FLAGS:
     -h, --help       Prints help information
     -s, --shade      Set Rain shading to fade or stay constant

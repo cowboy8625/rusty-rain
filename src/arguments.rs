@@ -3,7 +3,7 @@ use clap::{App, Arg};
 
 type COLOR = (u8, u8, u8);
 pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
-    let matches = App::new("Matrix Rain")
+    let matches = App::new("Rusty Rain")
         .version(VERSION)
         .author(AUTHOR)
         .about(ABOUT)
