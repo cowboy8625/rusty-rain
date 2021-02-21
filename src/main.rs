@@ -293,7 +293,11 @@ impl Rain {
         characters: (u32, u32),
         dw: bool,
     ) -> Self {
-        let w = if dw {(width/2) as usize} else {width as usize};
+        let w = if dw {
+            (width / 2) as usize
+        } else {
+            width as usize
+        };
         let h = height as usize;
         let charaters = gen_charater_vecs(w, height, characters);
         let locations = vec![0; w];
@@ -369,7 +373,15 @@ fn main() -> Result<()> {
         },
     };
 
-    let mut rain = Rain::new(create_color, head, width, height, color.into(), characters, double_wide);
+    let mut rain = Rain::new(
+        create_color,
+        head,
+        width,
+        height,
+        color.into(),
+        characters,
+        double_wide,
+    );
 
     terminal::enable_raw_mode()?;
     execute!(stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
@@ -391,7 +403,15 @@ fn main() -> Result<()> {
                 }
                 event::Event::Resize(w, h) => {
                     clear(&mut stdout)?;
-                    rain = Rain::new(create_color, head, w, h, color.into(), characters, double_wide);
+                    rain = Rain::new(
+                        create_color,
+                        head,
+                        w,
+                        h,
+                        color.into(),
+                        characters,
+                        double_wide,
+                    );
                 }
                 _ => {}
             }
