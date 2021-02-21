@@ -203,7 +203,7 @@ fn clear(w: &mut BufWriter<Stdout>) -> Result<()> {
     Ok(())
 }
 
-fn draw(w: &mut BufWriter<Stdout>, rain: &Rain, dw: bool) -> Result<()> {
+fn draw(w: &mut BufWriter<Stdout>, rain: &Rain, spacing: u16) -> Result<()> {
     let (mut chr, mut loc, mut len, mut clr);
     let height = rain.height();
     for x in rain.queue.iter() {
@@ -223,12 +223,11 @@ fn draw(w: &mut BufWriter<Stdout>, rain: &Rain, dw: bool) -> Result<()> {
         };
 
         let color = &clr[cstart..clr.len()];
-        let mode = if dw { 2 } else { 1 };
 
         for (y, ch) in slice.rev().enumerate() {
             queue!(
                 w,
-                cursor::MoveTo(*x as u16 * mode, (*loc.min(&height) - y) as u16),
+                cursor::MoveTo(*x as u16 * spacing, (*loc.min(&height) - y) as u16),
                 style::SetForegroundColor(color[y]),
                 style::Print(ch),
             )?;
@@ -236,8 +235,8 @@ fn draw(w: &mut BufWriter<Stdout>, rain: &Rain, dw: bool) -> Result<()> {
         if loc >= len {
             queue!(
                 w,
-                cursor::MoveTo(*x as u16 * mode, (usub(*loc, *len)) as u16),
-                style::Print(' '),
+                cursor::MoveTo(*x as u16 * spacing, (usub(*loc, *len)) as u16),
+                style::Print(" ".repeat(spacing as usize)),
             )?;
         }
     }
@@ -292,13 +291,9 @@ impl Rain {
         height: u16,
         base_color: style::Color,
         characters: (u32, u32),
-        dw: bool,
+        spacing: u16,
     ) -> Self {
-        let w = if dw {
-            (width / 2) as usize
-        } else {
-            width as usize
-        };
+        let w = (width / spacing) as usize;
         let h = height as usize;
         let charaters = gen_charater_vecs(w, height, characters);
         let locations = vec![0; w];
@@ -374,6 +369,12 @@ fn main() -> Result<()> {
         },
     };
 
+    let spacing = if double_wide {
+        2
+    } else {
+        1
+    };
+
     let mut rain = Rain::new(
         create_color,
         head,
@@ -381,7 +382,7 @@ fn main() -> Result<()> {
         height,
         color.into(),
         characters,
-        double_wide,
+        spacing,
     );
 
     terminal::enable_raw_mode()?;
@@ -411,14 +412,14 @@ fn main() -> Result<()> {
                         h,
                         color.into(),
                         characters,
-                        double_wide,
+                        spacing,
                     );
                 }
                 _ => {}
             }
         }
         update_queue(&mut rain);
-        draw(&mut stdout, &rain, double_wide)?;
+        draw(&mut stdout, &rain, spacing)?;
         stdout.flush()?;
         update_locations(&mut rain);
         reset(create_color, head, &mut rain, characters, h, color.into());
