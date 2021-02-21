@@ -2,7 +2,7 @@ use crate::{ABOUT, AUTHOR, VERSION};
 use clap::{App, Arg};
 
 type COLOR = (u8, u8, u8);
-pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
+pub fn cargs() -> (COLOR, COLOR, (u32, u32), bool, bool) {
     let matches = App::new("Rusty Rain")
         .version(VERSION)
         .author(AUTHOR)
@@ -41,11 +41,16 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
                 .long("chars")
                 .help(
                     "Set what kind of characters are printed as rain.
-                jap      - for Japanese characters
-                bin      - for binary characters
-                alphalow - for lowercase characters
-                alphaup  - for uppercase characters
-                num      - for numbers",
+                jap          - for Japanese characters
+                bin          - for binary characters
+                alphalow     - for lowercase characters
+                alphaup      - for uppercase characters
+                fancyalphaup - for fancy uppercase characters
+                moon         - for moon characters
+                earth        - for earth characters
+                more-emoji   - some colored some black and white emojis
+                emoji        - yes emojis!
+                num          - for numbers",
                 )
                 .takes_value(true),
         )
@@ -74,19 +79,25 @@ pub fn cargs() -> (COLOR, (u32, u32), bool, COLOR) {
         a => a.to_string().into_tuple(),
     };
 
-    let characters = match matches.value_of("characters").unwrap_or("bin") {
-        "jap" => (65382, 65437),
-        "bin" => (48, 50),
-        "alphalow" => (97, 122),
-        "alphaup" => (65, 90),
-        "num" => (48, 57),
-        "alphanumsim" => (33, 127),
-        _ => (48, 50),
+    let (characters, double_wide) = match matches.value_of("characters").unwrap_or("bin") {
+        "jap" => ((65382, 65437), false),
+        "bin" => ((48, 50), false),
+        "alphalow" => ((97, 122), false),
+        "alphaup" => ((65, 90), false),
+        "fancyalphaup" => ((127460, 127487), true),
+        "num" => ((48, 57), false),
+        "moon" => ((127761, 127768), true),
+        "earth" => ((127757, 127759), true),
+        "more-emoji" => ((127744, 128727), true),
+        "emoji" => ((129292, 129535), true),
+        "shapes" => ((128992, 129003), true),
+        "alphanumsim" => ((33, 127), false),
+        _ => ((48, 50), false),
     };
 
     let shading = matches.is_present("shade");
 
-    (color, characters, shading, head)
+    (color, head, characters, shading, double_wide)
 }
 
 impl StrTuple for String {

@@ -34,11 +34,16 @@
 //!
 //! OPTIONS:
 //!     -c, --chars <characters>    Set what kind of characters are printed as rain.
-//!                                                 jap      - for Japanese characters
-//!                                                 bin      - for binary characters
-//!                                                 alphalow - for lowercase characters
-//!                                                 alphaup  - for uppercase characters
-//!                                                 num      - for numbers",
+//!                                                 jap          - for Japanese characters
+//!                                                 bin          - for binary characters
+//!                                                 alphalow     - for lowercase characters
+//!                                                 alphaup      - for uppercase characters
+//!                                                 fancyalphaup - for fancy uppercase characters
+//!                                                 moon         - for moon characters
+//!                                                 earth        - for earth characters
+//!                                                 more-emoji   - some colored some black and white emojis
+//!                                                 emoji        - yes emojis!
+//!                                                 num          - for numbers",
 //!     -C, --color <color>         Set color of Rain with color string name or tuple
 //!                                                 white,
 //!                                                 red,
@@ -197,7 +202,7 @@ fn clear(w: &mut BufWriter<Stdout>) -> Result<()> {
     Ok(())
 }
 
-fn draw(w: &mut BufWriter<Stdout>, rain: &Rain) -> Result<()> {
+fn draw(w: &mut BufWriter<Stdout>, rain: &Rain, dw: bool) -> Result<()> {
     let (mut chr, mut loc, mut len, mut clr);
     let height = rain.height();
     for x in rain.queue.iter() {
@@ -217,11 +222,12 @@ fn draw(w: &mut BufWriter<Stdout>, rain: &Rain) -> Result<()> {
         };
 
         let color = &clr[cstart..clr.len()];
+        let mode = if dw { 2 } else { 1 };
 
         for (y, ch) in slice.rev().enumerate() {
             queue!(
                 w,
-                cursor::MoveTo(*x as u16, (*loc.min(&height) - y) as u16),
+                cursor::MoveTo(*x as u16 * mode, (*loc.min(&height) - y) as u16),
                 style::SetForegroundColor(color[y]),
                 style::Print(ch),
             )?;
@@ -229,7 +235,7 @@ fn draw(w: &mut BufWriter<Stdout>, rain: &Rain) -> Result<()> {
         if loc >= len {
             queue!(
                 w,
-                cursor::MoveTo(*x as u16, (usub(*loc, *len)) as u16),
+                cursor::MoveTo(*x as u16 * mode, (usub(*loc, *len)) as u16),
                 style::Print(' '),
             )?;
         }
@@ -285,8 +291,9 @@ impl Rain {
         height: u16,
         base_color: style::Color,
         characters: (u32, u32),
+        dw: bool,
     ) -> Self {
-        let w = width as usize;
+        let w = if dw {(width/2) as usize} else {width as usize};
         let h = height as usize;
         let charaters = gen_charater_vecs(w, height, characters);
         let locations = vec![0; w];
@@ -311,7 +318,7 @@ impl Rain {
 
 fn main() -> Result<()> {
     let mut stdout = BufWriter::with_capacity(8_192, stdout());
-    let (color, characters, shading, head) = cargs();
+    let (color, head, characters, shading, double_wide) = cargs();
     let (width, height) = terminal::size()?;
     let h = height as usize;
 
@@ -362,7 +369,7 @@ fn main() -> Result<()> {
         },
     };
 
-    let mut rain = Rain::new(create_color, head, width, height, color.into(), characters);
+    let mut rain = Rain::new(create_color, head, width, height, color.into(), characters, double_wide);
 
     terminal::enable_raw_mode()?;
     execute!(stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
@@ -384,13 +391,13 @@ fn main() -> Result<()> {
                 }
                 event::Event::Resize(w, h) => {
                     clear(&mut stdout)?;
-                    rain = Rain::new(create_color, head, w, h, color.into(), characters);
+                    rain = Rain::new(create_color, head, w, h, color.into(), characters, double_wide);
                 }
                 _ => {}
             }
         }
         update_queue(&mut rain);
-        draw(&mut stdout, &rain)?;
+        draw(&mut stdout, &rain, double_wide)?;
         stdout.flush()?;
         update_locations(&mut rain);
         reset(create_color, head, &mut rain, characters, h, color.into());

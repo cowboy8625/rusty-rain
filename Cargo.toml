@@ -1,6 +1,6 @@
 [package]
 name = "rusty-rain"
-version = "0.2.0"
+version = "0.2.1"
 authors = ["cowboy8625 <https://github.com/cowboy8625>"]
 edition = "2018"
 description = "A cross platform CMatrix like program."
@@ -9,7 +9,7 @@ repository = "https://github.com/cowboy8625/rusty-rain"
 homepage = "https://github.com/cowboy8625/rusty-rain"
 documentation = "https://docs.rs/rusty-rain"
 license-file = "LICENSE"
-keywords = ["matrix", "matrix-rain", "matrix_rain", "cmatrix", "rain"]
+keywords = ["matrix", "matrix-rain", "emoji", "cmatrix", "rain"]
 categories = ["command-line-utilities"]
 
 [dependencies]

@@ -1,6 +1,7 @@
 <h1 align="center">
   <br>
   <img src="https://user-images.githubusercontent.com/43012445/105452071-411e4880-5c43-11eb-8ae2-4de61f310bf9.gif" alt="GIF" width="800">
+  <img src="https://cdn.discordapp.com/attachments/509849754583302154/812942011400847391/emoji_rain.gif" alt="GIF" width="800">
   <br>
   Rusty Rain
   <br>
@@ -53,11 +54,16 @@ FLAGS:
 
 OPTIONS:
     -c, --chars <characters>    Set what kind of characters are printed as rain.
-                                                jap      - for Japanese characters
-                                                bin      - for binary characters
-                                                alphalow - for lowercase characters
-                                                alphaup  - for uppercase characters
-                                                num      - for numbers
+                                                jap          - for Japanese characters
+                                                bin          - for binary characters
+                                                alphalow     - for lowercase characters
+                                                alphaup      - for uppercase characters
+                                                fancyalphaup - for fancy uppercase characters
+                                                moon         - for moon characters
+                                                earth        - for earth characters
+                                                more-emoji   - some colored some black and white emojis
+                                                emoji        - yes emojis!
+                                                num          - for numbers",
     -C, --color <color>         Set color of Rain with color string name or tuple
                                                 white,
                                                 red,
