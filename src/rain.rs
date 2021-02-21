@@ -1,5 +1,5 @@
-use std::time::{Instant, Duration};
-use crate::{style, gen_charater_vecs, gen_lengths, gen_colors, gen_times};
+use crate::{gen_charater_vecs, gen_colors, gen_lengths, gen_times, style};
+use std::time::{Duration, Instant};
 
 #[derive(Debug)]
 pub struct Rain {

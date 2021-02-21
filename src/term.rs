@@ -1,4 +1,4 @@
-use crate::{style, cursor, queue, terminal, Result, Rain, BufWriter, Stdout};
+use crate::{cursor, queue, style, terminal, BufWriter, Rain, Result, Stdout};
 
 pub fn clear(w: &mut BufWriter<Stdout>) -> Result<()> {
     queue!(w, terminal::Clear(terminal::ClearType::All))?;
@@ -52,7 +52,6 @@ impl Unsigned for u32 {}
 impl Unsigned for u64 {}
 impl Unsigned for u128 {}
 impl Unsigned for usize {}
-
 
 fn usub<T>(x: T, y: T) -> T
 where

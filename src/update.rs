@@ -1,5 +1,5 @@
-use crate::{style, thread_rng, Rng, create_drop_chars, Rain};
-use std::time::{Instant, Duration};
+use crate::{create_drop_chars, style, thread_rng, Rain, Rng};
+use std::time::{Duration, Instant};
 
 pub fn update_queue(rain: &mut Rain) {
     rain.queue.clear();
@@ -11,7 +11,6 @@ pub fn update_queue(rain: &mut Rain) {
         }
     }
 }
-
 
 pub fn update_locations(rain: &mut Rain) {
     let queue = &rain.queue;

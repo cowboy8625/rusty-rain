@@ -1,6 +1,6 @@
+use crate::{style, thread_rng, Rng, MAXSPEED, MINSPEED};
 use std::char;
 use std::time::{Duration, Instant};
-use crate::{thread_rng, Rng, style, MINSPEED, MAXSPEED};
 
 pub fn ran_ch((min, max): (u32, u32)) -> char {
     let c: u32 = thread_rng().gen_range(min..max);

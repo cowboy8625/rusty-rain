@@ -92,19 +92,18 @@
 //! If find any bugs or performance is not up to par please submit a issue so I can better improve
 //! the project.
 
-
-mod rain;
 mod gen;
+mod rain;
 mod term;
 mod update;
-use rain::Rain;
-use gen::{gen_charater_vecs, gen_lengths, gen_colors, gen_times, create_drop_chars};
-use term::{draw, clear};
-use update::{reset, update_queue, update_locations};
 use crossterm::{cursor, event, execute, queue, style, terminal, Result};
+use gen::{create_drop_chars, gen_charater_vecs, gen_colors, gen_lengths, gen_times};
+use rain::Rain;
 use rand::{thread_rng, Rng};
 use std::io::{stdout, BufWriter, Stdout, Write};
 use std::time::Duration;
+use term::{clear, draw};
+use update::{reset, update_locations, update_queue};
 mod arguments;
 use arguments::cargs;
 
@@ -119,8 +118,6 @@ const AUTHOR: &str = "
 Email: cowboy8625@protonmail.com
 ";
 const ABOUT: &str = "A terminal program the makes all your friends think you are a hacker.";
-
-
 
 fn main() -> Result<()> {
     let mut stdout = BufWriter::with_capacity(8_192, stdout());
