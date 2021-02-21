@@ -369,11 +369,7 @@ fn main() -> Result<()> {
         },
     };
 
-    let spacing = if double_wide {
-        2
-    } else {
-        1
-    };
+    let spacing = if double_wide { 2 } else { 1 };
 
     let mut rain = Rain::new(
         create_color,
@@ -405,15 +401,7 @@ fn main() -> Result<()> {
                 }
                 event::Event::Resize(w, h) => {
                     clear(&mut stdout)?;
-                    rain = Rain::new(
-                        create_color,
-                        head,
-                        w,
-                        h,
-                        color.into(),
-                        characters,
-                        spacing,
-                    );
+                    rain = Rain::new(create_color, head, w, h, color.into(), characters, spacing);
                 }
                 _ => {}
             }
