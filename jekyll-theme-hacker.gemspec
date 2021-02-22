@@ -7,7 +7,8 @@ Gem::Specification.new do |s|
   s.authors               = ['Cowboy8625']
   s.email                 = ['cowboy8625@protonmail.com']
   s.homepage              = 'rusty-rain.xyz'
-  s.github.repository_url = 'https://github.com/cowboy8625/rusty-rain'
+  s.github.repository_url = 'https://github.com/cowboy8625/rusty-rain.git'
+  s.crate                 = 'https://crates.io/rusty-rain'
   s.summary               = 'Rusty Rain is a CMatrix Clone that also can display emoji\'s'
   s.files                 = `git ls-files -z`.split("\x0").select do |f|
     f.match(%r{^((_includes|_layouts|_sass|assets)/|(LICENSE|README)((\.(txt|md|markdown)|$)))}i)
