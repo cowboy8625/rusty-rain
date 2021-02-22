@@ -1,0 +1,9 @@
+AllCops:
+  Exclude:
+    - _site/**/*
+
+Metrics/LineLength:
+  Enabled: false
+
+Gemspec/RequiredRubyVersion:
+  Enabled: false

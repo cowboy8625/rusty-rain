@@ -1,9 +1,4 @@
-/target
-/Cargo.lock
-/graphs
-dod.rs
-*.lock
-*.txt
-*.sh
-*.svg
-*.data
+_site
+.sass-cache
+Gemfile.lock
+*.gem
