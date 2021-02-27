@@ -3,3 +3,4 @@ description: A CMatrix Clone in Rust
 show_downloads: true
 google_analytics: true
 theme: jekyll-theme-hacker
+crate: https://crates.io/rusty-rain
