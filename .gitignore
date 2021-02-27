@@ -4,3 +4,4 @@ Gemfile.lock
 *.gem
 *.lock
 ./target
+target
