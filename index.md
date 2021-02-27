@@ -9,11 +9,11 @@ Since version `0.2.0` Emoji rain is supported and let me tell ya, that is some f
 
 ## Table of Contents
 
-* [About](./about.md)
-* [Photo Gallary](./photo_gallary.md)
 * [Installing](./installation.md)
 * [Using](./using.md)
+* [Photo Gallary](./photo_gallary.md)
 * [Project Readme](./project_readme.md)
+* [About](./about.md)
 
 # Future
 
