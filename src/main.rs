@@ -107,9 +107,10 @@ use update::{reset, update_locations, update_queue};
 mod arguments;
 use arguments::cargs;
 
+use ezemoji::{EZEmojis, CharGroups, EmojiGroups};
+
 const MAXSPEED: u64 = 40;
 const MINSPEED: u64 = 200;
-const VERSION: &str = "0.2.0";
 const AUTHOR: &str = "
 ▞▀▖       ▌        ▞▀▖▞▀▖▞▀▖▛▀▘
 ▌  ▞▀▖▌  ▌▛▀▖▞▀▖▌ ▌▚▄▘▙▄  ▗▘▙▄
@@ -117,7 +118,14 @@ const AUTHOR: &str = "
 ▝▀ ▝▀  ▘▘ ▀▀ ▝▀ ▗▄▘▝▀ ▝▀ ▀▀▘▝▀
 Email: cowboy8625@protonmail.com
 ";
-const ABOUT: &str = "A terminal program the makes all your friends think you are a hacker.";
+
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+pub enum RustyTypes {
+    Bin,
+    Numbers,
+    LowerAlpha,
+    UpperAlpha,
+}
 
 fn main() -> Result<()> {
     let mut stdout = BufWriter::with_capacity(8_192, stdout());
@@ -125,11 +133,19 @@ fn main() -> Result<()> {
     let (width, height) = terminal::size()?;
     let h = height as usize;
 
+    let mut e = EZEmojis::new();
+    e.add(CharGroups::Custom(RustyTypes::Numbers), (48..57).collect());
+    e.add(CharGroups::Custom(RustyTypes::Bin), (48..50).collect());
+    e.add(CharGroups::Custom(RustyTypes::LowerAlpha), (97..122).collect());
+    e.add(CharGroups::Custom(RustyTypes::UpperAlpha), (65..90).collect());
+    let default_vec = &vec![96];
+    let characters = e.get_u32(&characters).unwrap_or(default_vec);
+
     // This Creates a closure off of the args
     // given to the program at start that will crates the colors for the rain
-    let create_color = match (color, characters, shading) {
+    let create_color = match shading {
         // Creates shading colors
-        (_, (65382, 65437), true) | (_, (48, 50), true) => {
+        true => {
             |bc: style::Color, head: style::Color, length: u8| {
                 let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
                 let (mut nr, mut ng, mut nb);
@@ -147,7 +163,7 @@ fn main() -> Result<()> {
             }
         }
         // creates with out color
-        (_, (65382, 65437), false) | (_, (48, 50), false) => {
+        false => {
             |bc: style::Color, head: style::Color, length: u8| {
                 let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
                 c.push(head);
@@ -159,17 +175,6 @@ fn main() -> Result<()> {
                 c
             }
         }
-        // Same as with out color
-        _ => |bc: style::Color, head: style::Color, length: u8| {
-            let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
-            c.push(head);
-            if let style::Color::Rgb { r, g, b } = bc {
-                for _ in 0..length {
-                    c.push((r, g, b).into());
-                }
-            }
-            c
-        },
     };
 
     let spacing = if double_wide { 2 } else { 1 };
@@ -180,7 +185,7 @@ fn main() -> Result<()> {
         width,
         height,
         color.into(),
-        characters,
+        &characters,
         spacing,
     );
 

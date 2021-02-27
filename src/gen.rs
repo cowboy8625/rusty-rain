@@ -7,11 +7,18 @@ pub fn ran_ch((min, max): (u32, u32)) -> char {
     char::from_u32(c).unwrap()
 }
 
-pub fn create_drop_chars(height: u16, characters: (u32, u32)) -> Vec<char> {
-    (0..height + 1).map(|_| ran_ch(characters)).collect()
+pub fn create_drop_chars(height: u16, characters: &[u32]) -> Vec<char> {
+    (0..height + 1)
+        .map(
+            |_| {
+                char::from_u32(
+                    characters[
+                    thread_rng().gen_range(0..characters.len())
+                    ]).unwrap_or('#')
+            }).collect()
 }
 
-pub fn gen_charater_vecs(width: usize, height: u16, characters: (u32, u32)) -> Vec<Vec<char>> {
+pub fn gen_charater_vecs(width: usize, height: u16, characters: &[u32]) -> Vec<Vec<char>> {
     let mut ch = Vec::new();
     for _ in 0..width {
         ch.push(create_drop_chars(height, characters));

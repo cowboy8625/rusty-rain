@@ -23,7 +23,7 @@ pub fn reset<F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>>(
     create_color: F,
     head: (u8, u8, u8),
     rain: &mut Rain,
-    characters: (u32, u32),
+    characters: &[u32],
     height: usize,
     bc: style::Color,
 ) {

@@ -18,7 +18,7 @@ impl Rain {
         width: u16,
         height: u16,
         base_color: style::Color,
-        characters: (u32, u32),
+        characters: &[u32],
         spacing: u16,
     ) -> Self {
         let w = (width / spacing) as usize;

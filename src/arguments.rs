@@ -1,12 +1,11 @@
-use crate::{ABOUT, AUTHOR, VERSION};
-use clap::{App, Arg};
+use crate::{AUTHOR, EmojiGroups, CharGroups, RustyTypes};
+use clap::{App, Arg, crate_name, crate_version, crate_description}; type COLOR = (u8, u8, u8);
+pub fn cargs() -> (COLOR, COLOR, CharGroups<RustyTypes>, bool, bool) {
 
-type COLOR = (u8, u8, u8);
-pub fn cargs() -> (COLOR, COLOR, (u32, u32), bool, bool) {
-    let matches = App::new("Rusty Rain")
-        .version(VERSION)
+    let matches = App::new(crate_name!())
+        .version(crate_version!())
         .author(AUTHOR)
-        .about(ABOUT)
+        .about(crate_description!())
         .arg(
             Arg::with_name("color")
                 .short("C")
@@ -80,19 +79,19 @@ pub fn cargs() -> (COLOR, COLOR, (u32, u32), bool, bool) {
     };
 
     let (characters, double_wide) = match matches.value_of("characters").unwrap_or("bin") {
-        "jap" => ((65382, 65437), false),
-        "bin" => ((48, 50), false),
-        "alphalow" => ((97, 122), false),
-        "alphaup" => ((65, 90), false),
-        "fancyalphaup" => ((127460, 127487), true),
-        "num" => ((48, 57), false),
-        "moon" => ((127761, 127768), true),
-        "earth" => ((127757, 127759), true),
-        "more-emoji" => ((127744, 128727), true),
-        "emoji" => ((129292, 129535), true),
-        "shapes" => ((128992, 129003), true),
-        "alphanumsim" => ((33, 127), false),
-        _ => ((48, 50), false),
+        "jap" => (EmojiGroups::Japanese.into(), false),           // 65382, 65437
+        "bin" => (CharGroups::Custom(RustyTypes::Bin), false), // 48, 50
+        "alphalow" => (CharGroups::Custom(RustyTypes::LowerAlpha), false), // (97, 122)
+        "alphaup" => (CharGroups::Custom(RustyTypes::UpperAlpha), false),   // (65, 90)
+        // "fancyalphaup" => ((127460, 127487), true), // (127460, 127487)
+        "num" => (CharGroups::Custom(RustyTypes::Numbers), false), // (48, 57)
+        "moon" => (EmojiGroups::Moon.into(), true),
+        "earth" => (EmojiGroups::Earth.into(), true),
+        // "more-emoji" => ((127744, 128727), true),
+        // "emoji" => ((129292, 129535), true),
+        "shapes" => (EmojiGroups::Shape.into(), true),
+        // "alphanumsim" => ((33, 127), false),
+        _ => (CharGroups::Custom(RustyTypes::Bin), false),
     };
 
     let shading = matches.is_present("shade");
@@ -121,3 +120,4 @@ trait StrTuple {
     type Tuple;
     fn into_tuple(self) -> Self::Tuple;
 }
+
