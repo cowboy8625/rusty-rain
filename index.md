@@ -5,7 +5,8 @@ layout: default
 # Welcome
 
 Rusty Rain is a fast matrix rain program that can be customized from the color of the rain to the characters that are used.
-Since version `0.2.0` Emoji rain is supported and let me tell ya, that is some funny stuff.
+Since version `0.2.0` Emoji rain is supported and let me tell ya, that is some funny stuff. I was inspired to create this clone
+from other cool matrix rain programs such as the famous [CMatrix](https://github.com/abishekvashok/cmatrix) and [Unimatrix](https://github.com/will8211/unimatrix) 
 
 ## Table of Contents
 
