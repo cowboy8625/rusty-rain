@@ -90,5 +90,5 @@ after installing:
 
 # Help
 
-If find any bugs or performance is not up to par please submit a issue so I can better improve
+If you find any bugs or performance is not up to par please submit a issue so I can better improve
 the project.

@@ -27,7 +27,9 @@
 //! git clone https://github.com/cowboy8625/rusty-rain.git
 //! cd rusty-rain
 //! ```
-//! Rusty Rain 0.2.0
+//! USAGE:
+//!     rusty-rain [FLAGS] [OPTIONS]
+//!
 //! FLAGS:
 //!     -h, --help       Prints help information
 //!     -s, --shade      Set Rain shading to fade or stay constant
@@ -35,28 +37,47 @@
 //!
 //! OPTIONS:
 //!     -c, --chars <characters>    Set what kind of characters are printed as rain.
-//!                                                 jap          - for Japanese characters
-//!                                                 bin          - for binary characters
-//!                                                 alphalow     - for lowercase characters
-//!                                                 alphaup      - for uppercase characters
-//!                                                 fancyalphaup - for fancy uppercase characters
-//!                                                 moon         - for moon characters
-//!                                                 earth        - for earth characters
-//!                                                 more-emoji   - some colored some black and white emojis
-//!                                                 emoji        - yes emojis!
-//!                                                 num          - for numbers",
+//!                                 OPTIONS:
+//!                                 -------------------------
+//!                                 all            - List Shows most of the Character Groups all at once.
+//!                                 alphalow       - Lower Case Alphabet Characters
+//!                                 alphaup        - Upper Case Alphabet Characters
+//!                                 arrow          - Arrow Emojis or Fancy Characters
+//!                                 bin            - All Ones and Zeros
+//!                                 cards          - Playing Cards
+//!                                 clock          - Clock Emojis
+//!                                 dominosh       - Domino's that are laying horizontal
+//!                                 dominosv       - Domino's that are laying vertical
+//!                                 earth          - Earth Emojis and different rotations
+//!                                 emojis         - This is just a bunch of random Emojis
+//!                                 jap            - Japanese Characters
+//!                                 large-letters  - Cool Looking Large Letters
+//!                                 moon           - Like the Earths but with the moon
+//!                                 num            - Good ol fashion Numbers
+//!                                 numbered-balls - These are like pool balls
+//!                                 numbered-cubes - These are like the pool balls but just cubes
+//!                                 plants         - Plants of sorts
+//!                                 smile          - Smiley faces!!!!
+//!                                 shapes         - Squares and Circles of a few colors
+//!                                 -------------------------
 //!     -C, --color <color>         Set color of Rain with color string name or tuple
-//!                                                 white,
-//!                                                 red,
-//!                                                 blue,
-//!                                                 green,
-//!                                                 r,g,b
+//!                                 OPTIONS:
+//!                                 -------------------------
+//!                                 white,
+//!                                 red,
+//!                                 blue,
+//!                                 green,
+//!                                 r,g,b
+//!                                 -------------------------
 //!     -H, --head <head>           Set the color of the first char in Rain.
-//!                                                 white,
-//!                                                 red,
-//!                                                 blue,
-//!                                                 green,
-//!                                                 r,g,b
+//!                                 OPTIONS:
+//!                                 -------------------------
+//!                                 white,
+//!                                 red,
+//!                                 blue,
+//!                                 green,
+//!                                 r,g,b
+//!                                 -------------------------
 //! ```
 //! cargo run --release
 //! ```
@@ -89,7 +110,7 @@
 //!
 //! # Help
 //!
-//! If find any bugs or performance is not up to par please submit a issue so I can better improve
+//! If you find any bugs or performance is not up to par please submit a issue so I can better improve
 //! the project.
 
 mod gen;
@@ -107,7 +128,7 @@ use update::{reset, update_locations, update_queue};
 mod arguments;
 use arguments::cargs;
 
-use ezemoji::{EZEmojis, CharGroups, EmojiGroups};
+use ezemoji::{CharGroups, EZEmojis, EmojiGroups};
 
 const MAXSPEED: u64 = 40;
 const MINSPEED: u64 = 200;
@@ -133,11 +154,17 @@ fn main() -> Result<()> {
     let (width, height) = terminal::size()?;
     let h = height as usize;
 
-    let mut e = EZEmojis::new();
+    let mut e = EZEmojis::default();
     e.add(CharGroups::Custom(RustyTypes::Numbers), (48..57).collect());
     e.add(CharGroups::Custom(RustyTypes::Bin), (48..50).collect());
-    e.add(CharGroups::Custom(RustyTypes::LowerAlpha), (97..122).collect());
-    e.add(CharGroups::Custom(RustyTypes::UpperAlpha), (65..90).collect());
+    e.add(
+        CharGroups::Custom(RustyTypes::LowerAlpha),
+        (97..122).collect(),
+    );
+    e.add(
+        CharGroups::Custom(RustyTypes::UpperAlpha),
+        (65..90).collect(),
+    );
     let default_vec = &vec![96];
     let characters = e.get_u32(&characters).unwrap_or(default_vec);
 
@@ -145,36 +172,32 @@ fn main() -> Result<()> {
     // given to the program at start that will crates the colors for the rain
     let create_color = match shading {
         // Creates shading colors
-        true => {
-            |bc: style::Color, head: style::Color, length: u8| {
-                let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
-                let (mut nr, mut ng, mut nb);
-                if let style::Color::Rgb { r, g, b } = bc {
-                    for i in 0..length {
-                        nr = r / length;
-                        ng = g / length;
-                        nb = b / length;
-                        c.push((nr * i, ng * i, nb * i).into());
-                    }
-                    c.push(head);
-                    c.reverse();
+        true => |bc: style::Color, head: style::Color, length: u8| {
+            let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
+            let (mut nr, mut ng, mut nb);
+            if let style::Color::Rgb { r, g, b } = bc {
+                for i in 0..length {
+                    nr = r / length;
+                    ng = g / length;
+                    nb = b / length;
+                    c.push((nr * i, ng * i, nb * i).into());
                 }
-                c
-            }
-        }
-        // creates with out color
-        false => {
-            |bc: style::Color, head: style::Color, length: u8| {
-                let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
                 c.push(head);
-                if let style::Color::Rgb { r, g, b } = bc {
-                    for _ in 0..length {
-                        c.push((r, g, b).into());
-                    }
-                }
-                c
+                c.reverse();
             }
-        }
+            c
+        },
+        // creates with out color
+        false => |bc: style::Color, head: style::Color, length: u8| {
+            let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
+            c.push(head);
+            if let style::Color::Rgb { r, g, b } = bc {
+                for _ in 0..length {
+                    c.push((r, g, b).into());
+                }
+            }
+            c
+        },
     };
 
     let spacing = if double_wide { 2 } else { 1 };

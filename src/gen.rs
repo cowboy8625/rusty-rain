@@ -9,13 +9,10 @@ pub fn ran_ch((min, max): (u32, u32)) -> char {
 
 pub fn create_drop_chars(height: u16, characters: &[u32]) -> Vec<char> {
     (0..height + 1)
-        .map(
-            |_| {
-                char::from_u32(
-                    characters[
-                    thread_rng().gen_range(0..characters.len())
-                    ]).unwrap_or('#')
-            }).collect()
+        .map(|_| {
+            char::from_u32(characters[thread_rng().gen_range(0..characters.len())]).unwrap_or('#')
+        })
+        .collect()
 }
 
 pub fn gen_charater_vecs(width: usize, height: u16, characters: &[u32]) -> Vec<Vec<char>> {
