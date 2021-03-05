@@ -1,5 +1,13 @@
 # How Use
 ```
+USAGE:
+    rusty-rain [FLAGS] [OPTIONS]
+
+FLAGS:
+    -h, --help       Prints help information
+    -s, --shade      Set Rain shading to fade or stay constant
+    -V, --version    Prints version information
+
 OPTIONS:
     -c, --chars <characters>    Set what kind of characters are printed as rain.
                                 OPTIONS:
@@ -43,4 +51,5 @@ OPTIONS:
                                 green,
                                 r,g,b
                                 -------------------------
+
 ```
