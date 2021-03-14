@@ -14,8 +14,8 @@ pub fn draw(w: &mut BufWriter<Stdout>, rain: &Rain, spacing: u16) -> Result<()> 
         len = &rain.length[*x];
         clr = &rain.colors[*x];
 
-        let start = clamp(usub(*loc, *len), chr.len(), 0);
-        let end = clamp(loc + 1, chr.len(), 1);
+        let start = loc.saturating_sub(*len).clamp(0, chr.len());
+        let end = (loc + 1).clamp(1, chr.len());
         let slice = chr[start..end].iter();
 
         let cstart = if loc > len {
@@ -37,33 +37,10 @@ pub fn draw(w: &mut BufWriter<Stdout>, rain: &Rain, spacing: u16) -> Result<()> 
         if loc >= len {
             queue!(
                 w,
-                cursor::MoveTo(*x as u16 * spacing, (usub(*loc, *len)) as u16),
+                cursor::MoveTo(*x as u16 * spacing, loc.saturating_sub(*len) as u16),
                 style::Print(" ".repeat(spacing as usize)),
             )?;
         }
     }
     Ok(())
-}
-
-pub trait Unsigned {}
-impl Unsigned for u8 {}
-impl Unsigned for u16 {}
-impl Unsigned for u32 {}
-impl Unsigned for u64 {}
-impl Unsigned for u128 {}
-impl Unsigned for usize {}
-
-fn usub<T>(x: T, y: T) -> T
-where
-    T: std::ops::Sub<Output = T> + std::cmp::PartialOrd + From<u8> + Unsigned,
-{
-    if y > x {
-        T::from(0)
-    } else {
-        x - y
-    }
-}
-
-fn clamp(x: usize, mx: usize, mn: usize) -> usize {
-    std::cmp::max(mn, std::cmp::min(x, mx))
 }
