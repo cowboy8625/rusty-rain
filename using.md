@@ -19,6 +19,7 @@ OPTIONS:
                                 bin            - All Ones and Zeros
                                 cards          - Playing Cards
                                 clock          - Clock Emojis
+                                crab           - Crab
                                 dominosh       - Domino's that are laying horizontal
                                 dominosv       - Domino's that are laying vertical
                                 earth          - Earth Emojis and different rotations
