@@ -2,11 +2,6 @@ use crate::{style, thread_rng, Rng, MAXSPEED, MINSPEED};
 use std::char;
 use std::time::{Duration, Instant};
 
-pub fn ran_ch((min, max): (u32, u32)) -> char {
-    let c: u32 = thread_rng().gen_range(min..max);
-    char::from_u32(c).unwrap()
-}
-
 pub fn create_drop_chars(height: u16, characters: &[u32]) -> Vec<char> {
     (0..height + 1)
         .map(|_| {
