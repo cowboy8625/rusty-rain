@@ -16,7 +16,7 @@ clap = "2.33.3"
 crossterm = "0.19.0"
 rand = "0.8.2"
 itertools = "0.10.0"
-ezemoji = "0.0.2"
+ezemoji = "0.0.3"
 
 [profile.release]
 debug = true
