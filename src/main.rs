@@ -57,6 +57,7 @@
 //!                                 numbered-balls - These are like pool balls
 //!                                 numbered-cubes - These are like the pool balls but just cubes
 //!                                 plants         - Plants of sorts
+//!                                 crab           - Crabs
 //!                                 smile          - Smiley faces!!!!
 //!                                 shapes         - Squares and Circles of a few colors
 //!                                 -------------------------

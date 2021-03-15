@@ -68,6 +68,7 @@ num            - Good ol fashion Numbers
 numbered-balls - These are like pool balls
 numbered-cubes - These are like the pool balls but just cubes
 plants         - Plants of sorts
+crab           - Crab
 smile          - Smiley faces!!!!
 shapes         - Squares and Circles of a few colors
 -------------------------
@@ -120,6 +121,7 @@ shapes         - Squares and Circles of a few colors
         "numbered-balls" => (EmojiGroups::NumberedBalls.into(), true),
         "numbered-cubes" => (EmojiGroups::NumberedCubes.into(), true),
         "plants" => (EmojiGroups::Plant.into(), true),
+        "crab" => (EmojiGroups::Crab.into(), true),
         "smile" => (EmojiGroups::Smile.into(), true),
         "shapes" => (EmojiGroups::Shape.into(), true),
 
