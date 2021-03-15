@@ -57,6 +57,7 @@ arrow          - Arrow Emojis or Fancy Characters
 bin            - All Ones and Zeros
 cards          - Playing Cards
 clock          - Clock Emojis
+crab           - Crab
 dominosh       - Domino's that are laying horizontal
 dominosv       - Domino's that are laying vertical
 earth          - Earth Emojis and different rotations
@@ -68,7 +69,6 @@ num            - Good ol fashion Numbers
 numbered-balls - These are like pool balls
 numbered-cubes - These are like the pool balls but just cubes
 plants         - Plants of sorts
-crab           - Crab
 smile          - Smiley faces!!!!
 shapes         - Squares and Circles of a few colors
 -------------------------
@@ -111,6 +111,7 @@ shapes         - Squares and Circles of a few colors
         "arrow" => (EmojiGroups::Arrow.into(), true),
         "cards" => (EmojiGroups::Cards.into(), true),
         "clock" => (EmojiGroups::Clock.into(), true),
+        "crab" => (EmojiGroups::Crab.into(), true),
         "dominosh" => (EmojiGroups::HorizontalDominos.into(), true),
         "dominosv" => (EmojiGroups::VerticalDominos.into(), false),
         "earth" => (EmojiGroups::Earth.into(), true),
@@ -121,7 +122,6 @@ shapes         - Squares and Circles of a few colors
         "numbered-balls" => (EmojiGroups::NumberedBalls.into(), true),
         "numbered-cubes" => (EmojiGroups::NumberedCubes.into(), true),
         "plants" => (EmojiGroups::Plant.into(), true),
-        "crab" => (EmojiGroups::Crab.into(), true),
         "smile" => (EmojiGroups::Smile.into(), true),
         "shapes" => (EmojiGroups::Shape.into(), true),
 
