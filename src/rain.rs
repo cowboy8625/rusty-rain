@@ -20,6 +20,7 @@ impl Rain {
         base_color: style::Color,
         characters: &[u32],
         spacing: u16,
+        speeds: (u64, u64),
     ) -> Self {
         let w = (width / spacing) as usize;
         let h = height as usize;
@@ -27,7 +28,7 @@ impl Rain {
         let locations = vec![0; w];
         let length = gen_lengths(w, h);
         let colors = gen_colors(create_color, head, w, &length, base_color);
-        let time = gen_times(w);
+        let time = gen_times(w, speeds);
         let queue = Vec::with_capacity(w);
         Self {
             charaters,

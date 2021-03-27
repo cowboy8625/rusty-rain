@@ -1,7 +1,9 @@
-use crate::{CharGroups, EmojiGroups, RustyTypes, AUTHOR};
-use clap::{crate_description, crate_name, crate_version, App, Arg};
+use crate::{AUTHOR, EmojiGroups, CharGroups, RustyTypes};
+use clap::{App, Arg, crate_name, crate_version, crate_description};
+
 type COLOR = (u8, u8, u8);
-pub fn cargs() -> (COLOR, COLOR, CharGroups<RustyTypes>, bool, bool) {
+
+pub fn cargs() -> (COLOR, COLOR, CharGroups<RustyTypes>, bool, bool, Option<(u64, u64)>) {
     let matches = App::new(crate_name!())
         .version(crate_version!())
         .author(AUTHOR)
@@ -77,6 +79,13 @@ shapes         - Squares and Circles of a few colors
                 .takes_value(true),
         )
         .arg(
+            Arg::with_name("speed")
+                .short("S")
+                .long("speed")
+                .help("Set speed of rain")
+                .takes_value(true),
+        )
+        .arg(
             Arg::with_name("shade")
                 .short("s")
                 .long("shade")
@@ -131,14 +140,37 @@ shapes         - Squares and Circles of a few colors
         _ => (CharGroups::Custom(RustyTypes::Bin), false),
     };
 
+    let speed = match matches.value_of("speed") {
+        Some(value) => {
+            let t = value.to_string().into_tuple();
+            eprintln!("{:?}", t);
+            Some(t)
+        },
+        None => None,
+    };
+
     let shading = matches.is_present("shade");
 
-    (color, head, characters, shading, double_wide)
+    (color, head, characters, shading, double_wide, speed)
 }
 
-impl StrTuple for String {
-    type Tuple = (u8, u8, u8);
-    fn into_tuple(self) -> Self::Tuple {
+impl StrTuple<(u64, u64)> for String {
+    fn into_tuple(self) -> (u64, u64) {
+        let mut nums = Vec::new();
+        for num in self.split(',') {
+            nums.push(
+                num.parse::<u64>()
+                    .expect("This is not the correct format, expecting 0,0,0 or name like white"),
+            );
+        }
+        let a = nums[0];
+        let b = nums[1];
+        (a, b)
+    }
+}
+
+impl StrTuple<(u8, u8, u8)> for String {
+    fn into_tuple(self) -> (u8, u8, u8) {
         let mut nums = Vec::new();
         for num in self.split(',') {
             nums.push(
@@ -153,7 +185,6 @@ impl StrTuple for String {
     }
 }
 
-trait StrTuple {
-    type Tuple;
-    fn into_tuple(self) -> Self::Tuple;
+trait StrTuple<T> {
+    fn into_tuple(self) -> T;
 }

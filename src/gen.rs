@@ -1,4 +1,4 @@
-use crate::{style, thread_rng, Rng, MAXSPEED, MINSPEED};
+use crate::{style, thread_rng, Rng};
 use std::char;
 use std::time::{Duration, Instant};
 
@@ -18,14 +18,14 @@ pub fn gen_charater_vecs(width: usize, height: u16, characters: &[u32]) -> Vec<V
     ch
 }
 
-pub fn gen_times(width: usize) -> Vec<(Instant, Duration)> {
+pub fn gen_times(width: usize, (slowest, fastest): (u64, u64)) -> Vec<(Instant, Duration)> {
     let now = Instant::now();
     let mut times = Vec::new();
     let mut rng = thread_rng();
     for _ in 0..width {
         times.push((
             now,
-            Duration::from_millis(rng.gen_range(MAXSPEED..MINSPEED)),
+            Duration::from_millis(rng.gen_range(slowest..fastest)),
         ));
     }
     times

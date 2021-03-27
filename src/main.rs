@@ -1,119 +1,3 @@
-//! <h1 align="center">
-//!   <br>
-//!   <img src="https://user-images.githubusercontent.com/43012445/105452071-411e4880-5c43-11eb-8ae2-4de61f310bf9.gif" alt="GIF" width="800">
-//!   <img src="https://cdn.discordapp.com/attachments/509849754583302154/812942011400847391/emoji_rain.gif" alt="GIF" width="800">
-//!   <br>
-//!   Rusty Rain
-//!   <br>
-//!   <br>
-//! </h1>
-//!
-//! <p align="center">
-//!   <a><img alt="lastupdated" src="https://img.shields.io/github/last-commit/cowboy8625/rusty-rain"></a>
-//!   <a><img alt="GitHub repo size" src="https://img.shields.io/github/repo-size/cowboy8625/rusty-rain"></a>
-//!   <a><img alt="issuse" src="https://img.shields.io/github/issues/cowboy8625/rusty-rain"></a>
-//!   <a><img alt="Lines of Code" src="https://img.shields.io/tokei/lines/github/cowboy8625/rusty-rain"></a>
-//!   <a><img alt="License" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
-//!   <a href="https://discord.gg/KwnGX8P"><img alt="Discord Chat" src="https://img.shields.io/discord/509849754155614230"></a>
-//! </p>
-//!
-//! A cross platform matrix rain terminal program that runs well and looks good.
-//!
-//! ## To Use
-//!
-//! Simply run the following command on windows/mac/linux:
-//!
-//! ```
-//! git clone https://github.com/cowboy8625/rusty-rain.git
-//! cd rusty-rain
-//! ```
-//! USAGE:
-//!     rusty-rain [FLAGS] [OPTIONS]
-//!
-//! FLAGS:
-//!     -h, --help       Prints help information
-//!     -s, --shade      Set Rain shading to fade or stay constant
-//!     -V, --version    Prints version information
-//!
-//! OPTIONS:
-//!     -c, --chars <characters>    Set what kind of characters are printed as rain.
-//!                                 OPTIONS:
-//!                                 -------------------------
-//!                                 all            - List Shows most of the Character Groups all at once.
-//!                                 alphalow       - Lower Case Alphabet Characters
-//!                                 alphaup        - Upper Case Alphabet Characters
-//!                                 arrow          - Arrow Emojis or Fancy Characters
-//!                                 bin            - All Ones and Zeros
-//!                                 cards          - Playing Cards
-//!                                 clock          - Clock Emojis
-//!                                 dominosh       - Domino's that are laying horizontal
-//!                                 dominosv       - Domino's that are laying vertical
-//!                                 earth          - Earth Emojis and different rotations
-//!                                 emojis         - This is just a bunch of random Emojis
-//!                                 jap            - Japanese Characters
-//!                                 large-letters  - Cool Looking Large Letters
-//!                                 moon           - Like the Earths but with the moon
-//!                                 num            - Good ol fashion Numbers
-//!                                 numbered-balls - These are like pool balls
-//!                                 numbered-cubes - These are like the pool balls but just cubes
-//!                                 plants         - Plants of sorts
-//!                                 crab           - Crabs
-//!                                 smile          - Smiley faces!!!!
-//!                                 shapes         - Squares and Circles of a few colors
-//!                                 -------------------------
-//!     -C, --color <color>         Set color of Rain with color string name or tuple
-//!                                 OPTIONS:
-//!                                 -------------------------
-//!                                 white,
-//!                                 red,
-//!                                 blue,
-//!                                 green,
-//!                                 r,g,b
-//!                                 -------------------------
-//!     -H, --head <head>           Set the color of the first char in Rain.
-//!                                 OPTIONS:
-//!                                 -------------------------
-//!                                 white,
-//!                                 red,
-//!                                 blue,
-//!                                 green,
-//!                                 r,g,b
-//!                                 -------------------------
-//! ```
-//! cargo run --release
-//! ```
-//!
-//! or to install:
-//!
-//! ```
-//!  cargo install rusty-rain
-//! ```
-//!
-//! ## Exit
-//!
-//! To exit just press `ESC` or `Ctrl + c`
-//!
-//!
-//! ## Command Line Arguments
-//!
-//! ```
-//! ```
-//!
-//! ### Example
-//!
-//! using cargo to run:
-//!
-//! `cargo run --release -- -C 0,139,139 -H 255,255,255 1 -c jap -s`
-//!
-//! after installing:
-//!
-//! `rusty-rain -C 0,139,139 -H 255,255,255 -c jap -s`
-//!
-//! # Help
-//!
-//! If you find any bugs or performance is not up to par please submit a issue so I can better improve
-//! the project.
-
 mod gen;
 mod rain;
 mod term;
@@ -151,7 +35,7 @@ pub enum RustyTypes {
 
 fn main() -> Result<()> {
     let mut stdout = BufWriter::with_capacity(8_192, stdout());
-    let (color, head, characters, shading, double_wide) = cargs();
+    let (color, head, characters, shading, double_wide, speed) = cargs();
     let (width, height) = terminal::size()?;
     let h = height as usize;
 
@@ -211,6 +95,7 @@ fn main() -> Result<()> {
         color.into(),
         &characters,
         spacing,
+        speed.unwrap_or((MAXSPEED, MINSPEED)),
     );
 
     terminal::enable_raw_mode()?;
@@ -233,7 +118,7 @@ fn main() -> Result<()> {
                 }
                 event::Event::Resize(w, h) => {
                     clear(&mut stdout)?;
-                    rain = Rain::new(create_color, head, w, h, color.into(), characters, spacing);
+                    rain = Rain::new(create_color, head, w, h, color.into(), characters, spacing, speed.unwrap_or((MAXSPEED, MINSPEED)));
                 }
                 _ => {}
             }
@@ -242,7 +127,7 @@ fn main() -> Result<()> {
         draw(&mut stdout, &rain, spacing)?;
         stdout.flush()?;
         update_locations(&mut rain);
-        reset(create_color, head, &mut rain, characters, h, color.into());
+        reset(create_color, head, &mut rain, characters, h, color.into(), speed.unwrap_or((MAXSPEED, MINSPEED)));
     }
 
     execute!(stdout, cursor::Show, terminal::LeaveAlternateScreen)?;

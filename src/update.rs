@@ -26,6 +26,7 @@ pub fn reset<F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>>(
     characters: &[u32],
     height: usize,
     bc: style::Color,
+    (fastest, slowest): (u64, u64),
 ) {
     // assert_eq!(height, rain.height());
     let mut rng = thread_rng();
@@ -37,7 +38,7 @@ pub fn reset<F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>>(
             rain.locations[*i] = 0;
             rain.length[*i] = rng.gen_range(4..height - 10);
             rain.colors[*i] = create_color(bc, head.into(), rain.length[*i] as u8);
-            rain.time[*i] = (now, Duration::from_millis(rng.gen_range(10..200)));
+            rain.time[*i] = (now, Duration::from_millis(rng.gen_range(fastest..slowest)));
         }
     }
 }
