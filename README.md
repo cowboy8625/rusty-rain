@@ -98,6 +98,7 @@ OPTIONS:
                                 green,
                                 r,g,b
                                 -------------------------
+    -S, --speed <speed>         Set speed of rain
 
 ```
 
