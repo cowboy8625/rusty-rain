@@ -118,7 +118,16 @@ fn main() -> Result<()> {
                 }
                 event::Event::Resize(w, h) => {
                     clear(&mut stdout)?;
-                    rain = Rain::new(create_color, head, w, h, color.into(), characters, spacing, speed.unwrap_or((MAXSPEED, MINSPEED)));
+                    rain = Rain::new(
+                        create_color,
+                        head,
+                        w,
+                        h,
+                        color.into(),
+                        characters,
+                        spacing,
+                        speed.unwrap_or((MAXSPEED, MINSPEED)),
+                    );
                 }
                 _ => {}
             }
@@ -127,7 +136,15 @@ fn main() -> Result<()> {
         draw(&mut stdout, &rain, spacing)?;
         stdout.flush()?;
         update_locations(&mut rain);
-        reset(create_color, head, &mut rain, characters, h, color.into(), speed.unwrap_or((MAXSPEED, MINSPEED)));
+        reset(
+            create_color,
+            head,
+            &mut rain,
+            characters,
+            h,
+            color.into(),
+            speed.unwrap_or((MAXSPEED, MINSPEED)),
+        );
     }
 
     execute!(stdout, cursor::Show, terminal::LeaveAlternateScreen)?;

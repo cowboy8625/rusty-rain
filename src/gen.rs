@@ -23,10 +23,7 @@ pub fn gen_times(width: usize, (slowest, fastest): (u64, u64)) -> Vec<(Instant, 
     let mut times = Vec::new();
     let mut rng = thread_rng();
     for _ in 0..width {
-        times.push((
-            now,
-            Duration::from_millis(rng.gen_range(slowest..fastest)),
-        ));
+        times.push((now, Duration::from_millis(rng.gen_range(slowest..fastest))));
     }
     times
 }

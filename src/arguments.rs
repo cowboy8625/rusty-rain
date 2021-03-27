@@ -1,9 +1,16 @@
-use crate::{AUTHOR, EmojiGroups, CharGroups, RustyTypes};
-use clap::{App, Arg, crate_name, crate_version, crate_description};
+use crate::{CharGroups, EmojiGroups, RustyTypes, AUTHOR};
+use clap::{crate_description, crate_name, crate_version, App, Arg};
 
 type COLOR = (u8, u8, u8);
 
-pub fn cargs() -> (COLOR, COLOR, CharGroups<RustyTypes>, bool, bool, Option<(u64, u64)>) {
+pub fn cargs() -> (
+    COLOR,
+    COLOR,
+    CharGroups<RustyTypes>,
+    bool,
+    bool,
+    Option<(u64, u64)>,
+) {
     let matches = App::new(crate_name!())
         .version(crate_version!())
         .author(AUTHOR)
@@ -145,7 +152,7 @@ shapes         - Squares and Circles of a few colors
             let t = value.to_string().into_tuple();
             eprintln!("{:?}", t);
             Some(t)
-        },
+        }
         None => None,
     };
 
