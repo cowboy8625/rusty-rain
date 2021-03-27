@@ -1,4 +1,3 @@
-[back](./index.md)
 <h1 align="center">
   <br>
   <img src="https://user-images.githubusercontent.com/43012445/105452071-411e4880-5c43-11eb-8ae2-4de61f310bf9.gif" alt="GIF" width="800">
@@ -47,7 +46,9 @@ To exit just press `ESC` or `Ctrl + C`
 ## Command Line Arguments
 
 ```
-Rusty Rain 0.2.0
+USAGE:
+    rusty-rain [FLAGS] [OPTIONS]
+
 FLAGS:
     -h, --help       Prints help information
     -s, --shade      Set Rain shading to fade or stay constant
@@ -55,28 +56,50 @@ FLAGS:
 
 OPTIONS:
     -c, --chars <characters>    Set what kind of characters are printed as rain.
-                                                jap          - for Japanese characters
-                                                bin          - for binary characters
-                                                alphalow     - for lowercase characters
-                                                alphaup      - for uppercase characters
-                                                fancyalphaup - for fancy uppercase characters
-                                                moon         - for moon characters
-                                                earth        - for earth characters
-                                                more-emoji   - some colored some black and white emojis
-                                                emoji        - yes emojis!
-                                                num          - for numbers",
+                                OPTIONS:
+                                -------------------------
+                                all            - List Shows most of the Character Groups all at once.
+                                alphalow       - Lower Case Alphabet Characters
+                                alphaup        - Upper Case Alphabet Characters
+                                arrow          - Arrow Emojis or Fancy Characters
+                                bin            - All Ones and Zeros
+                                cards          - Playing Cards
+                                clock          - Clock Emojis
+                                crab           - Crab
+                                dominosh       - Domino's that are laying horizontal
+                                dominosv       - Domino's that are laying vertical
+                                earth          - Earth Emojis and different rotations
+                                emojis         - This is just a bunch of random Emojis
+                                jap            - Japanese Characters
+                                large-letters  - Cool Looking Large Letters
+                                moon           - Like the Earths but with the moon
+                                num            - Good ol fashion Numbers
+                                numbered-balls - These are like pool balls
+                                numbered-cubes - These are like the pool balls but just cubes
+                                plants         - Plants of sorts
+                                smile          - Smiley faces!!!!
+                                shapes         - Squares and Circles of a few colors
+                                -------------------------
     -C, --color <color>         Set color of Rain with color string name or tuple
-                                                white,
-                                                red,
-                                                blue,
-                                                green,
-                                                r,g,b
+                                OPTIONS:
+                                -------------------------
+                                white,
+                                red,
+                                blue,
+                                green,
+                                r,g,b
+                                -------------------------
     -H, --head <head>           Set the color of the first char in Rain.
-                                                white,
-                                                red,
-                                                blue,
-                                                green,
-                                                r,g,b
+                                OPTIONS:
+                                -------------------------
+                                white,
+                                red,
+                                blue,
+                                green,
+                                r,g,b
+                                -------------------------
+    -S, --speed <speed>         Set speed of rain
+
 ```
 
 ### Example
@@ -91,5 +114,7 @@ after installing:
 
 # Help
 
-If find any bugs or performance is not up to par please submit a issue so I can better improve
+If you find any bugs or performance is not up to par please submit a issue so I can better improve
 the project.
+
+[home](./index.md)
