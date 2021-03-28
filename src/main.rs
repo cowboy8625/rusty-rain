@@ -25,6 +25,48 @@ const AUTHOR: &str = "
 Email: cowboy8625@protonmail.com
 ";
 
+
+
+#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+pub enum CharWidth {
+    Single,
+    Double,
+}
+
+impl CharWidth {
+    pub fn value(self) -> u16 {
+        match self {
+            Self::Single => 1,
+            Self::Double => 2,
+        }
+    }
+}
+
+#[derive(Clone, Hash, PartialEq, Eq)]
+pub struct UserSettings {
+    rain_color: (u8, u8, u8),
+    head_color: (u8, u8, u8),
+    group: CharGroups<RustyTypes>,
+    shading: bool,
+    spacing: CharWidth,
+    speed: (u64, u64),
+}
+
+impl UserSettings {
+    pub fn new(
+            rain_color: (u8, u8, u8),
+            head_color: (u8, u8, u8),
+            group: CharGroups<RustyTypes>,
+            shading: bool,
+            spacing: CharWidth,
+            speed: (u64, u64),
+        ) -> Self {
+        Self {
+            rain_color, head_color, group, shading, spacing, speed,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub enum RustyTypes {
     Bin,
@@ -35,7 +77,7 @@ pub enum RustyTypes {
 
 fn main() -> Result<()> {
     let mut stdout = BufWriter::with_capacity(8_192, stdout());
-    let (color, head, characters, shading, double_wide, speed) = cargs();
+    let user_settings = cargs();
     let (width, height) = terminal::size()?;
     let h = height as usize;
 
@@ -51,11 +93,11 @@ fn main() -> Result<()> {
         (65..90).collect(),
     );
     let default_vec = &vec![96];
-    let characters = e.get_u32(&characters).unwrap_or(default_vec);
+    let characters = e.get_u32(&user_settings.group).unwrap_or(default_vec);
 
     // This Creates a closure off of the args
     // given to the program at start that will crates the colors for the rain
-    let create_color = match shading {
+    let create_color = match user_settings.shading {
         // Creates shading colors
         true => |bc: style::Color, head: style::Color, length: u8| {
             let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
@@ -85,17 +127,12 @@ fn main() -> Result<()> {
         },
     };
 
-    let spacing = if double_wide { 2 } else { 1 };
-
     let mut rain = Rain::new(
         create_color,
-        head,
         width,
         height,
-        color.into(),
         &characters,
-        spacing,
-        speed.unwrap_or((MAXSPEED, MINSPEED)),
+        &user_settings,
     );
 
     terminal::enable_raw_mode()?;
@@ -120,30 +157,27 @@ fn main() -> Result<()> {
                     clear(&mut stdout)?;
                     rain = Rain::new(
                         create_color,
-                        head,
                         w,
                         h,
-                        color.into(),
-                        characters,
-                        spacing,
-                        speed.unwrap_or((MAXSPEED, MINSPEED)),
+                        &characters,
+                        &user_settings,
                     );
                 }
                 _ => {}
             }
         }
         update_queue(&mut rain);
-        draw(&mut stdout, &rain, spacing)?;
+        draw(&mut stdout, &rain, user_settings.spacing.value())?;
         stdout.flush()?;
         update_locations(&mut rain);
         reset(
             create_color,
-            head,
+            user_settings.head_color,
             &mut rain,
             characters,
             h,
-            color.into(),
-            speed.unwrap_or((MAXSPEED, MINSPEED)),
+            user_settings.rain_color.into(),
+            user_settings.speed,
         );
     }
 

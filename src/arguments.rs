@@ -1,16 +1,7 @@
-use crate::{CharGroups, EmojiGroups, RustyTypes, AUTHOR};
+use crate::{MINSPEED, MAXSPEED, CharGroups, EmojiGroups, RustyTypes, AUTHOR, UserSettings, CharWidth::*};
 use clap::{crate_description, crate_name, crate_version, App, Arg};
 
-type COLOR = (u8, u8, u8);
-
-pub fn cargs() -> (
-    COLOR,
-    COLOR,
-    CharGroups<RustyTypes>,
-    bool,
-    bool,
-    Option<(u64, u64)>,
-) {
+pub fn cargs() -> UserSettings {
     let matches = App::new(crate_name!())
         .version(crate_version!())
         .author(AUTHOR)
@@ -118,47 +109,43 @@ shapes         - Squares and Circles of a few colors
     };
 
     let (characters, double_wide) = match matches.value_of("characters").unwrap_or("bin") {
-        "alphalow" => (CharGroups::Custom(RustyTypes::LowerAlpha), false),
-        "alphaup" => (CharGroups::Custom(RustyTypes::UpperAlpha), false),
-        "bin" => (CharGroups::Custom(RustyTypes::Bin), false),
-        "num" => (CharGroups::Custom(RustyTypes::Numbers), false),
+        "alphalow" => (CharGroups::Custom(RustyTypes::LowerAlpha), Single),
+        "alphaup" => (CharGroups::Custom(RustyTypes::UpperAlpha), Single),
+        "bin" => (CharGroups::Custom(RustyTypes::Bin), Single),
+        "num" => (CharGroups::Custom(RustyTypes::Numbers), Single),
 
-        "all" => (EmojiGroups::All.into(), true),
-        "arrow" => (EmojiGroups::Arrow.into(), true),
-        "cards" => (EmojiGroups::Cards.into(), true),
-        "clock" => (EmojiGroups::Clock.into(), true),
-        "crab" => (EmojiGroups::Crab.into(), true),
-        "dominosh" => (EmojiGroups::HorizontalDominos.into(), true),
-        "dominosv" => (EmojiGroups::VerticalDominos.into(), false),
-        "earth" => (EmojiGroups::Earth.into(), true),
-        "emojis" => (EmojiGroups::Emojis.into(), true),
-        "jap" => (EmojiGroups::Japanese.into(), false),
-        "large-letters" => (EmojiGroups::LargeLetter.into(), true),
-        "moon" => (EmojiGroups::Moon.into(), true),
-        "numbered-balls" => (EmojiGroups::NumberedBalls.into(), true),
-        "numbered-cubes" => (EmojiGroups::NumberedCubes.into(), true),
-        "plants" => (EmojiGroups::Plant.into(), true),
-        "smile" => (EmojiGroups::Smile.into(), true),
-        "shapes" => (EmojiGroups::Shape.into(), true),
+        "all" => (EmojiGroups::All.into(), Double),
+        "arrow" => (EmojiGroups::Arrow.into(), Double),
+        "cards" => (EmojiGroups::Cards.into(), Double),
+        "clock" => (EmojiGroups::Clock.into(), Double),
+        "crab" => (EmojiGroups::Crab.into(), Double),
+        "dominosh" => (EmojiGroups::HorizontalDominos.into(), Double),
+        "dominosv" => (EmojiGroups::VerticalDominos.into(), Single),
+        "earth" => (EmojiGroups::Earth.into(), Double),
+        "emojis" => (EmojiGroups::Emojis.into(), Double),
+        "jap" => (EmojiGroups::Japanese.into(), Single),
+        "large-letters" => (EmojiGroups::LargeLetter.into(), Double),
+        "moon" => (EmojiGroups::Moon.into(), Double),
+        "numbered-balls" => (EmojiGroups::NumberedBalls.into(), Double),
+        "numbered-cubes" => (EmojiGroups::NumberedCubes.into(), Double),
+        "plants" => (EmojiGroups::Plant.into(), Double),
+        "smile" => (EmojiGroups::Smile.into(), Double),
+        "shapes" => (EmojiGroups::Shape.into(), Double),
 
         // "fancyalphaup" => ((127460, 127487), true), // (127460, 127487)
         // "more-emoji" => ((127744, 128727), true),
         // "alphanumsim" => ((33, 127), false),
-        _ => (CharGroups::Custom(RustyTypes::Bin), false),
+        _ => (CharGroups::Custom(RustyTypes::Bin), Single),
     };
 
     let speed = match matches.value_of("speed") {
-        Some(value) => {
-            let t = value.to_string().into_tuple();
-            eprintln!("{:?}", t);
-            Some(t)
-        }
-        None => None,
+        Some(value) => value.to_string().into_tuple(),
+        None => (MAXSPEED, MINSPEED),
     };
 
     let shading = matches.is_present("shade");
 
-    (color, head, characters, shading, double_wide, speed)
+    UserSettings::new(color, head, characters, shading, double_wide, speed)
 }
 
 impl StrTuple<(u64, u64)> for String {
