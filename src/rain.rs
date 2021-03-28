@@ -17,14 +17,20 @@ impl Rain {
         width: u16,
         height: u16,
         characters: &[u32],
-        us: &UserSettings
+        us: &UserSettings,
     ) -> Self {
         let w = (width / us.spacing.value()) as usize;
         let h = height as usize;
         let charaters = gen_charater_vecs(w, height, characters);
         let locations = vec![0; w];
         let length = gen_lengths(w, h);
-        let colors = gen_colors(create_color, us.head_color.into(), w, &length, us.rain_color.into());
+        let colors = gen_colors(
+            create_color,
+            us.head_color,
+            w,
+            &length,
+            us.rain_color.into(),
+        );
         let time = gen_times(w, us.speed);
         let queue = Vec::with_capacity(w);
         Self {

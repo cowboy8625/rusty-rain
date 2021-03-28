@@ -1,4 +1,6 @@
-use crate::{MINSPEED, MAXSPEED, CharGroups, EmojiGroups, RustyTypes, AUTHOR, UserSettings, CharWidth::*};
+use crate::{
+    CharGroups, CharWidth::*, EmojiGroups, RustyTypes, UserSettings, AUTHOR, MAXSPEED, MINSPEED,
+};
 use clap::{crate_description, crate_name, crate_version, App, Arg};
 
 pub fn cargs() -> UserSettings {

@@ -25,8 +25,6 @@ const AUTHOR: &str = "
 Email: cowboy8625@protonmail.com
 ";
 
-
-
 #[derive(Clone, Copy, Hash, PartialEq, Eq)]
 pub enum CharWidth {
     Single,
@@ -54,15 +52,20 @@ pub struct UserSettings {
 
 impl UserSettings {
     pub fn new(
-            rain_color: (u8, u8, u8),
-            head_color: (u8, u8, u8),
-            group: CharGroups<RustyTypes>,
-            shading: bool,
-            spacing: CharWidth,
-            speed: (u64, u64),
-        ) -> Self {
+        rain_color: (u8, u8, u8),
+        head_color: (u8, u8, u8),
+        group: CharGroups<RustyTypes>,
+        shading: bool,
+        spacing: CharWidth,
+        speed: (u64, u64),
+    ) -> Self {
         Self {
-            rain_color, head_color, group, shading, spacing, speed,
+            rain_color,
+            head_color,
+            group,
+            shading,
+            spacing,
+            speed,
         }
     }
 }
@@ -127,13 +130,7 @@ fn main() -> Result<()> {
         },
     };
 
-    let mut rain = Rain::new(
-        create_color,
-        width,
-        height,
-        &characters,
-        &user_settings,
-    );
+    let mut rain = Rain::new(create_color, width, height, &characters, &user_settings);
 
     terminal::enable_raw_mode()?;
     execute!(stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
@@ -155,13 +152,7 @@ fn main() -> Result<()> {
                 }
                 event::Event::Resize(w, h) => {
                     clear(&mut stdout)?;
-                    rain = Rain::new(
-                        create_color,
-                        w,
-                        h,
-                        &characters,
-                        &user_settings,
-                    );
+                    rain = Rain::new(create_color, w, h, &characters, &user_settings);
                 }
                 _ => {}
             }
