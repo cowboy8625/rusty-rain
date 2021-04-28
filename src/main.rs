@@ -13,7 +13,7 @@ use update::{reset, update_locations, update_queue};
 mod arguments;
 use arguments::cargs;
 
-use ezemoji::{CharGroups, EZEmojis, EmojiGroups};
+use ezemoji::*;
 
 const MAXSPEED: u64 = 40;
 const MINSPEED: u64 = 200;
@@ -25,7 +25,7 @@ const AUTHOR: &str = "
 Email: cowboy8625@protonmail.com
 ";
 
-#[derive(Clone, Copy, Hash, PartialEq, Eq)]
+#[derive(Clone, Copy)]
 pub enum CharWidth {
     Single,
     Double,
@@ -40,11 +40,11 @@ impl CharWidth {
     }
 }
 
-#[derive(Clone, Hash, PartialEq, Eq)]
+// #[derive(Clone)]
 pub struct UserSettings {
     rain_color: (u8, u8, u8),
     head_color: (u8, u8, u8),
-    group: CharGroups<RustyTypes>,
+    group: Box<dyn EZEmoji>,
     shading: bool,
     spacing: CharWidth,
     speed: (u64, u64),
@@ -54,7 +54,7 @@ impl UserSettings {
     pub fn new(
         rain_color: (u8, u8, u8),
         head_color: (u8, u8, u8),
-        group: CharGroups<RustyTypes>,
+        group: Box<dyn EZEmoji>,
         shading: bool,
         spacing: CharWidth,
         speed: (u64, u64),
@@ -70,37 +70,10 @@ impl UserSettings {
     }
 }
 
-#[derive(Clone, Copy, Hash, PartialEq, Eq)]
-pub enum RustyTypes {
-    Bin,
-    Numbers,
-    LowerAlpha,
-    UpperAlpha,
-}
-
-fn main() -> Result<()> {
-    let mut stdout = BufWriter::with_capacity(8_192, stdout());
-    let user_settings = cargs();
-    let (width, height) = terminal::size()?;
-    let h = height as usize;
-
-    let mut e = EZEmojis::default();
-    e.add(CharGroups::Custom(RustyTypes::Numbers), (48..57).collect());
-    e.add(CharGroups::Custom(RustyTypes::Bin), (48..50).collect());
-    e.add(
-        CharGroups::Custom(RustyTypes::LowerAlpha),
-        (97..122).collect(),
-    );
-    e.add(
-        CharGroups::Custom(RustyTypes::UpperAlpha),
-        (65..90).collect(),
-    );
-    let default_vec = &vec![96];
-    let characters = e.get_u32(&user_settings.group).unwrap_or(default_vec);
-
+fn gen_color_function(shading: bool) -> fn(style::Color, style::Color, u8) -> Vec<style::Color> {
     // This Creates a closure off of the args
     // given to the program at start that will crates the colors for the rain
-    let create_color = match user_settings.shading {
+    match shading {
         // Creates shading colors
         true => |bc: style::Color, head: style::Color, length: u8| {
             let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
@@ -118,7 +91,7 @@ fn main() -> Result<()> {
             c
         },
         // creates with out color
-        false => |bc: style::Color, head: style::Color, length: u8| {
+        _ => |bc: style::Color, head: style::Color, length: u8| {
             let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
             c.push(head);
             if let style::Color::Rgb { r, g, b } = bc {
@@ -128,9 +101,18 @@ fn main() -> Result<()> {
             }
             c
         },
-    };
+    }
+}
 
-    let mut rain = Rain::new(create_color, width, height, &characters, &user_settings);
+fn main() -> Result<()> {
+    let mut stdout = BufWriter::with_capacity(8_192, stdout());
+    let user_settings = cargs();
+    let (width, height) = terminal::size()?;
+    let h = height as usize;
+
+    let create_color = gen_color_function(user_settings.shading);
+
+    let mut rain = Rain::new(create_color, width, height, &user_settings);
 
     terminal::enable_raw_mode()?;
     execute!(stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
@@ -152,7 +134,7 @@ fn main() -> Result<()> {
                 }
                 event::Event::Resize(w, h) => {
                     clear(&mut stdout)?;
-                    rain = Rain::new(create_color, w, h, &characters, &user_settings);
+                    rain = Rain::new(create_color, w, h, &user_settings);
                 }
                 _ => {}
             }
@@ -163,12 +145,9 @@ fn main() -> Result<()> {
         update_locations(&mut rain);
         reset(
             create_color,
-            user_settings.head_color,
             &mut rain,
-            characters,
+            &user_settings,
             h,
-            user_settings.rain_color.into(),
-            user_settings.speed,
         );
     }
 

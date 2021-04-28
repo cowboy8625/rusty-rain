@@ -1,7 +1,8 @@
 use crate::{
-    CharGroups, CharWidth::*, EmojiGroups, RustyTypes, UserSettings, AUTHOR, MAXSPEED, MINSPEED,
+    CharWidth, CharWidth::*, UserSettings, AUTHOR, MAXSPEED, MINSPEED,
 };
 use clap::{crate_description, crate_name, crate_version, App, Arg};
+use ezemoji::*;
 
 pub fn cargs() -> UserSettings {
     let matches = App::new(crate_name!())
@@ -82,7 +83,7 @@ shapes         - Squares and Circles of a few colors
             Arg::with_name("speed")
                 .short("S")
                 .long("speed")
-                .help("Set speed of rain")
+                .help("Set speed of rain MAX,MIN -S 200,400")
                 .takes_value(true),
         )
         .arg(
@@ -110,34 +111,29 @@ shapes         - Squares and Circles of a few colors
         a => a.to_string().into_tuple(),
     };
 
-    let (characters, double_wide) = match matches.value_of("characters").unwrap_or("bin") {
-        "alphalow" => (CharGroups::Custom(RustyTypes::LowerAlpha), Single),
-        "alphaup" => (CharGroups::Custom(RustyTypes::UpperAlpha), Single),
-        "bin" => (CharGroups::Custom(RustyTypes::Bin), Single),
-        "num" => (CharGroups::Custom(RustyTypes::Numbers), Single),
-
-        "all" => (EmojiGroups::All.into(), Double),
-        "arrow" => (EmojiGroups::Arrow.into(), Double),
-        "cards" => (EmojiGroups::Cards.into(), Double),
-        "clock" => (EmojiGroups::Clock.into(), Double),
-        "crab" => (EmojiGroups::Crab.into(), Double),
-        "dominosh" => (EmojiGroups::HorizontalDominos.into(), Double),
-        "dominosv" => (EmojiGroups::VerticalDominos.into(), Single),
-        "earth" => (EmojiGroups::Earth.into(), Double),
-        "emojis" => (EmojiGroups::Emojis.into(), Double),
-        "jap" => (EmojiGroups::Japanese.into(), Single),
-        "large-letters" => (EmojiGroups::LargeLetter.into(), Double),
-        "moon" => (EmojiGroups::Moon.into(), Double),
-        "numbered-balls" => (EmojiGroups::NumberedBalls.into(), Double),
-        "numbered-cubes" => (EmojiGroups::NumberedCubes.into(), Double),
-        "plants" => (EmojiGroups::Plant.into(), Double),
-        "smile" => (EmojiGroups::Smile.into(), Double),
-        "shapes" => (EmojiGroups::Shape.into(), Double),
-
-        // "fancyalphaup" => ((127460, 127487), true), // (127460, 127487)
-        // "more-emoji" => ((127744, 128727), true),
-        // "alphanumsim" => ((33, 127), false),
-        _ => (CharGroups::Custom(RustyTypes::Bin), Single),
+    let (group, double_wide): (Box<dyn EZEmoji>, CharWidth) = match matches.value_of("characters").unwrap_or("bin") {
+        "all" => (Box::new(AllEmojis), Double),
+        "alphalow" => (Box::new(LowerAlpha), Single),
+        "alphaup" => (Box::new(UpperAlpha), Single),
+        "arrow" => (Box::new(Arrow), Double),
+        "bin" => (Box::new(Bin), Single),
+        "cards" => (Box::new(Cards), Double),
+        "clock" => (Box::new(Clock), Double),
+        "crab" => (Box::new(Crab), Double),
+        "dominosh" => (Box::new(HorizontalDominos), Double),
+        "dominosv" => (Box::new(VerticalDominos), Single),
+        "earth" => (Box::new(Earth), Double),
+        "emojis" => (Box::new(Emojis), Double),
+        "jap" => (Box::new(Japanese), Single),
+        "large-letters" => (Box::new(LargeLetter), Double),
+        "moon" => (Box::new(Moon), Double),
+        "num" => (Box::new(Numbers), Single),
+        "numbered-balls" => (Box::new(NumberedBalls), Double),
+        "numbered-cubes" => (Box::new(NumberedCubes), Double),
+        "plants" => (Box::new(Plant), Double),
+        "smile" => (Box::new(Smile), Double),
+        "shapes" => (Box::new(Shape), Double),
+        _ => (Box::new(Bin), Single),
     };
 
     let speed = match matches.value_of("speed") {
@@ -147,7 +143,7 @@ shapes         - Squares and Circles of a few colors
 
     let shading = matches.is_present("shade");
 
-    UserSettings::new(color, head, characters, shading, double_wide, speed)
+    UserSettings::new(color, head, group, shading, double_wide, speed)
 }
 
 impl StrTuple<(u64, u64)> for String {

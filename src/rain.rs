@@ -12,16 +12,18 @@ pub struct Rain {
 }
 
 impl Rain {
-    pub fn new<F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>>(
+    pub fn new<F>(
         create_color: F,
         width: u16,
         height: u16,
-        characters: &[u32],
         us: &UserSettings,
-    ) -> Self {
-        let w = (width / us.spacing.value()) as usize;
+    ) -> Self
+        where
+        F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>,
+    {
+        let w = (width / &us.spacing.value()) as usize;
         let h = height as usize;
-        let charaters = gen_charater_vecs(w, height, characters);
+        let charaters = gen_charater_vecs(w, height, &us.group);
         let locations = vec![0; w];
         let length = gen_lengths(w, h);
         let colors = gen_colors(

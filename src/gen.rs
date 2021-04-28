@@ -1,19 +1,21 @@
 use crate::{style, thread_rng, Rng};
 use std::char;
 use std::time::{Duration, Instant};
+use ezemoji::EZEmoji;
 
-pub fn create_drop_chars(height: u16, characters: &[u32]) -> Vec<char> {
+pub fn create_drop_chars(height: u16, group: &Box<dyn EZEmoji>) -> Vec<char> {
+    let g = group.as_vec_u32();
     (0..height + 1)
         .map(|_| {
-            char::from_u32(characters[thread_rng().gen_range(0..characters.len())]).unwrap_or('#')
+            char::from_u32(g[thread_rng().gen_range(0..g.len())]).unwrap_or('#')
         })
         .collect()
 }
 
-pub fn gen_charater_vecs(width: usize, height: u16, characters: &[u32]) -> Vec<Vec<char>> {
+pub fn gen_charater_vecs(width: usize, height: u16, group: &Box<dyn EZEmoji>) -> Vec<Vec<char>> {
     let mut ch = Vec::new();
     for _ in 0..width {
-        ch.push(create_drop_chars(height, characters));
+        ch.push(create_drop_chars(height, group));
     }
     ch
 }
