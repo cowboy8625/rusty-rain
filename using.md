@@ -53,5 +53,5 @@ OPTIONS:
                                 r,g,b
                                 -------------------------
 
-    -S, --speed <speed>         Set speed of rain
+    -S, --speed <speed>         Set speed of rain MAX,MIN -S 200,400
 ```
