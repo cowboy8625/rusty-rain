@@ -1,6 +1,4 @@
-use crate::{
-    CharWidth, CharWidth::*, UserSettings, AUTHOR, MAXSPEED, MINSPEED,
-};
+use crate::{CharWidth, CharWidth::*, UserSettings, AUTHOR, MAXSPEED, MINSPEED};
 use clap::{crate_description, crate_name, crate_version, App, Arg};
 use ezemoji::*;
 
@@ -111,30 +109,31 @@ shapes         - Squares and Circles of a few colors
         a => a.to_string().into_tuple(),
     };
 
-    let (group, double_wide): (Box<dyn EZEmoji>, CharWidth) = match matches.value_of("characters").unwrap_or("bin") {
-        "all" => (Box::new(AllEmojis), Double),
-        "alphalow" => (Box::new(LowerAlpha), Single),
-        "alphaup" => (Box::new(UpperAlpha), Single),
-        "arrow" => (Box::new(Arrow), Double),
-        "bin" => (Box::new(Bin), Single),
-        "cards" => (Box::new(Cards), Double),
-        "clock" => (Box::new(Clock), Double),
-        "crab" => (Box::new(Crab), Double),
-        "dominosh" => (Box::new(HorizontalDominos), Double),
-        "dominosv" => (Box::new(VerticalDominos), Single),
-        "earth" => (Box::new(Earth), Double),
-        "emojis" => (Box::new(Emojis), Double),
-        "jap" => (Box::new(Japanese), Single),
-        "large-letters" => (Box::new(LargeLetter), Double),
-        "moon" => (Box::new(Moon), Double),
-        "num" => (Box::new(Numbers), Single),
-        "numbered-balls" => (Box::new(NumberedBalls), Double),
-        "numbered-cubes" => (Box::new(NumberedCubes), Double),
-        "plants" => (Box::new(Plant), Double),
-        "smile" => (Box::new(Smile), Double),
-        "shapes" => (Box::new(Shape), Double),
-        _ => (Box::new(Bin), Single),
-    };
+    let (group, double_wide): (Box<dyn EZEmoji>, CharWidth) =
+        match matches.value_of("characters").unwrap_or("bin") {
+            "all" => (Box::new(AllEmojis), Double),
+            "alphalow" => (Box::new(LowerAlpha), Single),
+            "alphaup" => (Box::new(UpperAlpha), Single),
+            "arrow" => (Box::new(Arrow), Double),
+            "bin" => (Box::new(Bin), Single),
+            "cards" => (Box::new(Cards), Double),
+            "clock" => (Box::new(Clock), Double),
+            "crab" => (Box::new(Crab), Double),
+            "dominosh" => (Box::new(HorizontalDominos), Double),
+            "dominosv" => (Box::new(VerticalDominos), Single),
+            "earth" => (Box::new(Earth), Double),
+            "emojis" => (Box::new(Emojis), Double),
+            "jap" => (Box::new(Japanese), Single),
+            "large-letters" => (Box::new(LargeLetter), Double),
+            "moon" => (Box::new(Moon), Double),
+            "num" => (Box::new(Numbers), Single),
+            "numbered-balls" => (Box::new(NumberedBalls), Double),
+            "numbered-cubes" => (Box::new(NumberedCubes), Double),
+            "plants" => (Box::new(Plant), Double),
+            "smile" => (Box::new(Smile), Double),
+            "shapes" => (Box::new(Shape), Double),
+            _ => (Box::new(Bin), Single),
+        };
 
     let speed = match matches.value_of("speed") {
         Some(value) => value.to_string().into_tuple(),

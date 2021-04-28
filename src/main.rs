@@ -143,12 +143,7 @@ fn main() -> Result<()> {
         draw(&mut stdout, &rain, user_settings.spacing.value())?;
         stdout.flush()?;
         update_locations(&mut rain);
-        reset(
-            create_color,
-            &mut rain,
-            &user_settings,
-            h,
-        );
+        reset(create_color, &mut rain, &user_settings, h);
     }
 
     execute!(stdout, cursor::Show, terminal::LeaveAlternateScreen)?;

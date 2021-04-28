@@ -12,13 +12,8 @@ pub struct Rain {
 }
 
 impl Rain {
-    pub fn new<F>(
-        create_color: F,
-        width: u16,
-        height: u16,
-        us: &UserSettings,
-    ) -> Self
-        where
+    pub fn new<F>(create_color: F, width: u16, height: u16, us: &UserSettings) -> Self
+    where
         F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>,
     {
         let w = (width / &us.spacing.value()) as usize;
