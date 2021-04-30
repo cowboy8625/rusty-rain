@@ -33,7 +33,7 @@ where
             rain.locations[*i] = 0;
             rain.length[*i] = rng.gen_range(4..height - 10);
             rain.colors[*i] = create_color(
-                us.head_color.into(),
+                us.rain_color.into(),
                 us.head_color.into(),
                 rain.length[*i] as u8,
             );
