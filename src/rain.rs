@@ -16,7 +16,7 @@ impl Rain {
     where
         F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>,
     {
-        let w = (width / &us.spacing.value()) as usize;
+        let w = (width / us.group.width()) as usize;
         let h = height as usize;
         let charaters = gen_charater_vecs(w, height, &us.group);
         let locations = vec![0; w];
