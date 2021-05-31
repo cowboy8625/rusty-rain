@@ -17,6 +17,40 @@ pub fn gen_charater_vecs(width: usize, height: u16, group: &Characters) -> Vec<V
     ch
 }
 
+pub fn gen_color_function(shading: bool) -> fn(style::Color, style::Color, u8) -> Vec<style::Color> {
+    // This Creates a closure off of the args
+    // given to the program at start that will crates the colors for the rain
+    match shading {
+        // Creates shading colors
+        true => |bc: style::Color, head: style::Color, length: u8| {
+            let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
+            let (mut nr, mut ng, mut nb);
+            if let style::Color::Rgb { r, g, b } = bc {
+                for i in 0..length {
+                    nr = r / length;
+                    ng = g / length;
+                    nb = b / length;
+                    c.push((nr * i, ng * i, nb * i).into());
+                }
+                c.push(head);
+                c.reverse();
+            }
+            c
+        },
+        // creates with out color
+        _ => |bc: style::Color, head: style::Color, length: u8| {
+            let mut c: Vec<style::Color> = Vec::with_capacity(length as usize);
+            c.push(head);
+            if let style::Color::Rgb { r, g, b } = bc {
+                for _ in 0..length {
+                    c.push((r, g, b).into());
+                }
+            }
+            c
+        },
+    }
+}
+
 pub fn gen_times(width: usize, (slowest, fastest): (u64, u64)) -> Vec<(Instant, Duration)> {
     let now = Instant::now();
     let mut times = Vec::new();
