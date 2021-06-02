@@ -10,11 +10,13 @@ by Chris Allegretta and Abishek V. Ashok  and inspired by [Unimatrix](https://gi
 
 ## Table of Contents
 
-* [Installing](./installation.md)
-* [Using](./using.md)
-* [Photo Gallary](./photo_gallary.md)
-* [Project Readme](./project_readme.md)
-* [About](./about.md)
+* [Installing](./pages/installation.md)
+* [Using](./pages/using.md)
+* [Photo Gallary](./pages/photo_gallary.md)
+* [Project Readme](./pages/project_readme.md)
+* [About Rusty Rain Development](./pages/about.md)
+* [Related Projects](./pages/ezemoji.md)
+
 
 # Future
 
