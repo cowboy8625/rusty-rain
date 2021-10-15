@@ -18,12 +18,12 @@ use std::time::Duration;
 use arguments::cargs;
 use characters::Characters;
 use gen::{
-    create_drop_chars, gen_charater_vecs, gen_colors, gen_lengths, gen_times,
-    gen_color_function,
+    create_drop_chars, gen_charater_vecs, gen_color_function, gen_colors, gen_lengths, gen_times,
 };
 use rain::Rain;
 use term::{clear, draw};
 use update::{reset, update_locations, update_queue};
+use user_settings::UserSettings;
 
 const MAXSPEED: u64 = 40;
 const MINSPEED: u64 = 200;
