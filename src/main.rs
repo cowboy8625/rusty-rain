@@ -4,15 +4,15 @@ mod gen;
 mod rain;
 mod term;
 mod update;
+mod user_input;
 mod user_settings;
 
 // None Standard Crates
-use crossterm::{cursor, event, execute, queue, style, terminal, Result};
+use crossterm::{cursor, execute, queue, style, terminal, Result};
 use rand::{thread_rng, Rng};
 
 // Standard Library Crates
 use std::io::{stdout, BufWriter, Stdout, Write};
-use std::time::Duration;
 
 // Modules
 use arguments::cargs;
@@ -23,6 +23,7 @@ use gen::{
 use rain::Rain;
 use term::{clear, draw};
 use update::{reset, update_locations, update_queue};
+use user_input::user_input;
 use user_settings::UserSettings;
 
 const MAXSPEED: u64 = 40;
@@ -44,32 +45,13 @@ fn main() -> Result<()> {
     let create_color = gen_color_function(user_settings.shading);
 
     let mut rain = Rain::new(create_color, width, height, &user_settings);
+    let mut is_running = true;
 
     terminal::enable_raw_mode()?;
     execute!(stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
 
-    loop {
-        if event::poll(Duration::from_millis(50))? {
-            match event::read()? {
-                event::Event::Key(keyevent) => {
-                    if keyevent
-                        == event::KeyEvent::new(
-                            event::KeyCode::Char('c'),
-                            event::KeyModifiers::CONTROL,
-                        )
-                        || keyevent
-                            == event::KeyEvent::new(event::KeyCode::Esc, event::KeyModifiers::NONE)
-                    {
-                        break;
-                    }
-                }
-                event::Event::Resize(w, h) => {
-                    clear(&mut stdout)?;
-                    rain = Rain::new(create_color, w, h, &user_settings);
-                }
-                _ => {}
-            }
-        }
+    while is_running {
+        is_running = user_input(&mut stdout, &mut rain, &user_settings, create_color)?;
         update_queue(&mut rain);
         draw(&mut stdout, &rain, user_settings.group.width())?;
         stdout.flush()?;

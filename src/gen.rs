@@ -17,7 +17,9 @@ pub fn gen_charater_vecs(width: usize, height: u16, group: &Characters) -> Vec<V
     ch
 }
 
-pub fn gen_color_function(shading: bool) -> fn(style::Color, style::Color, u8) -> Vec<style::Color> {
+pub fn gen_color_function(
+    shading: bool,
+) -> fn(style::Color, style::Color, u8) -> Vec<style::Color> {
     // This Creates a closure off of the args
     // given to the program at start that will crates the colors for the rain
     match shading {
