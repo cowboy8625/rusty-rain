@@ -2,6 +2,7 @@ use crate::{style, thread_rng, Characters, Rng};
 use std::char;
 use std::time::{Duration, Instant};
 
+/// Generates a single column of Characters.
 pub fn create_drop_chars(height: u16, group: &Characters) -> Vec<char> {
     let g = group.as_vec_u32();
     (0..height + 1)
@@ -9,14 +10,14 @@ pub fn create_drop_chars(height: u16, group: &Characters) -> Vec<char> {
         .collect()
 }
 
+/// Generates all Characters in columns.
 pub fn gen_charater_vecs(width: usize, height: u16, group: &Characters) -> Vec<Vec<char>> {
-    let mut ch = Vec::new();
-    for _ in 0..width {
-        ch.push(create_drop_chars(height, group));
-    }
-    ch
+    (0..width)
+        .map(|_| create_drop_chars(height, group))
+        .collect()
 }
 
+/// Generates the color function on startup to remove branching if statements from code.
 pub fn gen_color_function(
     shading: bool,
 ) -> fn(style::Color, style::Color, u8) -> Vec<style::Color> {
@@ -53,25 +54,23 @@ pub fn gen_color_function(
     }
 }
 
+// TODO: I feel like slowest and fastest are labeled wrong.........
+/// Generates Timing for rain to fall. AKA the speed of the rain fall.
 pub fn gen_times(width: usize, (slowest, fastest): (u64, u64)) -> Vec<(Instant, Duration)> {
     let now = Instant::now();
-    let mut times = Vec::new();
     let mut rng = thread_rng();
-    for _ in 0..width {
-        times.push((now, Duration::from_millis(rng.gen_range(slowest..fastest))));
-    }
-    times
+    (0..width)
+        .map(|_| (now, Duration::from_millis(rng.gen_range(slowest..fastest))))
+        .collect()
 }
 
+/// Generates the length of each column.
 pub fn gen_lengths(width: usize, height: usize) -> Vec<usize> {
-    let mut len = Vec::new();
     let mut rng = thread_rng();
-    for _ in 0..width {
-        len.push(rng.gen_range(4..height - 10));
-    }
-    len
+    (0..width).map(|_| rng.gen_range(4..height - 10)).collect()
 }
 
+/// Uses Generates function to create all the color of the Rain/Characters.
 pub fn gen_colors<F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>>(
     create_color: F,
     head: (u8, u8, u8),

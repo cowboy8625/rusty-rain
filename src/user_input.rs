@@ -1,9 +1,9 @@
 use crate::{clear, Rain, Result, UserSettings};
 use crossterm::{event, style};
-use std::io::{BufWriter, Stdout};
+use std::io::Stdout;
 use std::time::Duration;
 pub fn user_input(
-    stdout: &mut BufWriter<Stdout>,
+    stdout: &mut Stdout,
     rain: &mut Rain,
     user_settings: &UserSettings,
     create_color: fn(style::Color, style::Color, u8) -> Vec<style::Color>,

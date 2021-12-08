@@ -12,7 +12,7 @@ use crossterm::{cursor, execute, queue, style, terminal, Result};
 use rand::{thread_rng, Rng};
 
 // Standard Library Crates
-use std::io::{stdout, BufWriter, Stdout, Write};
+use std::io::{stdout, Stdout, Write};
 
 // Modules
 use arguments::cargs;
@@ -22,7 +22,7 @@ use gen::{
 };
 use rain::Rain;
 use term::{clear, draw};
-use update::{reset, update_locations, update_queue};
+use update::{reset, update};
 use user_input::user_input;
 use user_settings::UserSettings;
 
@@ -37,10 +37,10 @@ Email: cowboy8625@protonmail.com
 ";
 
 fn main() -> Result<()> {
-    let mut stdout = BufWriter::with_capacity(8_192, stdout());
+    let mut stdout = stdout();
     let user_settings = cargs();
     let (width, height) = terminal::size()?;
-    let h = height as usize;
+    // let h = height as usize;
 
     let create_color = gen_color_function(user_settings.shading);
 
@@ -52,11 +52,10 @@ fn main() -> Result<()> {
 
     while is_running {
         is_running = user_input(&mut stdout, &mut rain, &user_settings, create_color)?;
-        update_queue(&mut rain);
         draw(&mut stdout, &rain, user_settings.group.width())?;
         stdout.flush()?;
-        update_locations(&mut rain);
-        reset(create_color, &mut rain, &user_settings, h);
+        update(&mut rain);
+        reset(create_color, &mut rain, &user_settings);
     }
 
     execute!(stdout, cursor::Show, terminal::LeaveAlternateScreen)?;
