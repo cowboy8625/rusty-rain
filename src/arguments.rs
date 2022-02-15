@@ -1,4 +1,4 @@
-use crate::{UserSettings, AUTHOR, MAXSPEED, MINSPEED};
+use crate::{Direction, UserSettings, AUTHOR, MAXSPEED, MINSPEED};
 use clap::{crate_description, crate_name, crate_version, App, Arg};
 use ezemoji::*;
 
@@ -14,13 +14,27 @@ pub fn cargs() -> UserSettings {
                 .help(
                     "Set color of Rain with color string name or tuple
 OPTIONS:
--------------------------
-white,
-red,
-blue,
-green,
-r,g,b
--------------------------
+    white,
+    red,
+    blue,
+    green,
+    r,g,b
+",
+                )
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("direction")
+                .short("d")
+                .long("direction")
+                .help(
+                    "Set the direction of the Rain.
+Default is set to down/south
+OPTIONS:
+    up, north,
+    down, south,
+    left, west,
+    right, east
 ",
                 )
                 .takes_value(true),
@@ -32,13 +46,11 @@ r,g,b
                 .help(
                     "Set the color of the first char in Rain.
 OPTIONS:
--------------------------
-white,
-red,
-blue,
-green,
-r,g,b
--------------------------
+    white,
+    red,
+    blue,
+    green,
+    r,g,b
 ",
                 )
                 .takes_value(true),
@@ -50,29 +62,27 @@ r,g,b
                 .help(
                     "Set what kind of characters are printed as rain.
 OPTIONS:
--------------------------
-all            - List Shows most of the Character Groups all at once.
-alphalow       - Lower Case Alphabet Characters
-alphaup        - Upper Case Alphabet Characters
-arrow          - Arrow Emojis or Fancy Characters
-bin            - All Ones and Zeros
-cards          - Playing Cards
-clock          - Clock Emojis
-crab           - Crab
-dominosh       - Domino's that are laying horizontal
-dominosv       - Domino's that are laying vertical
-earth          - Earth Emojis and different rotations
-emojis         - This is just a bunch of random Emojis
-jap            - Japanese Characters
-large-letters  - Cool Looking Large Letters
-moon           - Like the Earths but with the moon
-num            - Good ol fashion Numbers
-numbered-balls - These are like pool balls
-numbered-cubes - These are like the pool balls but just cubes
-plants         - Plants of sorts
-smile          - Smiley faces!!!!
-shapes         - Squares and Circles of a few colors
--------------------------
+    all            - This shows most of the Character Groups all at once.
+    alphalow       - Lower Case Alphabet Characters
+    alphaup        - Upper Case Alphabet Characters
+    arrow          - Arrow Emojis or Fancy Characters
+    bin            - All Ones and Zeros
+    cards          - Playing Cards
+    clock          - 🕑
+    crab           - 🦀
+    dominosh       - 🀽
+    dominosv       - 🁫
+    earth          - 🌎
+    emojis         - This is just a bunch of random Emojis
+    jap            - Japanese Characters
+    large-letters  - Cool Looking Large Letters
+    moon           - 🌕
+    num            - Good ol fashion Numbers
+    numbered-balls - These are like pool balls
+    numbered-cubes - These are like the pool balls but just cubes
+    plants         - Plants of sorts
+    smile          - 😃
+    shapes         - Squares and Circles of a few colors
 ",
                 )
                 .takes_value(true),
@@ -97,6 +107,7 @@ shapes         - Squares and Circles of a few colors
         "white" => (255, 255, 255),
         "red" => (255, 0, 0),
         "green" => (0, 255, 0),
+        "cyan" => (0, 139, 139),
         "blue" => (0, 0, 255),
         a => a.to_string().into_tuple(),
     };
@@ -106,6 +117,7 @@ shapes         - Squares and Circles of a few colors
         "red" => (255, 0, 0),
         "green" => (0, 255, 0),
         "blue" => (0, 0, 255),
+        "cyan" => (0, 139, 139),
         a => a.to_string().into_tuple(),
     };
 
@@ -139,9 +151,20 @@ shapes         - Squares and Circles of a few colors
         None => (MAXSPEED, MINSPEED),
     };
 
+    let direction = match matches.value_of("direction").unwrap_or("down") {
+        "up" | "north" => Direction::Up,
+        "down" | "south" => Direction::Down,
+        "left" | "west" => Direction::Left,
+        "right" | "east" => Direction::Right,
+        e => {
+            eprintln!("'{}' is not reconized direction.", e);
+            std::process::exit(1);
+        }
+    };
+
     let shading = matches.is_present("shade");
 
-    UserSettings::new(color, head, group, shading, speed)
+    UserSettings::new(color, head, group, shading, speed, direction)
 }
 
 impl StrTuple<(u64, u64)> for String {

@@ -7,6 +7,7 @@ pub struct UserSettings {
     pub group: Characters,
     pub shading: bool,
     pub speed: (u64, u64),
+    pub direction: Direction,
 }
 
 impl UserSettings {
@@ -16,6 +17,7 @@ impl UserSettings {
         group: Characters,
         shading: bool,
         speed: (u64, u64),
+        direction: Direction,
     ) -> Self {
         Self {
             rain_color,
@@ -23,6 +25,7 @@ impl UserSettings {
             group,
             shading,
             speed,
+            direction,
         }
     }
 }

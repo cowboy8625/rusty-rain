@@ -1,4 +1,4 @@
-use crate::{create_drop_chars, style, thread_rng, Rain, Rng, UserSettings};
+use crate::{gen, style, thread_rng, Rain, Rng, UserSettings};
 use itertools::izip;
 use std::time::{Duration, Instant};
 
@@ -19,13 +19,14 @@ where
     F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>,
 {
     let mut rng = thread_rng();
-    let h16 = rain.height() as u16;
+    let h16 = rain.height;
+    let hsize = rain.height as usize;
     let now = Instant::now();
     for i in rain.queue.iter() {
-        if rain.locations[*i] > rain.height() + rain.length[*i] {
-            rain.charaters[*i] = create_drop_chars(h16, &us.group);
+        if rain.locations[*i] > hsize + rain.length[*i] {
+            rain.charaters[*i] = gen::create_drop_chars(h16, &us.group);
             rain.locations[*i] = 0;
-            rain.length[*i] = rng.gen_range(4..rain.height() - 10);
+            rain.length[*i] = rng.gen_range(4..hsize - 10);
             rain.colors[*i] = create_color(
                 us.rain_color.into(),
                 us.head_color.into(),

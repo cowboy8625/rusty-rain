@@ -21,7 +21,7 @@ pub fn user_input(
             }
             event::Event::Resize(w, h) => {
                 clear(stdout)?;
-                *rain = Rain::new(create_color, w, h, &user_settings);
+                *rain = Rain::new(create_color, w, h, user_settings);
             }
             _ => {}
         }
