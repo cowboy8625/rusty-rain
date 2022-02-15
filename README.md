@@ -55,53 +55,52 @@ FLAGS:
 -V, --version    Prints version information
 
 OPTIONS:
--c, --chars <characters>       Set what kind of characters are printed as rain.
-OPTIONS:
-all            - This shows most of the Character Groups all at once.
-alphalow       - Lower Case Alphabet Characters
-alphaup        - Upper Case Alphabet Characters
-arrow          - Arrow Emojis or Fancy Characters
-bin            - All Ones and Zeros
-cards          - Playing Cards
-clock          - 🕑
-crab           - 🦀
-dominosh       - 🀽
-dominosv       - 🁫
-earth          - 🌎
-emojis         - This is just a bunch of random Emojis
-jap            - Japanese Characters
-large-letters  - Cool Looking Large Letters
-moon           - 🌕
-num            - Good ol fashion Numbers
-numbered-balls - These are like pool balls
-numbered-cubes - These are like the pool balls but just cubes
-plants         - Plants of sorts
-smile          - 😃
-shapes         - Squares and Circles of a few colors
--C, --color <color>            Set color of Rain with color string name or tuple
-OPTIONS:
-white,
-  red,
-  blue,
-  green,
-  r,g,b
-  -d, --direction <direction>    Set the direction of the Rain.
-  Default is set to down/south
-  OPTIONS:
-  up, north,
-  down, south,
-  left, west,
-  right, east
-  -H, --head <head>              Set the color of the first char in Rain.
-  OPTIONS:
-  white,
-  red,
-  blue,
-  green,
-  r,g,b
-  -S, --speed <speed>            Set speed of rain MAX,MIN -S 200,400
-
-  ```
+-c, --chars <characters>     Set what kind of characters are printed as rain.
+                             OPTIONS:
+                               all            - This shows most of the Character Groups all at once.
+                               alphalow       - Lower Case Alphabet Characters
+                               alphaup        - Upper Case Alphabet Characters
+                               arrow          - Arrow Emojis or Fancy Characters
+                               bin            - All Ones and Zeros
+                               cards          - Playing Cards
+                               clock          - 🕑
+                               crab           - 🦀
+                               dominosh       - 🀽
+                               dominosv       - 🁫
+                               earth          - 🌎
+                               emojis         - This is just a bunch of random Emojis
+                               jap            - Japanese Characters
+                               large-letters  - Cool Looking Large Letters
+                               moon           - 🌕
+                               num            - Good ol fashion Numbers
+                               numbered-balls - These are like pool balls
+                               numbered-cubes - These are like the pool balls but just cubes
+                               plants         - Plants of sorts
+                               smile          - 😃
+                               shapes         - Squares and Circles of a few colors
+-C, --color <color>          Set color of Rain with color string name or tuple
+                             OPTIONS:
+                             white,
+                               red,
+                               blue,
+                               green,
+                               r,g,b
+-d, --direction <direction>  Set the direction of the Rain.
+                             Default is set to down/south
+                             OPTIONS:
+                               up, north,
+                               down, south,
+                               left, west,
+                               right, east
+-H, --head <head>            Set the color of the first char in Rain.
+                             OPTIONS:
+                               white,
+                               red,
+                               blue,
+                               green,
+                               r,g,b
+-S, --speed <speed>          Set speed of rain MAX,MIN -S 200,400
+```
 
 ### Example
 
