@@ -14,13 +14,11 @@ pub fn cargs() -> UserSettings {
                 .help(
                     "Set color of Rain with color string name or tuple
 OPTIONS:
--------------------------
-white,
-red,
-blue,
-green,
-r,g,b
--------------------------
+    white,
+    red,
+    blue,
+    green,
+    r,g,b
 ",
                 )
                 .takes_value(true),
@@ -28,18 +26,15 @@ r,g,b
         .arg(
             Arg::with_name("direction")
                 .short("d")
-                .long("head")
+                .long("direction")
                 .help(
                     "Set the direction of the Rain.
 Default is set to down/south
-
 OPTIONS:
--------------------------
-up, north,
-down, south,
-left, west,
-right, east
--------------------------
+    up, north,
+    down, south,
+    left, west,
+    right, east
 ",
                 )
                 .takes_value(true),
@@ -51,13 +46,11 @@ right, east
                 .help(
                     "Set the color of the first char in Rain.
 OPTIONS:
--------------------------
-white,
-red,
-blue,
-green,
-r,g,b
--------------------------
+    white,
+    red,
+    blue,
+    green,
+    r,g,b
 ",
                 )
                 .takes_value(true),
@@ -69,29 +62,27 @@ r,g,b
                 .help(
                     "Set what kind of characters are printed as rain.
 OPTIONS:
--------------------------
-all            - List Shows most of the Character Groups all at once.
-alphalow       - Lower Case Alphabet Characters
-alphaup        - Upper Case Alphabet Characters
-arrow          - Arrow Emojis or Fancy Characters
-bin            - All Ones and Zeros
-cards          - Playing Cards
-clock          - Clock Emojis
-crab           - Crab
-dominosh       - Domino's that are laying horizontal
-dominosv       - Domino's that are laying vertical
-earth          - Earth Emojis and different rotations
-emojis         - This is just a bunch of random Emojis
-jap            - Japanese Characters
-large-letters  - Cool Looking Large Letters
-moon           - Like the Earths but with the moon
-num            - Good ol fashion Numbers
-numbered-balls - These are like pool balls
-numbered-cubes - These are like the pool balls but just cubes
-plants         - Plants of sorts
-smile          - Smiley faces!!!!
-shapes         - Squares and Circles of a few colors
--------------------------
+    all            - This shows most of the Character Groups all at once.
+    alphalow       - Lower Case Alphabet Characters
+    alphaup        - Upper Case Alphabet Characters
+    arrow          - Arrow Emojis or Fancy Characters
+    bin            - All Ones and Zeros
+    cards          - Playing Cards
+    clock          - 🕑
+    crab           - 🦀
+    dominosh       - 🀽
+    dominosv       - 🁫
+    earth          - 🌎
+    emojis         - This is just a bunch of random Emojis
+    jap            - Japanese Characters
+    large-letters  - Cool Looking Large Letters
+    moon           - 🌕
+    num            - Good ol fashion Numbers
+    numbered-balls - These are like pool balls
+    numbered-cubes - These are like the pool balls but just cubes
+    plants         - Plants of sorts
+    smile          - 😃
+    shapes         - Squares and Circles of a few colors
 ",
                 )
                 .takes_value(true),
@@ -116,6 +107,7 @@ shapes         - Squares and Circles of a few colors
         "white" => (255, 255, 255),
         "red" => (255, 0, 0),
         "green" => (0, 255, 0),
+        "cyan" => (0, 139, 139),
         "blue" => (0, 0, 255),
         a => a.to_string().into_tuple(),
     };
@@ -125,6 +117,7 @@ shapes         - Squares and Circles of a few colors
         "red" => (255, 0, 0),
         "green" => (0, 255, 0),
         "blue" => (0, 0, 255),
+        "cyan" => (0, 139, 139),
         a => a.to_string().into_tuple(),
     };
 
