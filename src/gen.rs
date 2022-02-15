@@ -11,16 +11,14 @@ pub fn create_drop_chars(height: u16, group: &Characters) -> Vec<char> {
 }
 
 /// Generates all Characters in columns.
-pub fn gen_charater_vecs(width: usize, height: u16, group: &Characters) -> Vec<Vec<char>> {
+pub fn charater_vecs(width: usize, height: u16, group: &Characters) -> Vec<Vec<char>> {
     (0..width)
         .map(|_| create_drop_chars(height, group))
         .collect()
 }
 
 /// Generates the color function on startup to remove branching if statements from code.
-pub fn gen_color_function(
-    shading: bool,
-) -> fn(style::Color, style::Color, u8) -> Vec<style::Color> {
+pub fn color_function(shading: bool) -> fn(style::Color, style::Color, u8) -> Vec<style::Color> {
     // This Creates a closure off of the args
     // given to the program at start that will crates the colors for the rain
     match shading {
@@ -56,7 +54,7 @@ pub fn gen_color_function(
 
 // TODO: I feel like slowest and fastest are labeled wrong.........
 /// Generates Timing for rain to fall. AKA the speed of the rain fall.
-pub fn gen_times(width: usize, (slowest, fastest): (u64, u64)) -> Vec<(Instant, Duration)> {
+pub fn times(width: usize, (slowest, fastest): (u64, u64)) -> Vec<(Instant, Duration)> {
     let now = Instant::now();
     let mut rng = thread_rng();
     (0..width)
@@ -64,14 +62,14 @@ pub fn gen_times(width: usize, (slowest, fastest): (u64, u64)) -> Vec<(Instant, 
         .collect()
 }
 
-/// Generates the length of each column.
-pub fn gen_lengths(width: usize, height: usize) -> Vec<usize> {
+/// Generates the visable length of each column.
+pub fn lengths(width: usize, height: usize) -> Vec<usize> {
     let mut rng = thread_rng();
     (0..width).map(|_| rng.gen_range(4..height - 10)).collect()
 }
 
 /// Uses Generates function to create all the color of the Rain/Characters.
-pub fn gen_colors<F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>>(
+pub fn colors<F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>>(
     create_color: F,
     head: (u8, u8, u8),
     width: usize,

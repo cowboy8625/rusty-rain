@@ -1,4 +1,4 @@
-use crate::{UserSettings, AUTHOR, MAXSPEED, MINSPEED};
+use crate::{Direction, UserSettings, AUTHOR, MAXSPEED, MINSPEED};
 use clap::{crate_description, crate_name, crate_version, App, Arg};
 use ezemoji::*;
 
@@ -20,6 +20,25 @@ red,
 blue,
 green,
 r,g,b
+-------------------------
+",
+                )
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("direction")
+                .short("d")
+                .long("head")
+                .help(
+                    "Set the direction of the Rain.
+Default is set to down/south
+
+OPTIONS:
+-------------------------
+up, north,
+down, south,
+left, west,
+right, east
 -------------------------
 ",
                 )
@@ -139,9 +158,20 @@ shapes         - Squares and Circles of a few colors
         None => (MAXSPEED, MINSPEED),
     };
 
+    let direction = match matches.value_of("direction").unwrap_or("down") {
+        "up" | "north" => Direction::Up,
+        "down" | "south" => Direction::Down,
+        "left" | "west" => Direction::Left,
+        "right" | "east" => Direction::Right,
+        e => {
+            eprintln!("'{}' is not reconized direction.", e);
+            std::process::exit(1);
+        }
+    };
+
     let shading = matches.is_present("shade");
 
-    UserSettings::new(color, head, group, shading, speed)
+    UserSettings::new(color, head, group, shading, speed, direction)
 }
 
 impl StrTuple<(u64, u64)> for String {
