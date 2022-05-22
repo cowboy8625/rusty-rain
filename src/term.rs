@@ -45,14 +45,14 @@ pub fn draw(w: &mut Stdout, rain: &Rain, spacing: u16, direction: &Direction) ->
         let slice = chr[start..end].iter();
 
         let cstart = if col > len {
-            clr.len() - slice.len()
+            clr.len().saturating_sub(slice.len())
         } else {
             0
         };
 
-        let color = &clr[cstart..clr.len()];
+        let color = &clr[cstart..];
 
-        for (y, ch) in slice.rev().enumerate() {
+        for (y, (ch, _c)) in slice.rev().zip(color.iter().copied()).enumerate() {
             queue!(
                 w,
                 move_to(
@@ -60,7 +60,7 @@ pub fn draw(w: &mut Stdout, rain: &Rain, spacing: u16, direction: &Direction) ->
                     (*col.min(&height) - y) as u16,
                     offset
                 ),
-                style::SetForegroundColor(color[y]),
+                style::SetForegroundColor(_c),
                 style::Print(ch),
             )?;
         }
