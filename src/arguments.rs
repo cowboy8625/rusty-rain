@@ -1,15 +1,15 @@
 use crate::{Direction, UserSettings, AUTHOR, MAXSPEED, MINSPEED};
-use clap::{crate_description, crate_name, crate_version, App, Arg};
+use clap::{crate_description, crate_name, crate_version, Arg, Command};
 use ezemoji::*;
 
 pub fn cargs() -> UserSettings {
-    let matches = App::new(crate_name!())
+    let matches = Command::new(crate_name!())
         .version(crate_version!())
         .author(AUTHOR)
         .about(crate_description!())
         .arg(
-            Arg::with_name("color")
-                .short("C")
+            Arg::new("color")
+                .short('C')
                 .long("color")
                 .help(
                     "Set color of Rain with color string name or tuple
@@ -24,8 +24,8 @@ OPTIONS:
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("direction")
-                .short("d")
+            Arg::new("direction")
+                .short('d')
                 .long("direction")
                 .help(
                     "Set the direction of the Rain.
@@ -40,8 +40,8 @@ OPTIONS:
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("head")
-                .short("H")
+            Arg::new("head")
+                .short('H')
                 .long("head")
                 .help(
                     "Set the color of the first char in Rain.
@@ -56,8 +56,8 @@ OPTIONS:
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("characters")
-                .short("c")
+            Arg::new("characters")
+                .short('c')
                 .long("chars")
                 .help(
                     "Set what kind of characters are printed as rain.
@@ -88,15 +88,15 @@ OPTIONS:
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("speed")
-                .short("S")
+            Arg::new("speed")
+                .short('S')
                 .long("speed")
                 .help("Set speed of rain MAX,MIN -S 200,400")
                 .takes_value(true),
         )
         .arg(
-            Arg::with_name("shade")
-                .short("s")
+            Arg::new("shade")
+                .short('s')
                 .long("shade")
                 .help("Set Rain shading to fade or stay constant")
                 .takes_value(false),
