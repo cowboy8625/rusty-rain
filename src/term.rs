@@ -10,7 +10,7 @@ pub fn clear(w: &mut Stdout) -> Result<()> {
 pub fn draw(w: &mut Stdout, rain: &Rain, spacing: u16, direction: &Direction) -> Result<()> {
     // NOTE: Maybe move this into its own functions to be generated at startup
     // to lessen the amount of branching done.
-    // Futher investigation into the assembly code to see if this is worth it.
+    // Further investigation into the assembly code to see if this is worth it.
     use Direction::*;
     // Since we do not keep track of the x and y value of the rain we need to swap
     // values depending on desired direction.
@@ -64,7 +64,7 @@ pub fn draw(w: &mut Stdout, rain: &Rain, spacing: u16, direction: &Direction) ->
                 style::Print(ch),
             )?;
         }
-        // This Deletes old tail charater of rain.
+        // This Deletes old tail character of rain.
         if col >= len {
             queue!(
                 w,
