@@ -6,7 +6,7 @@ pub fn clear(w: &mut Stdout) -> Result<()> {
 }
 
 // TODO: Clean this crap up
-// Daw takes rain data and places it on screen.
+// Draw takes rain data and places it on screen.
 pub fn draw(w: &mut Stdout, rain: &Rain, spacing: u16, direction: &Direction) -> Result<()> {
     // NOTE: Maybe move this into its own functions to be generated at startup
     // to lessen the amount of branching done.
@@ -20,7 +20,7 @@ pub fn draw(w: &mut Stdout, rain: &Rain, spacing: u16, direction: &Direction) ->
         Right => |x: u16, y: u16, _: u16| cursor::MoveTo(y, x),
         Left => |x: u16, y: u16, offest: u16| cursor::MoveTo(offest - y, x),
     };
-    // By subtracting height - location you get opposite location on sreen.
+    // By subtracting height - location you get opposite location on screen.
     let offset = match direction {
         Down | Right => 0,
         Up | Left => rain.height,
@@ -31,7 +31,7 @@ pub fn draw(w: &mut Stdout, rain: &Rain, spacing: u16, direction: &Direction) ->
     let (mut chr, mut col, mut len, mut clr);
     let height = rain.height as usize;
     for row in rain.queue.iter() {
-        // charater
+        // character
         chr = &rain.charaters[*row];
         // location
         col = &rain.locations[*row];
