@@ -68,6 +68,7 @@ OPTIONS:
     arrow          - Arrow Emojis or Fancy Characters
     bin            - All Ones and Zeros
     cards          - Playing Cards
+    classic        - Characters as seen in the movie
     clock          - 🕑
     crab           - 🦀
     dominosh       - 🀽
@@ -128,6 +129,7 @@ OPTIONS:
         "arrow" => Arrow.into(),
         "bin" => Bin.into(),
         "cards" => Cards.into(),
+        "classic" => Classic.into(),
         "clock" => Clock.into(),
         "crab" => Crab.into(),
         "dominosh" => HorizontalDominos.into(),

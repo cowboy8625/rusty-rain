@@ -28,6 +28,7 @@ Simply run the following command on windows/mac/linux:
 git clone https://github.com/cowboy8625/rusty-rain.git
 cd rusty-rain
 ```
+
 ```
 cargo run --release
 ```
@@ -41,7 +42,6 @@ cargo install rusty-rain
 ## Exit
 
 To exit just press `ESC` or `Ctrl + C`
-
 
 ## Command Line Arguments
 
@@ -63,6 +63,7 @@ OPTIONS:
                                arrow          - Arrow Emojis or Fancy Characters
                                bin            - All Ones and Zeros
                                cards          - Playing Cards
+                               classic        - Characters as seen in the movie
                                clock          - 🕑
                                crab           - 🦀
                                dominosh       - 🀽

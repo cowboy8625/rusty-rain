@@ -15,6 +15,8 @@ impl CharWidth {
     }
 }
 
+
+
 #[derive(Debug, Clone, Copy)]
 pub enum Characters {
     All(AllEmojis),
@@ -23,6 +25,7 @@ pub enum Characters {
     Arrow(Arrow),
     Bin(Bin),
     Cards(Cards),
+    Classic(Classic),
     Clock(Clock),
     Crab(Crab),
     Dominosh(HorizontalDominos),
@@ -49,6 +52,7 @@ impl Characters {
             Self::Arrow(_) => CharWidth::Double.width(),
             Self::Bin(_) => CharWidth::Single.width(),
             Self::Cards(_) => CharWidth::Double.width(),
+            Self::Classic(_) => CharWidth::Single.width(),
             Self::Clock(_) => CharWidth::Double.width(),
             Self::Crab(_) => CharWidth::Double.width(),
             Self::Dominosh(_) => CharWidth::Double.width(),
@@ -75,6 +79,7 @@ impl Characters {
             Self::Arrow(c) => c.as_vec_u32(),
             Self::Bin(c) => c.as_vec_u32(),
             Self::Cards(c) => c.as_vec_u32(),
+            Self::Classic(c) => c.as_vec_u32(),
             Self::Clock(c) => c.as_vec_u32(),
             Self::Crab(c) => c.as_vec_u32(),
             Self::Dominosh(c) => c.as_vec_u32(),
@@ -129,6 +134,14 @@ impl From<ezemoji::Cards> for Characters {
         Self::Cards(e)
     }
 }
+
+
+impl From<ezemoji::Classic> for Characters {
+    fn from(e: ezemoji::Classic) -> Self {
+        Self::Classic(e)
+    }
+}
+
 
 impl From<ezemoji::Clock> for Characters {
     fn from(e: ezemoji::Clock) -> Self {
