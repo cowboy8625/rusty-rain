@@ -116,3 +116,14 @@ OPTIONS:
 
   If you find any bugs or performance is not up to par please submit a issue so I can better improve
   the project.
+
+## Star History
+
+<a href="https://star-history.com/#cowboy8625/rusty-rain&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=cowboy8625/rusty-rain&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=cowboy8625/rusty-rain&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=cowboy8625/rusty-rain&type=Date" />
+  </picture>
+</a>
+
