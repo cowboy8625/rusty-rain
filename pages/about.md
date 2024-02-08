@@ -1,14 +1,16 @@
-# Why
+# About Rusty Rain Development
 
-I made Rusty Rain a while ago trying to learn Rust and man it was super fun!
-[version 0.1.0](https://github.com/cowboy8625/rusty-rain/tree/v0.0.1) was the
-first try and boy oh boy I had no clue what I was doing.
-That version was so slow and was so badly designed.
-I started looking into DOD (Data Oriented Design) and I was very intrigued so
-to try and put this new design pattern to work.  I made a new branch
-[dod](https://github.com/cowboy8625/rusty-rain/tree/dod) and basically started from
-scratch.  It was pretty easy to be honest to implement. So did it speed the program up?
-About 90% I would say, the CPU usage went from 98% to 2-5% usage depending on what
-options are given.  Shading the characters can make a lot more draw calls and can lead
-to more CPU usage.
 
+I created Rusty Rain a while ago while trying to learn Rust, and it was an incredibly enjoyable experience!
+
+The [version 0.1.0](https://github.com/cowboy8625/rusty-rain/tree/v0.0.1) marked the first attempt, and let me tell you, I had no clue what I was doing back then. It was slow and poorly designed, to say the least.
+
+As I delved deeper into learning about Data-Oriented Design (DOD), I became increasingly intrigued. To put this new design pattern to the test, I created a new branch named [DOD](https://github.com/cowboy8625/rusty-rain/tree/dod) and essentially started from scratch.
+
+Surprisingly, implementing DOD was relatively straightforward. But did it make a difference in performance?
+
+I'd estimate about a 90% improvement! The CPU usage plummeted from 98% to just 2-5%, depending on the options given. However, shading the characters can still result in more draw calls and slightly higher CPU usage.
+
+[back](../index.md)
+[back](./index.md)
+[back](./)

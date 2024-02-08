@@ -22,6 +22,6 @@ cargo install path .
 
 I am working for a app image and other ways to install rusty rain
 - [ ] Linux Debian `apt install rusty-rain`
-- [ ] Linux ARU
+- [ ] Linux AUR
 - [ ] Window's Chocolaty
 - [ ] Mac Home Brew

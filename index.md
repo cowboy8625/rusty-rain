@@ -10,7 +10,7 @@ by Chris Allegretta and Abishek V. Ashok  and inspired by [Unimatrix](https://gi
 
 ## Table of Contents
 
-* [Installing](./pages/installation.md)
+* [Installing](pages/installation.md)
 * [Using](./pages/using.md)
 * [Photo Gallary](./pages/photo_gallary.md)
 * [Project Readme](./pages/project_readme.md)
@@ -20,5 +20,5 @@ by Chris Allegretta and Abishek V. Ashok  and inspired by [Unimatrix](https://gi
 
 # Future
 
-I would like to make this project avalible as a package on `Windows` and `Linux debian` OS's.  I do not have a Mac, so I'm not sure
+I would like to make this project available as a package on `Windows` and `Linux debian` OS's.  I do not have a Mac, so I'm not sure
 If I can get something working for `brew` but I would like to try.

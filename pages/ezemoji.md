@@ -1,7 +1,9 @@
-# [EzEmoji](https://crates.io/crates/ezemoji)
+# About [EzEmoji](https://crates.io/crates/ezemoji)
 
-This crate has changed so much over the development of it.  It started off where all the groups of emojis where just a enum variants of a Group enum.
-Later I changed the enums variants to structure types so they could have a trait behavior.  This is not completely done as I would like to make a
-derive macro for it so it would be super easy for a user to make a new one if ezemoji is missing a group. Also it would be fun to make this feature.
-I was also suggested to make the not allocate on creation.  So this has made me think a lot about how to make this work.  As this project grows and morphs
-so shall this page.  So come back to see how things turn out.
+This crate has undergone significant changes throughout its development journey. Initially, all groups of emojis were simply enum variants of a Group enum.
+
+Later on, I revamped the enum variants to structure types to imbue them with trait behavior. While this transformation isn't fully completed yet, my goal is to create a derive macro for it, making it incredibly easy for users to create new ones if ezemoji is missing a group. It's a feature I'm eager to implement.
+
+Additionally, I received suggestions to make the crate not allocate on creation. This has sparked a lot of contemplation on how to achieve this.
+
+As this project continues to evolve, so will this page. Be sure to check back to see how things unfold!
