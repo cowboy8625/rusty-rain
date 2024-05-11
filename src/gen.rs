@@ -65,7 +65,9 @@ pub fn times(width: usize, (slowest, fastest): (u64, u64)) -> Vec<(Instant, Dura
 /// Generates the visable length of each column.
 pub fn lengths(width: usize, height: usize) -> Vec<usize> {
     let mut rng = thread_rng();
-    (0..width).map(|_| rng.gen_range(4..height - 10)).collect()
+    (0..width.max(1))
+        .map(|_| rng.gen_range(4..(height - 10).max(4)))
+        .collect()
 }
 
 /// Uses Generates function to create all the color of the Rain/Characters.
