@@ -1,13 +1,18 @@
-use crate::{cursor, queue, style, terminal, Direction, Rain, Result, Stdout};
+use crate::{cursor, queue, style, terminal, Direction, Rain, Stdout};
 
-pub fn clear(w: &mut Stdout) -> Result<()> {
+pub fn clear(w: &mut Stdout) -> std::io::Result<()> {
     queue!(w, terminal::Clear(terminal::ClearType::All))?;
     Ok(())
 }
 
 // TODO: Clean this crap up
 // Draw takes rain data and places it on screen.
-pub fn draw(w: &mut Stdout, rain: &Rain, spacing: u16, direction: &Direction) -> Result<()> {
+pub fn draw(
+    w: &mut Stdout,
+    rain: &Rain,
+    spacing: u16,
+    direction: &Direction,
+) -> std::io::Result<()> {
     // NOTE: Maybe move this into its own functions to be generated at startup
     // to lessen the amount of branching done.
     // Further investigation into the assembly code to see if this is worth it.

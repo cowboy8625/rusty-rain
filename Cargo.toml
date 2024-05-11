@@ -13,7 +13,7 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 clap = { version = "3.1.18", features = ["cargo"] }
-crossterm = "0.23.2"
+crossterm = "0.27.0"
 rand = "0.8.5"
 itertools = "0.10.3"
 ezemoji = "0.2.0"

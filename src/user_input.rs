@@ -1,4 +1,4 @@
-use crate::{clear, Rain, Result, UserSettings};
+use crate::{clear, Rain, UserSettings};
 use crossterm::{event, style};
 use std::io::Stdout;
 use std::time::Duration;
@@ -7,7 +7,7 @@ pub fn user_input(
     rain: &mut Rain,
     user_settings: &UserSettings,
     create_color: fn(style::Color, style::Color, u8) -> Vec<style::Color>,
-) -> Result<bool> {
+) -> std::io::Result<bool> {
     if event::poll(Duration::from_millis(50))? {
         match event::read()? {
             event::Event::Key(keyevent) => {

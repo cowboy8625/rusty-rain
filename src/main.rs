@@ -9,7 +9,7 @@ mod user_input;
 mod user_settings;
 
 // None Standard Crates
-use crossterm::{cursor, execute, queue, style, terminal, Result};
+use crossterm::{cursor, execute, queue, style, terminal};
 use rand::{thread_rng, Rng};
 
 // Standard Library Crates
@@ -47,7 +47,7 @@ impl App {
             user_settings,
         }
     }
-    fn run(&mut self) -> Result<()> {
+    fn run(&mut self) -> std::io::Result<()> {
         let (width, height) = match self.user_settings.direction {
             Direction::Left | Direction::Right => {
                 let (w, h) = terminal::size()?;
@@ -93,7 +93,7 @@ impl Drop for App {
     }
 }
 
-fn main() -> Result<()> {
+fn main() -> std::io::Result<()> {
     let user_settings = cargs();
     App::new(user_settings).run()
 }
