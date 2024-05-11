@@ -35,40 +35,65 @@ const AUTHOR: &str = "
 Email: cowboy8625@protonmail.com
 ";
 
-fn main() -> Result<()> {
-    let mut stdout = stdout();
-    let user_settings = cargs();
-    let (width, height) = match user_settings.direction {
-        Direction::Left | Direction::Right => {
-            let (w, h) = terminal::size()?;
-            (h, w)
+struct App {
+    stdout: Stdout,
+    user_settings: UserSettings,
+}
+
+impl App {
+    fn new(user_settings: UserSettings) -> Self {
+        Self {
+            stdout: stdout(),
+            user_settings,
         }
-        Direction::Up | Direction::Down => terminal::size()?,
-    };
-
-    let create_color = gen::color_function(user_settings.shading);
-
-    let mut rain = Rain::new(create_color, width, height, &user_settings);
-    let mut is_running = true;
-
-    terminal::enable_raw_mode()?;
-    execute!(stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
-
-    while is_running {
-        is_running = user_input(&mut stdout, &mut rain, &user_settings, create_color)?;
-        draw(
-            &mut stdout,
-            &rain,
-            user_settings.group.width(),
-            &user_settings.direction,
-        )?;
-        stdout.flush()?;
-        update(&mut rain);
-        reset(create_color, &mut rain, &user_settings);
     }
+    fn run(&mut self) -> Result<()> {
+        let (width, height) = match self.user_settings.direction {
+            Direction::Left | Direction::Right => {
+                let (w, h) = terminal::size()?;
+                (h, w)
+            }
+            Direction::Up | Direction::Down => terminal::size()?,
+        };
 
-    execute!(stdout, cursor::Show, terminal::LeaveAlternateScreen)?;
-    terminal::disable_raw_mode()?;
+        let create_color = gen::color_function(self.user_settings.shading);
 
-    Ok(())
+        let mut rain = Rain::new(create_color, width, height, &self.user_settings);
+        let mut is_running = true;
+
+        terminal::enable_raw_mode()?;
+        execute!(self.stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
+
+        while is_running {
+            is_running = user_input(
+                &mut self.stdout,
+                &mut rain,
+                &self.user_settings,
+                create_color,
+            )?;
+            draw(
+                &mut self.stdout,
+                &rain,
+                self.user_settings.group.width(),
+                &self.user_settings.direction,
+            )?;
+            self.stdout.flush()?;
+            update(&mut rain);
+            reset(create_color, &mut rain, &self.user_settings);
+        }
+        Ok(())
+    }
+}
+
+impl Drop for App {
+    fn drop(&mut self) {
+        execute!(self.stdout, cursor::Show, terminal::LeaveAlternateScreen)
+            .expect("failed to leave alternate screen");
+        terminal::disable_raw_mode().expect("failed to disable raw mode");
+    }
+}
+
+fn main() -> Result<()> {
+    let user_settings = cargs();
+    App::new(user_settings).run()
 }
