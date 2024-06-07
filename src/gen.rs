@@ -52,11 +52,16 @@ pub fn color_function(shading: bool) -> fn(style::Color, style::Color, u8) -> Ve
     }
 }
 
-// TODO: I feel like slowest and fastest are labeled wrong.........
-/// Generates Timing for rain to fall. AKA the speed of the rain fall.
 pub fn times(width: usize, (slowest, fastest): (u64, u64)) -> Vec<(Instant, Duration)> {
     let now = Instant::now();
     let mut rng = thread_rng();
+    eprintln!(
+        "slowest: {}, fastest: {}, width: {}, range: {:?}",
+        fastest,
+        slowest,
+        width,
+        rng.gen_range(slowest..=fastest),
+    );
     (0..width)
         .map(|_| (now, Duration::from_millis(rng.gen_range(slowest..fastest))))
         .collect()
@@ -66,7 +71,7 @@ pub fn times(width: usize, (slowest, fastest): (u64, u64)) -> Vec<(Instant, Dura
 pub fn lengths(width: usize, height: usize) -> Vec<usize> {
     let mut rng = thread_rng();
     (0..width.max(1))
-        .map(|_| rng.gen_range(4..(height - 10).max(4)))
+        .map(|_| rng.gen_range(4..(height - 10).max(5)))
         .collect()
 }
 

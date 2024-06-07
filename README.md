@@ -60,6 +60,7 @@ OPTIONS:
                                all            - This shows most of the Character Groups all at once.
                                alphalow       - Lower Case Alphabet Characters
                                alphaup        - Upper Case Alphabet Characters
+                               alphanum       - All Alphabets and Numbers
                                arrow          - Arrow Emojis or Fancy Characters
                                bin            - All Ones and Zeros
                                cards          - Playing Cards

@@ -1,4 +1,5 @@
-use crate::{gen, style, UserSettings};
+use crate::cli::Cli;
+use crate::{gen, style};
 use std::time::{Duration, Instant};
 
 #[derive(Debug)]
@@ -14,23 +15,23 @@ pub struct Rain {
 }
 
 impl Rain {
-    pub fn new<F>(create_color: F, width: u16, height: u16, us: &UserSettings) -> Self
+    pub fn new<F>(create_color: F, width: u16, height: u16, settings: &Cli) -> Self
     where
         F: Fn(style::Color, style::Color, u8) -> Vec<style::Color>,
     {
-        let w = (width / us.group.width()) as usize;
+        let w = (width / settings.chars.width()) as usize;
         let h = height as usize;
-        let charaters = gen::charater_vecs(w, height, &us.group);
+        let charaters = gen::charater_vecs(w, height, &settings.chars);
         let locations = vec![0; w];
         let length = gen::lengths(w, h);
         let colors = gen::colors(
             create_color,
-            us.head_color,
+            settings.head_color(),
             w,
             &length,
-            us.rain_color.into(),
+            settings.rain_color().into(),
         );
-        let time = gen::times(w, us.speed);
+        let time = gen::times(w, settings.speed());
         let queue = Vec::with_capacity(w);
         Self {
             charaters,
