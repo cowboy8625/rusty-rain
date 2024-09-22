@@ -13,10 +13,9 @@ categories = ["command-line-utilities"]
 
 [dependencies]
 clap = { version = "4.5.18", features = ["cargo", "derive"] }
-crossterm = "0.27.0"
+crossterm = "0.28.1"
 rand = "0.8.5"
 itertools = "0.13.0"
-ezemoji = "0.2.0"
 
 [profile.release]
 debug = true
