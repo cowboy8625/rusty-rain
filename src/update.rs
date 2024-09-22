@@ -27,7 +27,7 @@ where
         if rain.locations[*i] > hsize + rain.length[*i] {
             rain.charaters[*i] = gen::create_drop_chars(h16, &settings.chars);
             rain.locations[*i] = 0;
-            rain.length[*i] = rng.gen_range(4..hsize - 10);
+            rain.length[*i] = rng.gen_range(4..hsize.saturating_sub(10).max(5));
             rain.colors[*i] = create_color(
                 settings.rain_color().into(),
                 settings.head_color().into(),
