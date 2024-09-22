@@ -12,10 +12,10 @@ keywords = ["matrix", "matrix-rain", "emoji", "cmatrix", "rain"]
 categories = ["command-line-utilities"]
 
 [dependencies]
-clap = { version = "4.5.4", features = ["cargo", "derive"] }
+clap = { version = "4.5.18", features = ["cargo", "derive"] }
 crossterm = "0.27.0"
 rand = "0.8.5"
-itertools = "0.12.1"
+itertools = "0.13.0"
 ezemoji = "0.2.0"
 
 [profile.release]

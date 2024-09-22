@@ -3,6 +3,58 @@ use crate::characters::Characters;
 use crate::direction::Direction;
 use clap::{crate_description, crate_name, crate_version, Parser};
 
+const HELP_DIRECTION: &str = "Set the direction of the Rain.
+Default is set to down/south
+OPTIONS:
+    up, north,
+    down, south,
+    left, west,
+    right, east
+";
+
+const HELP_COLORS: &str = "Set color of Rain with color string name or tuple
+OPTIONS:
+    white,
+    red,
+    blue,
+    green,
+    r,g,b
+";
+
+const HELP_CHARS: &str = "Set what kind of characters are printed as rain.
+OPTIONS:
+    all            - This shows most of the Character Groups all at once.
+    alphalow       - Lower Case Alphabet Characters
+    alphaup        - Upper Case Alphabet Characters
+    arrow          - Arrow Emojis or Fancy Characters
+    bin            - All Ones and Zeros
+    cards          - Playing Cards
+    clock          - 🕑
+    crab           - 🦀
+    dominosh       - 🀽
+    dominosv       - 🁫
+    earth          - 🌎
+    emojis         - This is just a bunch of random Emojis
+    jap            - Japanese Characters
+    large-letters  - Cool Looking Large Letters
+    moon           - 🌕
+    num            - Good ol fashion Numbers
+    numbered-balls - These are like pool balls
+    numbered-cubes - These are like the pool balls but just cubes
+    plants         - Plants of sorts
+    smile          - 😃
+    shapes         - Squares and Circles of a few colors
+";
+
+const HELP_HEAD: &str = "Set the color of the first char in Rain.
+OPTIONS:
+    white,
+    red,
+    blue,
+    green,
+    r,g,b
+";
+
 #[derive(Debug, Parser)]
 #[command(
     author = AUTHOR,
@@ -14,15 +66,15 @@ use clap::{crate_description, crate_name, crate_version, Parser};
 pub struct Cli {
     #[arg(short, long, default_value_t = false)]
     pub shade: bool,
-    #[arg(short, long, default_value_t = Characters::Bin)]
+    #[arg(short, long, help = HELP_CHARS, default_value_t = Characters::Bin)]
     pub chars: Characters,
-    #[arg(short = 'C', long, default_value_t = String::from("green"))]
+    #[arg(short = 'C', long, help = HELP_COLORS, default_value_t = String::from("green"))]
     pub color: String,
-    #[arg(short = 'H', long, default_value_t = String::from("white"))]
+    #[arg(short = 'H', long, help = HELP_HEAD, default_value_t = String::from("white"))]
     pub head: String,
-    #[arg(short, long, default_value_t = Direction::Down)]
+    #[arg(short, long, help = HELP_DIRECTION, default_value_t = Direction::Down)]
     pub direction: Direction,
-    #[arg(short = 'S', long, default_value_t = format!("{MINSPEED},{MAXSPEED}"))]
+    #[arg(short = 'S', long, default_value_t = format!("{MAXSPEED},{MINSPEED}"))]
     pub speed: String,
 }
 
@@ -36,13 +88,13 @@ impl Cli {
 
     pub fn speed(&self) -> (u64, u64) {
         match self.speed.into_tuple() {
-            Ok((min, max)) => (min, max),
-            _ => (MINSPEED, MAXSPEED),
+            Ok((max, min)) => (max, min),
+            _ => (MAXSPEED, MINSPEED),
         }
     }
     pub fn speed_range(&self) -> std::ops::Range<u64> {
-        let (min, max) = self.speed();
-        min..max
+        let (max, min) = self.speed();
+        max..min
     }
 }
 
