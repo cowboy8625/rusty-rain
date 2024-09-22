@@ -10,7 +10,6 @@ pub struct Rain {
     pub colors: Vec<Vec<style::Color>>,
     pub time: Vec<(Instant, Duration)>,
     pub queue: Vec<usize>,
-    pub width: u16,
     pub height: u16,
 }
 
@@ -40,7 +39,6 @@ impl Rain {
             colors,
             time,
             queue,
-            width,
             height,
         }
     }
