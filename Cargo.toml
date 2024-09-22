@@ -1,6 +1,6 @@
 [package]
 name = "rusty-rain"
-version = "0.3.6"
+version = "0.3.7"
 authors = ["cowboy8625 <https://github.com/cowboy8625>"]
 edition = "2021"
 description = "A cross platform CMatrix like program."
