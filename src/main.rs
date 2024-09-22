@@ -1,14 +1,15 @@
-mod arguments;
+// mod arguments;
 mod characters;
+mod cli;
 mod direction;
 mod gen;
 mod rain;
 mod term;
 mod update;
 mod user_input;
-mod user_settings;
 
 // None Standard Crates
+use clap::Parser;
 use crossterm::{cursor, execute, queue, style, terminal};
 use rand::{thread_rng, Rng};
 
@@ -16,14 +17,13 @@ use rand::{thread_rng, Rng};
 use std::io::{stdout, Stdout, Write};
 
 // Modules
-use arguments::cargs;
+//use arguments::cargs;
 use characters::Characters;
 use direction::Direction;
 use rain::Rain;
 use term::{clear, draw};
 use update::{reset, update};
 use user_input::user_input;
-use user_settings::UserSettings;
 
 const MAXSPEED: u64 = 40;
 const MINSPEED: u64 = 200;
@@ -37,18 +37,18 @@ Email: cowboy8625@protonmail.com
 
 struct App {
     stdout: Stdout,
-    user_settings: UserSettings,
+    settings: cli::Cli,
 }
 
 impl App {
-    fn new(user_settings: UserSettings) -> Self {
+    fn new(settings: cli::Cli) -> Self {
         Self {
             stdout: stdout(),
-            user_settings,
+            settings,
         }
     }
     fn run(&mut self) -> std::io::Result<()> {
-        let (width, height) = match self.user_settings.direction {
+        let (width, height) = match self.settings.direction {
             Direction::Left | Direction::Right => {
                 let (w, h) = terminal::size()?;
                 (h, w)
@@ -56,30 +56,25 @@ impl App {
             Direction::Up | Direction::Down => terminal::size()?,
         };
 
-        let create_color = gen::color_function(self.user_settings.shading);
+        let create_color = gen::color_function(self.settings.shade);
 
-        let mut rain = Rain::new(create_color, width, height, &self.user_settings);
+        let mut rain = Rain::new(create_color, width, height, &self.settings);
         let mut is_running = true;
 
         terminal::enable_raw_mode()?;
         execute!(self.stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
 
         while is_running {
-            is_running = user_input(
-                &mut self.stdout,
-                &mut rain,
-                &self.user_settings,
-                create_color,
-            )?;
+            is_running = user_input(&mut self.stdout, &mut rain, &self.settings, create_color)?;
             draw(
                 &mut self.stdout,
                 &rain,
-                self.user_settings.group.width(),
-                &self.user_settings.direction,
+                self.settings.chars.width(),
+                &self.settings.direction,
             )?;
             self.stdout.flush()?;
             update(&mut rain);
-            reset(create_color, &mut rain, &self.user_settings);
+            reset(create_color, &mut rain, &self.settings);
         }
         Ok(())
     }
@@ -94,6 +89,6 @@ impl Drop for App {
 }
 
 fn main() -> std::io::Result<()> {
-    let user_settings = cargs();
-    App::new(user_settings).run()
+    let settings = cli::Cli::parse();
+    App::new(settings).run()
 }

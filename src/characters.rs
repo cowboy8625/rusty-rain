@@ -1,221 +1,162 @@
-use ezemoji::*;
+use clap::ValueEnum;
 
+#[repr(u16)]
 #[derive(Debug, Clone, Copy)]
 pub enum CharWidth {
-    Single,
-    Double,
+    Single = 1,
+    Double = 2,
 }
 
-impl CharWidth {
-    pub fn width(self) -> u16 {
-        match self {
-            Self::Single => 1,
-            Self::Double => 2,
-        }
+#[derive(Debug, ValueEnum, Clone, Copy)]
+pub enum Characters {
+    All,
+    Alphalow,
+    Alphaup,
+    AlphaNum,
+    Arrow,
+    Bin,
+    Cards,
+    Clock,
+    Crab,
+    Dominosh,
+    Dominosv,
+    Earth,
+    Emojis,
+    Jap,
+    LargeLetters,
+    Moon,
+    Num,
+    NumberedBalls,
+    NumberedCubes,
+    Plants,
+    Smile,
+    Shapes,
+}
+
+impl std::fmt::Display for Characters {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let value = match self {
+            Characters::All => "all",
+            Characters::Alphalow => "alphalow",
+            Characters::Alphaup => "alphaup",
+            Characters::AlphaNum => "alphanum",
+            Characters::Arrow => "arrow",
+            Characters::Bin => "bin",
+            Characters::Cards => "cards",
+            Characters::Clock => "clock",
+            Characters::Crab => "crab",
+            Characters::Dominosh => "dominosh",
+            Characters::Dominosv => "dominosv",
+            Characters::Earth => "earth",
+            Characters::Emojis => "emojis",
+            Characters::Jap => "jap",
+            Characters::LargeLetters => "largeletters",
+            Characters::Moon => "moon",
+            Characters::Num => "num",
+            Characters::NumberedBalls => "numberedballs",
+            Characters::NumberedCubes => "numberedcubes",
+            Characters::Plants => "plants",
+            Characters::Smile => "smile",
+            Characters::Shapes => "shapes",
+        };
+        write!(f, "{}", value)
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-pub enum Characters {
-    All(AllEmojis),
-    Alphalow(LowerAlpha),
-    Alphaup(UpperAlpha),
-    Arrow(Arrow),
-    Bin(Bin),
-    Cards(Cards),
-    Clock(Clock),
-    Crab(Crab),
-    Dominosh(HorizontalDominos),
-    Dominosv(VerticalDominos),
-    Earth(Earth),
-    Emojis(Emojis),
-    Jap(Japanese),
-    LargeLetters(LargeLetter),
-    Moon(Moon),
-    Num(Numbers),
-    NumberedBalls(NumberedBalls),
-    NumberedCubes(NumberedCubes),
-    Plants(Plant),
-    Smile(Smile),
-    Shapes(Shape),
+impl Characters {
+    pub fn as_vec_u32(&self) -> Vec<u32> {
+        match self {
+            Self::All => Self::Alphalow
+                .as_vec_u32()
+                .into_iter()
+                .chain(Self::Alphaup.as_vec_u32())
+                .chain(Self::AlphaNum.as_vec_u32())
+                .chain(Self::Arrow.as_vec_u32())
+                .chain(Self::Bin.as_vec_u32())
+                .chain(Self::Cards.as_vec_u32())
+                .chain(Self::Clock.as_vec_u32())
+                .chain(Self::Crab.as_vec_u32())
+                .chain(Self::Dominosh.as_vec_u32())
+                .chain(Self::Dominosv.as_vec_u32())
+                .chain(Self::Earth.as_vec_u32())
+                .chain(Self::Emojis.as_vec_u32())
+                .chain(Self::Jap.as_vec_u32())
+                .chain(Self::LargeLetters.as_vec_u32())
+                .chain(Self::Moon.as_vec_u32())
+                .chain(Self::Num.as_vec_u32())
+                .chain(Self::NumberedBalls.as_vec_u32())
+                .chain(Self::NumberedCubes.as_vec_u32())
+                .chain(Self::Plants.as_vec_u32())
+                .chain(Self::Smile.as_vec_u32())
+                .chain(Self::Shapes.as_vec_u32())
+                .collect(),
+            Self::Alphalow => (97..=122).collect(),
+            Self::Alphaup => (65..=90).collect(),
+            Self::AlphaNum => Self::Alphalow
+                .as_vec_u32()
+                .into_iter()
+                .chain(Self::Alphaup.as_vec_u32())
+                .chain(Self::Num.as_vec_u32())
+                .collect(),
+            Self::Arrow => (129024..=129035)
+                .chain(129040..=129095)
+                .chain(129168..=129195)
+                .chain(129168..=129195)
+                .chain(129104..=129113)
+                .collect(),
+            Self::Bin => (48..=49).collect(),
+            Self::Cards => (127137..=127166)
+                .chain(127169..=127182)
+                .chain(127185..=127198)
+                .collect(),
+            Self::Clock => (128336..=128359).collect(),
+            Self::Crab => vec![129408],
+            Self::Dominosh => (127024..=127073).collect(),
+            Self::Dominosv => (127074..=127123).collect(),
+            Self::Earth => (127757..=127760).collect(),
+            Self::Emojis => (129292..=129400) // Hearts
+                .chain(129402..=129482) // Diamonds
+                .chain(129484..=129535) // Clubs
+                // Spades?
+                .collect(),
+            Self::Jap => (65382..=65437).collect(),
+            Self::LargeLetters => (127462..=127487).collect(),
+            Self::Moon => (127760..=127773).collect(),
+            Self::Num => (48..=57).collect(),
+            Self::NumberedBalls => (127312..=127337).collect(),
+            Self::NumberedCubes => (127344..=127369).collect(),
+            Self::Plants => (127793..=127827).collect(),
+            Self::Smile => (128512..=128518).collect(),
+            Self::Shapes => (128992..=129003).collect(),
+        }
+    }
 }
 
 impl Characters {
     pub fn width(&self) -> u16 {
         match self {
-            Self::All(_) => CharWidth::Double.width(),
-            Self::Alphalow(_) => CharWidth::Single.width(),
-            Self::Alphaup(_) => CharWidth::Single.width(),
-            Self::Arrow(_) => CharWidth::Double.width(),
-            Self::Bin(_) => CharWidth::Single.width(),
-            Self::Cards(_) => CharWidth::Double.width(),
-            Self::Clock(_) => CharWidth::Double.width(),
-            Self::Crab(_) => CharWidth::Double.width(),
-            Self::Dominosh(_) => CharWidth::Double.width(),
-            Self::Dominosv(_) => CharWidth::Single.width(),
-            Self::Earth(_) => CharWidth::Double.width(),
-            Self::Emojis(_) => CharWidth::Double.width(),
-            Self::Jap(_) => CharWidth::Single.width(),
-            Self::LargeLetters(_) => CharWidth::Double.width(),
-            Self::Moon(_) => CharWidth::Double.width(),
-            Self::Num(_) => CharWidth::Single.width(),
-            Self::NumberedBalls(_) => CharWidth::Double.width(),
-            Self::NumberedCubes(_) => CharWidth::Double.width(),
-            Self::Plants(_) => CharWidth::Double.width(),
-            Self::Smile(_) => CharWidth::Double.width(),
-            Self::Shapes(_) => CharWidth::Double.width(),
+            Self::All => CharWidth::Double as u16,
+            Self::Alphalow => CharWidth::Single as u16,
+            Self::Alphaup => CharWidth::Single as u16,
+            Self::AlphaNum => CharWidth::Single as u16,
+            Self::Arrow => CharWidth::Double as u16,
+            Self::Bin => CharWidth::Single as u16,
+            Self::Cards => CharWidth::Double as u16,
+            Self::Clock => CharWidth::Double as u16,
+            Self::Crab => CharWidth::Double as u16,
+            Self::Dominosh => CharWidth::Double as u16,
+            Self::Dominosv => CharWidth::Single as u16,
+            Self::Earth => CharWidth::Double as u16,
+            Self::Emojis => CharWidth::Double as u16,
+            Self::Jap => CharWidth::Single as u16,
+            Self::LargeLetters => CharWidth::Double as u16,
+            Self::Moon => CharWidth::Double as u16,
+            Self::Num => CharWidth::Single as u16,
+            Self::NumberedBalls => CharWidth::Double as u16,
+            Self::NumberedCubes => CharWidth::Double as u16,
+            Self::Plants => CharWidth::Double as u16,
+            Self::Smile => CharWidth::Double as u16,
+            Self::Shapes => CharWidth::Double as u16,
         }
-    }
-
-    pub fn as_vec_u32(&self) -> Vec<u32> {
-        match self {
-            Self::All(c) => c.as_vec_u32(),
-            Self::Alphalow(c) => c.as_vec_u32(),
-            Self::Alphaup(c) => c.as_vec_u32(),
-            Self::Arrow(c) => c.as_vec_u32(),
-            Self::Bin(c) => c.as_vec_u32(),
-            Self::Cards(c) => c.as_vec_u32(),
-            Self::Clock(c) => c.as_vec_u32(),
-            Self::Crab(c) => c.as_vec_u32(),
-            Self::Dominosh(c) => c.as_vec_u32(),
-            Self::Dominosv(c) => c.as_vec_u32(),
-            Self::Earth(c) => c.as_vec_u32(),
-            Self::Emojis(c) => c.as_vec_u32(),
-            Self::Jap(c) => c.as_vec_u32(),
-            Self::LargeLetters(c) => c.as_vec_u32(),
-            Self::Moon(c) => c.as_vec_u32(),
-            Self::Num(c) => c.as_vec_u32(),
-            Self::NumberedBalls(c) => c.as_vec_u32(),
-            Self::NumberedCubes(c) => c.as_vec_u32(),
-            Self::Plants(c) => c.as_vec_u32(),
-            Self::Smile(c) => c.as_vec_u32(),
-            Self::Shapes(c) => c.as_vec_u32(),
-        }
-    }
-}
-
-impl From<ezemoji::AllEmojis> for Characters {
-    fn from(e: ezemoji::AllEmojis) -> Self {
-        Self::All(e)
-    }
-}
-
-impl From<ezemoji::LowerAlpha> for Characters {
-    fn from(e: ezemoji::LowerAlpha) -> Self {
-        Self::Alphalow(e)
-    }
-}
-
-impl From<ezemoji::UpperAlpha> for Characters {
-    fn from(e: ezemoji::UpperAlpha) -> Self {
-        Self::Alphaup(e)
-    }
-}
-
-impl From<ezemoji::Arrow> for Characters {
-    fn from(e: ezemoji::Arrow) -> Self {
-        Self::Arrow(e)
-    }
-}
-
-impl From<ezemoji::Bin> for Characters {
-    fn from(e: ezemoji::Bin) -> Self {
-        Self::Bin(e)
-    }
-}
-
-impl From<ezemoji::Cards> for Characters {
-    fn from(e: ezemoji::Cards) -> Self {
-        Self::Cards(e)
-    }
-}
-
-impl From<ezemoji::Clock> for Characters {
-    fn from(e: ezemoji::Clock) -> Self {
-        Self::Clock(e)
-    }
-}
-
-impl From<ezemoji::Crab> for Characters {
-    fn from(e: ezemoji::Crab) -> Self {
-        Self::Crab(e)
-    }
-}
-
-impl From<ezemoji::HorizontalDominos> for Characters {
-    fn from(e: ezemoji::HorizontalDominos) -> Self {
-        Self::Dominosh(e)
-    }
-}
-
-impl From<ezemoji::VerticalDominos> for Characters {
-    fn from(e: ezemoji::VerticalDominos) -> Self {
-        Self::Dominosv(e)
-    }
-}
-
-impl From<ezemoji::Earth> for Characters {
-    fn from(e: ezemoji::Earth) -> Self {
-        Self::Earth(e)
-    }
-}
-
-impl From<ezemoji::Emojis> for Characters {
-    fn from(e: ezemoji::Emojis) -> Self {
-        Self::Emojis(e)
-    }
-}
-
-impl From<ezemoji::Japanese> for Characters {
-    fn from(e: ezemoji::Japanese) -> Self {
-        Self::Jap(e)
-    }
-}
-
-impl From<ezemoji::LargeLetter> for Characters {
-    fn from(e: ezemoji::LargeLetter) -> Self {
-        Self::LargeLetters(e)
-    }
-}
-
-impl From<ezemoji::Moon> for Characters {
-    fn from(e: ezemoji::Moon) -> Self {
-        Self::Moon(e)
-    }
-}
-
-impl From<ezemoji::Numbers> for Characters {
-    fn from(e: ezemoji::Numbers) -> Self {
-        Self::Num(e)
-    }
-}
-
-impl From<ezemoji::NumberedBalls> for Characters {
-    fn from(e: ezemoji::NumberedBalls) -> Self {
-        Self::NumberedBalls(e)
-    }
-}
-
-impl From<ezemoji::NumberedCubes> for Characters {
-    fn from(e: ezemoji::NumberedCubes) -> Self {
-        Self::NumberedCubes(e)
-    }
-}
-
-impl From<ezemoji::Plant> for Characters {
-    fn from(e: ezemoji::Plant) -> Self {
-        Self::Plants(e)
-    }
-}
-
-impl From<ezemoji::Smile> for Characters {
-    fn from(e: ezemoji::Smile) -> Self {
-        Self::Smile(e)
-    }
-}
-
-impl From<ezemoji::Shape> for Characters {
-    fn from(e: ezemoji::Shape) -> Self {
-        Self::Shapes(e)
     }
 }
