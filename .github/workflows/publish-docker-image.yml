@@ -3,7 +3,7 @@ name: Create and publish container image
 on:
   workflow_dispatch:
   push:
-    branches: ['main']
+    branches: ['master']
 
 env:
   REGISTRY: ghcr.io
