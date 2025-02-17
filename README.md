@@ -38,6 +38,19 @@ or to install:
 cargo install rusty-rain
 ```
 
+or use Dockerfile to build an image
+
+```
+docker build -t rusty-rain .
+docker run --rm -it rusty-rain alpha-num -s 
+```
+
+or pull docker image from Github repository and run directly
+
+```
+docker run --rm -it --platform linux/amd64 ghcr.io/cowboy8625/rusty-rain:latest -c alpha-num -s
+```
+
 ## Exit
 
 To exit just press `ESC` or `Ctrl + C`
