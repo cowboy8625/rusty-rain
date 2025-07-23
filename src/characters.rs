@@ -59,7 +59,7 @@ impl std::fmt::Display for Characters {
             Characters::Smile => "smile",
             Characters::Shapes => "shapes",
         };
-        write!(f, "{}", value)
+        write!(f, "{value}")
     }
 }
 
