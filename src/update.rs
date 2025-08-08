@@ -1,12 +1,13 @@
 use crate::cli::Cli;
 use crate::{gen, style, Rain, Rng};
-use itertools::izip;
 use std::time::{Duration, Instant};
 
 pub fn update(rain: &mut Rain) {
     rain.queue.clear();
     let now = Instant::now();
-    for (idx, ((time, delay), location)) in izip!(&mut rain.time, &mut rain.locations).enumerate() {
+    for (idx, ((time, delay), location)) in
+        rain.time.iter_mut().zip(&mut rain.locations).enumerate()
+    {
         if *time <= now {
             *time += *delay;
             *location += 1;
