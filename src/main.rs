@@ -11,10 +11,10 @@ mod user_input;
 // None Standard Crates
 use clap::Parser;
 use crossterm::{cursor, execute, queue, style, terminal};
-use rand::{thread_rng, Rng};
+use rand::prelude::*;
 
 // Standard Library Crates
-use std::io::{stdout, Stdout, Write};
+use std::io::{stdout, BufWriter, Stdout, Write};
 
 // Modules
 //use arguments::cargs;
@@ -36,14 +36,14 @@ Email: cowboy8625@protonmail.com
 ";
 
 struct App {
-    stdout: Stdout,
+    stdout: BufWriter<Stdout>,
     settings: cli::Cli,
 }
 
 impl App {
     fn new(settings: cli::Cli) -> Self {
         Self {
-            stdout: stdout(),
+            stdout: BufWriter::with_capacity(640_000, stdout()),
             settings,
         }
     }

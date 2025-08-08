@@ -1,12 +1,13 @@
-use crate::{style, thread_rng, Characters, Rng};
+use crate::{style, Characters, Rng};
 use std::char;
 use std::time::{Duration, Instant};
 
 /// Generates a single column of Characters.
 pub fn create_drop_chars(height: u16, group: &Characters) -> Vec<char> {
+    let mut rng = rand::rng();
     let g = group.as_vec_u32();
     (0..height + 1)
-        .map(|_| char::from_u32(g[thread_rng().gen_range(0..g.len())]).unwrap_or('#'))
+        .map(|_| char::from_u32(g[rng.random_range(0..g.len())]).unwrap_or('#'))
         .collect()
 }
 
@@ -54,17 +55,22 @@ pub fn color_function(shading: bool) -> fn(style::Color, style::Color, u8) -> Ve
 
 pub fn times(width: usize, (fastest, slowest): (u64, u64)) -> Vec<(Instant, Duration)> {
     let now = Instant::now();
-    let mut rng = thread_rng();
+    let mut rng = rand::rng();
     (0..width.max(1))
-        .map(|_| (now, Duration::from_millis(rng.gen_range(fastest..slowest))))
+        .map(|_| {
+            (
+                now,
+                Duration::from_millis(rng.random_range(fastest..slowest)),
+            )
+        })
         .collect()
 }
 
 /// Generates the visable length of each column.
 pub fn lengths(width: usize, height: usize) -> Vec<usize> {
-    let mut rng = thread_rng();
+    let mut rng = rand::rng();
     (0..width.max(1))
-        .map(|_| rng.gen_range(4..(height.saturating_sub(10)).max(5)))
+        .map(|_| rng.random_range(4..(height.saturating_sub(10)).max(5)))
         .collect()
 }
 
