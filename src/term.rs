@@ -7,82 +7,89 @@ pub fn clear(w: &mut BufWriter<Stdout>) -> std::io::Result<()> {
     Ok(())
 }
 
-// TODO: Clean this crap up
-// Draw takes rain data and places it on screen.
+/// Converts logical rain coordinates to terminal cursor positions based on direction.
+fn calc_position(direction: &Direction, x: u16, y: u16, offset: u16) -> cursor::MoveTo {
+    use Direction::*;
+    match direction {
+        Down => cursor::MoveTo(x, y),
+        Up => cursor::MoveTo(x, offset - y),
+        Right => cursor::MoveTo(y, x),
+        Left => cursor::MoveTo(offset - y, x),
+    }
+}
+
+/// Draws one column of rain at the given index.
+fn draw_column(
+    w: &mut BufWriter<Stdout>,
+    rain: &Rain,
+    row: usize,
+    spacing: u16,
+    offset: u16,
+    direction: &Direction,
+) -> std::io::Result<()> {
+    let characters = &rain.characters[row];
+    let col = rain.locations[row];
+    let len = rain.length[row];
+    let colors = &rain.colors[row];
+
+    let height = rain.height as usize;
+
+    let start = col.saturating_sub(len).clamp(0, characters.len());
+    let end = (col + 1).clamp(1, characters.len());
+    let slice = &characters[start..end];
+
+    let cstart = if col > len {
+        colors.len().saturating_sub(slice.len())
+    } else {
+        0
+    };
+    let color_slice = &colors[cstart..];
+
+    for (y, (&ch, &color)) in slice.iter().rev().zip(color_slice.iter()).enumerate() {
+        queue!(
+            w,
+            calc_position(
+                direction,
+                row as u16 * spacing,
+                (col.min(height) - y) as u16,
+                offset
+            ),
+            style::SetForegroundColor(color),
+            style::Print(ch),
+        )?;
+    }
+
+    // Clear the old tail character if the rain has moved past its length
+    if col >= len {
+        queue!(
+            w,
+            calc_position(
+                direction,
+                row as u16 * spacing,
+                col.saturating_sub(len) as u16,
+                offset
+            ),
+            style::Print(" ".repeat(spacing as usize)),
+        )?;
+    }
+
+    Ok(())
+}
+
 pub fn draw(
     w: &mut BufWriter<Stdout>,
     rain: &Rain,
     spacing: u16,
     direction: &Direction,
 ) -> std::io::Result<()> {
-    // NOTE: Maybe move this into its own functions to be generated at startup
-    // to lessen the amount of branching done.
-    // Further investigation into the assembly code to see if this is worth it.
-    use Direction::*;
-    // Since we do not keep track of the x and y value of the rain we need to swap
-    // values depending on desired direction.
-    let move_to = match direction {
-        Down => |x: u16, y: u16, _: u16| cursor::MoveTo(x, y),
-        Up => |x: u16, y: u16, offest: u16| cursor::MoveTo(x, offest - y),
-        Right => |x: u16, y: u16, _: u16| cursor::MoveTo(y, x),
-        Left => |x: u16, y: u16, offest: u16| cursor::MoveTo(offest - y, x),
-    };
-    // By subtracting height - location you get opposite location on screen.
     let offset = match direction {
-        Down | Right => 0,
-        Up | Left => rain.height,
+        Direction::Down | Direction::Right => 0,
+        Direction::Up | Direction::Left => rain.height,
     };
 
-    // -------------------------------------
-
-    let (mut chr, mut col, mut len, mut clr);
-    let height = rain.height as usize;
-    for row in rain.queue.iter() {
-        // character
-        chr = &rain.charaters[*row];
-        // location
-        col = &rain.locations[*row];
-        // length
-        len = &rain.length[*row];
-        // color
-        clr = &rain.colors[*row];
-
-        let start = col.saturating_sub(*len).clamp(0, chr.len());
-        let end = (col + 1).clamp(1, chr.len());
-        let slice = chr[start..end].iter();
-
-        let cstart = if col > len {
-            clr.len().saturating_sub(slice.len())
-        } else {
-            0
-        };
-
-        let color = &clr[cstart..];
-
-        for (y, (ch, _c)) in slice.rev().zip(color.iter().copied()).enumerate() {
-            queue!(
-                w,
-                move_to(
-                    *row as u16 * spacing,
-                    (*col.min(&height) - y) as u16,
-                    offset
-                ),
-                style::SetForegroundColor(_c),
-                style::Print(ch),
-            )?;
-        }
-        // This Deletes old tail character of rain.
-        if col >= len {
-            queue!(
-                w,
-                move_to(
-                    *row as u16 * spacing,
-                    col.saturating_sub(*len) as u16,
-                    offset
-                ),
-                style::Print(" ".repeat(spacing as usize)),
-            )?;
-        }
+    for &row in &rain.queue {
+        draw_column(w, rain, row, spacing, offset, direction)?;
     }
+
     Ok(())
 }

@@ -130,9 +130,7 @@ impl Characters {
             Self::Shapes => (128992..=129003).collect(),
         }
     }
-}
 
-impl Characters {
     pub fn width(&self) -> u16 {
         match self {
             Self::All => CharWidth::Double as u16,

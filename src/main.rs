@@ -17,7 +17,6 @@ use rand::prelude::*;
 use std::io::{stdout, BufWriter, Stdout, Write};
 
 // Modules
-//use arguments::cargs;
 use characters::Characters;
 use direction::Direction;
 use rain::Rain;

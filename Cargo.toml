@@ -18,3 +18,13 @@ rand = "0.9.2"
 
 [profile.release]
 debug = true
+
+[package.metadata.deb]
+maintainer = "cowboy8625 <cowboy8625@protonmail.com>"
+priority = "optional"
+section = "utils"
+depends = ""
+assets = [
+    ["target/release/rusty-rain", "usr/bin/", "755"],
+    ["rusty-rain.1", "usr/share/man/man1/", "644"]
+]

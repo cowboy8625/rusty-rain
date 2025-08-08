@@ -1,0 +1,80 @@
+.TH RUSTY-RAIN 1 "August 2025" "rusty-rain 0.3.7"
+.SH NAME
+rusty-rain \- A cross platform CMatrix-like program.
+.SH SYNOPSIS
+.B rusty-rain
+[\fIOPTIONS\fR]
+.SH DESCRIPTION
+Rusty Rain simulates a "digital rain" effect in your terminal, similar to the
+classic CMatrix program, but written in Rust with additional customization
+options for colors, characters, speed, and direction. It is cross-platform and
+supports many fun visual styles.
+.SH OPTIONS
+.TP
+.BR \-s ", " \-\-shade
+Enable shaded rain effect.
+.TP
+.BR \-c ", " \-\-chars " \fICHARS\fR"
+Set what kind of characters are printed as rain.
+.br
+Available values:
+    all, alphalow, alphaup, alpha-num, arrow, bin, cards, clock,
+    crab, dominosh, dominosv, earth, emojis, jap, large-letters,
+    moon, num, numbered-balls, numbered-cubes, plants, smile, shapes
+.br
+Default: \fIbin\fR
+.TP
+.BR \-C ", " \-\-color " \fICOLOR\fR"
+Set color of rain using a color name or RGB tuple.
+.br
+Available names: white, red, blue, green
+.br
+Tuple format: \fIr,g,b\fR
+.br
+Default: \fIgreen\fR
+.TP
+.BR \-H ", " \-\-head " \fICOLOR\fR"
+Set the color of the first character in each rain drop.
+.br
+Available names: white, red, blue, green
+.br
+Tuple format: \fIr,g,b\fR
+.br
+Default: \fIwhite\fR
+.TP
+.BR \-d ", " \-\-direction " \fIDIRECTION\fR"
+Set the direction of the rain.
+.br
+Available values: up, down, left, right
+.br
+Aliases: north, south, west, east
+.br
+Default: \fIdown\fR
+.TP
+.BR \-S ", " \-\-speed " \fISPEED\fR"
+Set the rain speed in milliseconds. May be a single value or a range.
+.br
+Default: \fI40,200\fR
+.TP
+.BR \-h ", " \-\-help
+Display help message and exit.
+.TP
+.BR \-V ", " \-\-version
+Display version information and exit.
+.SH EXAMPLES
+.TP
+Start rain with shaded effect:
+.br
+.B rusty-rain --shade
+.TP
+Matrix-style Japanese characters in red:
+.br
+.B rusty-rain --chars jap --color red
+.TP
+Slow blue rain from right to left:
+.br
+.B rusty-rain --color blue --direction left --speed 200,400
+.SH AUTHOR
+cowboy8625 <cowboy8625@protonmail.com>
+.SH HOMEPAGE
+<http://rusty-rain.xyz>
