@@ -1,6 +1,8 @@
+use std::io::BufWriter;
+
 use crate::{cursor, queue, style, terminal, Direction, Rain, Stdout};
 
-pub fn clear(w: &mut Stdout) -> std::io::Result<()> {
+pub fn clear(w: &mut BufWriter<Stdout>) -> std::io::Result<()> {
     queue!(w, terminal::Clear(terminal::ClearType::All))?;
     Ok(())
 }
@@ -8,7 +10,7 @@ pub fn clear(w: &mut Stdout) -> std::io::Result<()> {
 // TODO: Clean this crap up
 // Draw takes rain data and places it on screen.
 pub fn draw(
-    w: &mut Stdout,
+    w: &mut BufWriter<Stdout>,
     rain: &Rain,
     spacing: u16,
     direction: &Direction,
