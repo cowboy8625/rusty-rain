@@ -174,20 +174,20 @@ impl<const LENGTH: usize> Rain<LENGTH> {
     }
 
     #[inline]
-    fn reset_time(&mut self, i: usize, rng: &mut impl rand::Rng) {
+    fn reset_time(&mut self, i: usize) {
         let (start, duration) = &mut self.time[i];
         *start = Instant::now();
-        *duration = Duration::from_millis(rng.random_range(MAXSPEED..MINSPEED));
+        *duration = Duration::from_millis(self.rng.random_range(MAXSPEED..MINSPEED));
     }
 
     #[inline]
-    fn reset_start(&mut self, i: usize, rng: &mut impl rand::Rng) {
-        self.starts[i] = rng.random_range(0..self.chars.len());
+    fn reset_start(&mut self, i: usize) {
+        self.starts[i] = self.rng.random_range(0..self.chars.len());
     }
 
     #[inline]
-    fn reset_window(&mut self, i: usize, rng: &mut impl rand::Rng) {
-        self.windows[i] = rng.random_range(
+    fn reset_window(&mut self, i: usize) {
+        self.windows[i] = self.rng.random_range(
             Self::MIN_LENGTH_OF_RAIN..self.height.saturating_sub(Self::MAX_LENGTH_OFFSET_OF_RAIN),
         );
     }
@@ -198,10 +198,9 @@ impl<const LENGTH: usize> Rain<LENGTH> {
     }
 
     fn reset(&mut self, i: usize) {
-        let mut rng = rand::rng();
-        self.reset_time(i, &mut rng);
-        self.reset_start(i, &mut rng);
-        self.reset_window(i, &mut rng);
+        self.reset_time(i);
+        self.reset_start(i);
+        self.reset_window(i);
         self.reset_position(i);
     }
 
