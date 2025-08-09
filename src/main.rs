@@ -29,6 +29,8 @@ Email: cowboy8625@protonmail.com
 use rand::rngs::{StdRng, ThreadRng};
 use rand::{Rng, SeedableRng};
 
+/// rand crate wrapper for testing.
+/// being able to have deterministic tests is important
 #[derive(Debug)]
 pub struct Random {
     #[cfg(test)]
@@ -120,7 +122,13 @@ impl<const LENGTH: usize> Rain<LENGTH> {
     const MAX_LENGTH_OFFSET_OF_RAIN: usize = 4;
     fn new(width: usize, height: usize, settings: &cli::Cli) -> Self {
         let mut rng = Random::new();
-        let chars: [char; LENGTH] = std::array::from_fn(|_| rng.random_range('a'..='z'));
+        let chars_u32 = settings.chars.as_vec_u32();
+        let chars: [char; LENGTH] = std::array::from_fn(|_| {
+            chars_u32
+                .get(rng.random_range(0..chars_u32.len()))
+                .and_then(|&c| char::from_u32(c))
+                .unwrap_or('#') // fallback character
+        });
 
         let starts: Vec<usize> = (0..width)
             .map(|_| rng.random_range(0..chars.len()))
