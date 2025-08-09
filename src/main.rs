@@ -7,13 +7,12 @@ mod test;
 use clap::Parser;
 use crossterm::{
     cursor, event, execute, queue,
-    style::{Color, Print},
+    style::{Color, Print, SetForegroundColor},
     terminal,
 };
 use direction::Direction;
 use rand::prelude::*;
 use std::io::{stdout, BufWriter, Stdout, Write};
-use std::ops::Range;
 use std::time::{Duration, Instant};
 
 const MAXSPEED: u64 = 0;
@@ -57,6 +56,35 @@ impl Random {
     }
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct Cell {
+    char: char,
+    color: Color,
+}
+
+impl Cell {
+    fn new(char: char) -> Self {
+        Self {
+            char,
+            color: Color::Reset,
+        }
+    }
+
+    fn color(mut self, color: Color) -> Self {
+        self.color = color;
+        self
+    }
+}
+
+impl Default for Cell {
+    fn default() -> Self {
+        Self {
+            char: ' ',
+            color: Color::Reset,
+        }
+    }
+}
+
 #[derive(Debug)]
 struct Rain<const LENGTH: usize> {
     rng: Random,
@@ -83,8 +111,8 @@ struct Rain<const LENGTH: usize> {
 
     width: usize,
     height: usize,
-    screen_buffer: Vec<char>,
-    previous_screen_buffer: Vec<char>,
+    screen_buffer: Vec<Cell>,
+    previous_screen_buffer: Vec<Cell>,
 }
 
 impl<const LENGTH: usize> Rain<LENGTH> {
@@ -123,9 +151,9 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             head_colors: vec![settings.head_color().into(); width],
             height,
             positions: vec![0; width],
-            previous_screen_buffer: vec![' '; width * height],
+            previous_screen_buffer: vec![Cell::default(); width * height],
             queue: Vec::with_capacity(width),
-            screen_buffer: vec![' '; width * height],
+            screen_buffer: vec![Cell::default(); width * height],
             starts,
             time,
             width,
@@ -193,7 +221,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                     continue;
                 }
 
-                self.screen_buffer[idx] = ' ';
+                self.screen_buffer[idx] = Cell::default();
             }
 
             // If head is below the screen, just advance position
@@ -211,7 +239,13 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                 }
 
                 let char_idx = (start_idx + pos - offset) % self.chars.len();
-                self.screen_buffer[y * self.width + i] = self.chars[char_idx];
+                let c = self.chars[char_idx];
+                let color = if offset == 0 {
+                    self.head_colors[i]
+                } else {
+                    self.body_colors[i]
+                };
+                self.screen_buffer[y * self.width + i] = Cell::new(c).color(color);
             }
 
             self.positions[i] += 1;
@@ -229,10 +263,12 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                 if self.screen_buffer[idx] == self.previous_screen_buffer[idx] {
                     continue;
                 }
+                let cell = &self.screen_buffer[idx];
                 queue!(
                     w,
                     cursor::MoveTo(x as u16, y as u16),
-                    Print(self.screen_buffer[idx])
+                    SetForegroundColor(cell.color),
+                    Print(cell.char),
                 )?;
                 self.previous_screen_buffer[idx] = self.screen_buffer[idx];
             }
