@@ -1,5 +1,0 @@
-[alias]
-build-linux = "build --release --target=x86_64-unknown-linux-musl"
-build-win = "build --release --target=x86_64-pc-windows-gnu"
-build-mac = "build --release --target=x86_64-apple-darwin"
-build-mac-arm = "build --release --target=aarch64-apple-darwin"

@@ -16,8 +16,14 @@ clap = { version = "4.5.43", features = ["cargo", "derive"] }
 crossterm = "0.29.0"
 rand = "0.9.2"
 
-[profile.release]
-debug = true
+[dev-dependencies]
+insta = { version = "1.43.1", features = ["yaml"] }
+
+[profile.dev.package.insta]
+opt-level = 3
+
+[profile.dev.package.similar]
+opt-level = 3
 
 [package.metadata.deb]
 maintainer = "cowboy8625 <cowboy8625@protonmail.com>"

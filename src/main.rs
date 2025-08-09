@@ -27,9 +27,39 @@ const AUTHOR: &str = "
 ▝▀ ▝▀  ▘▘ ▀▀ ▝▀ ▗▄▘▝▀ ▝▀ ▀▀▘▝▀
 Email: cowboy8625@protonmail.com
 ";
+use rand::rngs::{StdRng, ThreadRng};
+use rand::{Rng, SeedableRng};
+
+#[derive(Debug)]
+pub struct Random {
+    #[cfg(test)]
+    rng: StdRng,
+    #[cfg(not(test))]
+    rng: ThreadRng,
+}
+
+impl Random {
+    pub fn new() -> Self {
+        Self {
+            #[cfg(test)]
+            rng: StdRng::seed_from_u64(42),
+            #[cfg(not(test))]
+            rng: rand::rng(),
+        }
+    }
+
+    pub fn random_range<T, R>(&mut self, range: R) -> T
+    where
+        T: rand::distr::uniform::SampleUniform + PartialOrd,
+        R: rand::distr::uniform::SampleRange<T>,
+    {
+        self.rng.random_range(range)
+    }
+}
 
 #[derive(Debug)]
 struct Rain<const LENGTH: usize> {
+    rng: Random,
     /// Characters to use for the rain
     chars: [char; LENGTH],
     /// Starting positions of the rain within the chars array
@@ -61,7 +91,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
     const MIN_LENGTH_OF_RAIN: usize = 4;
     const MAX_LENGTH_OFFSET_OF_RAIN: usize = 4;
     fn new(width: usize, height: usize, settings: &cli::Cli) -> Self {
-        let mut rng = rand::rng();
+        let mut rng = Random::new();
         let chars: [char; LENGTH] = std::array::from_fn(|_| rng.random_range('a'..='z'));
 
         let starts: Vec<usize> = (0..width)
@@ -82,12 +112,11 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                 let start = Instant::now();
                 let duration = Duration::from_millis(rng.random_range(MAXSPEED..MINSPEED));
                 (start, duration)
-
-                // (start, Duration::from_millis(0))
             })
             .collect();
 
         Self {
+            rng,
             body_colors: vec![settings.rain_color().into(); width],
             chars,
             directions: vec![Direction::Down; width],
@@ -200,7 +229,6 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                 if self.screen_buffer[idx] == self.previous_screen_buffer[idx] {
                     continue;
                 }
-                // Move cursor and print only the changed char
                 queue!(
                     w,
                     cursor::MoveTo(x as u16, y as u16),
@@ -293,28 +321,6 @@ impl Drop for App {
 }
 
 fn main() -> std::io::Result<()> {
-    // let mut rain = Rain::<1024>::new(40, 20, &cli::Cli::parse());
-    // for id in 0..100 {
-    //     rain.update();
-    //     rain.update_screen_buffer()?;
-    //     // rain.draw_frame(&mut stdout)?;
-    //     let mut window = String::new();
-    //
-    //     for (i, chunk) in rain.screen_buffer.chunks(40).enumerate() {
-    //         window.push_str(&format!("{:02X} |", i));
-    //         window.push_str(&chunk.iter().collect::<String>());
-    //         if i == 20 {
-    //             continue;
-    //         }
-    //         window.push('\n');
-    //     }
-    //
-    //     println!("---------- {} -------------", id);
-    //     println!("{}", window);
-    //     println!("---------------------------");
-    //     std::io::stdin().read_line(&mut String::new()).unwrap();
-    // }
-    // Ok(())
     let settings = cli::Cli::parse();
     App::new(settings).run()
 }
