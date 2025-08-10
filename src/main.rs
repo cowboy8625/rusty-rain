@@ -109,6 +109,7 @@ impl std::fmt::Display for Cell {
 
 #[derive(Debug)]
 struct Rain<const LENGTH: usize> {
+    /// Random number generator wrapper for testing purposes
     rng: Random,
     /// Characters to use for the rain
     chars: [char; LENGTH],
@@ -130,12 +131,21 @@ struct Rain<const LENGTH: usize> {
     time: Vec<(Instant, Duration)>,
     /// List of columns that need to be updated
     queue: Vec<usize>,
-
+    /// Speed of the rain
     speed: std::ops::Range<u64>,
+    /// Group of characters defined by a array of u64 values
     group: Characters,
+    /// Width of the terminal
+    /// NOTE: This value is not a true width of the terminal but size in visible characters
+    /// 🌕 is a single character but takes up 2 columns and so the width value would count this as
+    /// 1.  This maybe be a wrong way to think about it 🤷 (two wide character).
     width: usize,
+    /// Height of the terminal.
+    /// Unlike width this is a true height of the terminal
     height: usize,
+    /// Current screen buffer
     screen_buffer: Vec<Cell>,
+    /// Previous screen buffer
     previous_screen_buffer: Vec<Cell>,
 }
 
