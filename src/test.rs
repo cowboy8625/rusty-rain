@@ -16,7 +16,12 @@ fn test_screen_buffer() {
 
         for (i, chunk) in rain.screen_buffer.chunks(width).enumerate() {
             write!(&mut window, "{:02X} |", i).unwrap();
-            write!(&mut window, "{}", &chunk.iter().collect::<String>()).unwrap();
+            write!(
+                &mut window,
+                "{}",
+                &chunk.iter().map(|c| c.to_string()).collect::<String>()
+            )
+            .unwrap();
             if i == 20 {
                 continue;
             }

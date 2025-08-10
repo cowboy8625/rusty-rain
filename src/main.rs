@@ -4,6 +4,7 @@ mod direction;
 #[cfg(test)]
 mod test;
 
+use characters::Characters;
 use clap::Parser;
 use crossterm::{
     cursor, event, execute, queue,
@@ -11,7 +12,6 @@ use crossterm::{
     terminal,
 };
 use direction::Direction;
-use rand::prelude::*;
 use std::io::{stdout, BufWriter, Stdout, Write};
 use std::time::{Duration, Instant};
 
@@ -26,24 +26,27 @@ const AUTHOR: &str = "
 ▝▀ ▝▀  ▘▘ ▀▀ ▝▀ ▗▄▘▝▀ ▝▀ ▀▀▘▝▀
 Email: cowboy8625@protonmail.com
 ";
-use rand::rngs::{StdRng, ThreadRng};
-use rand::{Rng, SeedableRng};
+
+use rand::Rng;
+
+#[cfg(test)]
+use rand::SeedableRng;
 
 /// rand crate wrapper for testing.
 /// being able to have deterministic tests is important
 #[derive(Debug)]
 pub struct Random {
     #[cfg(test)]
-    rng: StdRng,
+    rng: rand::rngs::StdRng,
     #[cfg(not(test))]
-    rng: ThreadRng,
+    rng: rand::rngs::ThreadRng,
 }
 
 impl Random {
     pub fn new() -> Self {
         Self {
             #[cfg(test)]
-            rng: StdRng::seed_from_u64(42),
+            rng: rand::rngs::StdRng::seed_from_u64(42),
             #[cfg(not(test))]
             rng: rand::rng(),
         }
@@ -76,6 +79,10 @@ impl Cell {
         self.color = color;
         self
     }
+
+    fn is_visible(&self) -> bool {
+        self.char != ' '
+    }
 }
 
 impl Default for Cell {
@@ -84,6 +91,17 @@ impl Default for Cell {
             char: ' ',
             color: Color::Reset,
         }
+    }
+}
+
+impl std::fmt::Display for Cell {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}{}",
+            crossterm::style::SetForegroundColor(self.color),
+            self.char
+        )
     }
 }
 
@@ -111,6 +129,8 @@ struct Rain<const LENGTH: usize> {
     /// List of columns that need to be updated
     queue: Vec<usize>,
 
+    speed: std::ops::Range<u64>,
+    group: Characters,
     width: usize,
     height: usize,
     screen_buffer: Vec<Cell>,
@@ -120,7 +140,13 @@ struct Rain<const LENGTH: usize> {
 impl<const LENGTH: usize> Rain<LENGTH> {
     const MIN_LENGTH_OF_RAIN: usize = 4;
     const MAX_LENGTH_OFFSET_OF_RAIN: usize = 4;
-    fn new(width: usize, height: usize, settings: &cli::Cli) -> Self {
+    fn new(mut width: usize, mut height: usize, settings: &cli::Cli) -> Self {
+        if matches!(settings.direction, Direction::Up | Direction::Down) {
+            width /= settings.chars.width() as usize;
+        } else if matches!(settings.direction, Direction::Left | Direction::Right) {
+            height /= settings.chars.width() as usize;
+        }
+
         let mut rng = Random::new();
         let chars_u32 = settings.chars.as_vec_u32();
         let chars: [char; LENGTH] = std::array::from_fn(|_| {
@@ -143,10 +169,11 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             })
             .collect();
 
+        let speed = settings.speed_range();
         let time: Vec<(Instant, Duration)> = (0..width)
             .map(|_| {
                 let start = Instant::now();
-                let duration = Duration::from_millis(rng.random_range(MAXSPEED..MINSPEED));
+                let duration = Duration::from_millis(rng.random_range(speed.start..speed.end));
                 (start, duration)
             })
             .collect();
@@ -163,6 +190,8 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             queue: Vec::with_capacity(width),
             screen_buffer: vec![Cell::default(); width * height],
             starts,
+            group: settings.chars,
+            speed,
             time,
             width,
             windows,
@@ -185,7 +214,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
     fn reset_time(&mut self, i: usize) {
         let (start, duration) = &mut self.time[i];
         *start = Instant::now();
-        *duration = Duration::from_millis(self.rng.random_range(MAXSPEED..MINSPEED));
+        *duration = Duration::from_millis(self.rng.random_range(self.speed.start..self.speed.end));
     }
 
     #[inline]
@@ -262,8 +291,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
     }
 
     fn draw_frame(&mut self, w: &mut BufWriter<Stdout>) -> std::io::Result<()> {
-        // TODO: probably a better way to do this by checking each line instead of iterating
-        // over the entire screen buffer
+        let group_width = self.group.width() as usize;
         for y in 0..self.height {
             for x in 0..self.width {
                 let idx = y * self.width + x;
@@ -271,17 +299,20 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                     continue;
                 }
                 let cell = &self.screen_buffer[idx];
+                let x = x * group_width;
                 queue!(
                     w,
                     cursor::MoveTo(x as u16, y as u16),
                     SetForegroundColor(cell.color),
-                    Print(cell.char),
+                    if cell.is_visible() {
+                        Print(cell.char.to_string())
+                    } else {
+                        Print(" ".repeat(group_width))
+                    },
                 )?;
                 self.previous_screen_buffer[idx] = self.screen_buffer[idx];
             }
         }
-
-        std::mem::swap(&mut self.screen_buffer, &mut self.previous_screen_buffer);
 
         Ok(())
     }
