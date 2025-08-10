@@ -16,7 +16,7 @@ use std::io::{stdout, BufWriter, Stdout, Write};
 use std::time::{Duration, Instant};
 
 const MAXSPEED: u64 = 0;
-const MINSPEED: u64 = 500;
+const MINSPEED: u64 = 200;
 const POLL_INTERVAL: Duration = Duration::from_millis(50);
 
 const AUTHOR: &str = "
@@ -42,8 +42,8 @@ pub struct Random {
     rng: rand::rngs::ThreadRng,
 }
 
-impl Random {
-    pub fn new() -> Self {
+impl Default for Random {
+    fn default() -> Self {
         Self {
             #[cfg(test)]
             rng: rand::rngs::StdRng::seed_from_u64(42),
@@ -51,7 +51,9 @@ impl Random {
             rng: rand::rng(),
         }
     }
+}
 
+impl Random {
     pub fn random_range<T, R>(&mut self, range: R) -> T
     where
         T: rand::distr::uniform::SampleUniform + PartialOrd,
@@ -147,7 +149,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             height /= settings.chars.width() as usize;
         }
 
-        let mut rng = Random::new();
+        let mut rng = Random::default();
         let chars_u32 = settings.chars.as_vec_u32();
         let chars: [char; LENGTH] = std::array::from_fn(|_| {
             chars_u32
@@ -170,10 +172,14 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             .collect();
 
         let speed = settings.speed_range();
+        let now = Instant::now();
         let time: Vec<(Instant, Duration)> = (0..width)
             .map(|_| {
-                let start = Instant::now();
-                let duration = Duration::from_millis(rng.random_range(speed.start..speed.end));
+                let milli_seconds = rng.random_range(speed.start..speed.end);
+                let duration = Duration::from_millis(milli_seconds);
+                let future_delay_ms = rng.random_range(0..2000);
+                let start = now + Duration::from_millis(future_delay_ms);
+
                 (start, duration)
             })
             .collect();
@@ -182,7 +188,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             rng,
             body_colors: vec![settings.rain_color().into(); width],
             chars,
-            directions: vec![Direction::Down; width],
+            directions: vec![settings.direction; width],
             head_colors: vec![settings.head_color().into(); width],
             height,
             positions: vec![0; width],
@@ -214,7 +220,8 @@ impl<const LENGTH: usize> Rain<LENGTH> {
     fn reset_time(&mut self, i: usize) {
         let (start, duration) = &mut self.time[i];
         *start = Instant::now();
-        *duration = Duration::from_millis(self.rng.random_range(self.speed.start..self.speed.end));
+        let milli_seconds = self.rng.random_range(self.speed.start..self.speed.end);
+        *duration = Duration::from_millis(milli_seconds);
     }
 
     #[inline]
@@ -246,42 +253,92 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             let pos = self.positions[i];
             let start_idx = self.starts[i];
             let window_len = self.windows[i];
+            let direction = self.directions[i];
 
+            // Helper closure: compute buffer index from x,y safely
+            let idx = |x: usize, y: usize| -> Option<usize> {
+                if x < self.width && y < self.height {
+                    Some(y * self.width + x)
+                } else {
+                    None
+                }
+            };
+
+            // 1. Tail cleanup
             let is_tail_visible = pos >= window_len;
             if is_tail_visible {
-                let tail_y = pos - window_len;
-                let idx = tail_y * self.width + i;
-
-                if idx >= self.screen_buffer.len() {
-                    self.reset(i);
-                    continue;
+                match direction {
+                    Direction::Down => {
+                        let tail_y = pos - window_len;
+                        if let Some(buf_idx) = idx(i, tail_y) {
+                            self.screen_buffer[buf_idx] = Cell::default();
+                        } else {
+                            self.reset(i);
+                            continue;
+                        }
+                    }
+                    Direction::Up => {
+                        let tail_y = self.height.saturating_sub(pos - window_len + 1);
+                        if let Some(buf_idx) = idx(i, tail_y) {
+                            self.screen_buffer[buf_idx] = Cell::default();
+                        } else {
+                            self.reset(i);
+                            continue;
+                        }
+                    }
+                    Direction::Right => {
+                        let tail_x = pos - window_len;
+                        if let Some(buf_idx) = idx(tail_x, i) {
+                            self.screen_buffer[buf_idx] = Cell::default();
+                        } else {
+                            self.reset(i);
+                            continue;
+                        }
+                    }
+                    Direction::Left => {
+                        let tail_x = self.width.saturating_sub(pos - window_len + 1);
+                        if let Some(buf_idx) = idx(tail_x, i) {
+                            self.screen_buffer[buf_idx] = Cell::default();
+                        } else {
+                            self.reset(i);
+                            continue;
+                        }
+                    }
                 }
-
-                self.screen_buffer[idx] = Cell::default();
             }
 
-            let is_head_below_the_screen = pos > self.height;
-            if is_head_below_the_screen {
+            // 2. Head beyond screen check
+            let is_head_out_of_bounds = match direction {
+                Direction::Down => pos > self.height,
+                Direction::Up => pos > self.height,
+                Direction::Right => pos > self.width,
+                Direction::Left => pos > self.width,
+            };
+            if is_head_out_of_bounds {
                 self.positions[i] += 1;
                 continue;
             }
 
-            // Draw visible portion of the rain
+            // 3. Draw visible portion
             let visible_len = (pos + 1).min(window_len);
             for offset in 0..visible_len {
-                let y = pos - offset;
-                if y >= self.height {
-                    continue;
-                }
-
-                let char_idx = (start_idx + pos - offset) % self.chars.len();
-                let c = self.chars[char_idx];
-                let color = if offset == 0 {
-                    self.head_colors[i]
-                } else {
-                    self.body_colors[i]
+                let (x, y) = match direction {
+                    Direction::Down => (i, pos - offset),
+                    Direction::Up => (i, self.height.saturating_sub(pos - offset + 1)),
+                    Direction::Right => (pos - offset, i),
+                    Direction::Left => (self.width.saturating_sub(pos - offset + 1), i),
                 };
-                self.screen_buffer[y * self.width + i] = Cell::new(c).color(color);
+
+                if let Some(buf_idx) = idx(x, y) {
+                    let char_idx = (start_idx + pos - offset) % self.chars.len();
+                    let c = self.chars[char_idx];
+                    let color = if offset == 0 {
+                        self.head_colors[i]
+                    } else {
+                        self.body_colors[i]
+                    };
+                    self.screen_buffer[buf_idx] = Cell::new(c).color(color);
+                }
             }
 
             self.positions[i] += 1;
@@ -315,7 +372,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             let screen = self
                 .screen_buffer
                 .iter()
-                .map(|c| format!("{}", c))
+                .map(|c| format!("{c}"))
                 .collect::<String>();
             execute!(w, Print(screen))?;
             self.queue.clear();
