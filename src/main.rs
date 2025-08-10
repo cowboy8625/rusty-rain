@@ -162,11 +162,15 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             .map(|_| rng.random_range(0..chars.len()))
             .collect();
 
+        let window_height = match settings.direction {
+            Direction::Up | Direction::Down => height,
+            Direction::Left | Direction::Right => width,
+        };
         let windows: Vec<usize> = (0..width)
             .map(|_| {
                 rng.random_range(
                     Self::MIN_LENGTH_OF_RAIN
-                        ..height.saturating_sub(Self::MAX_LENGTH_OFFSET_OF_RAIN),
+                        ..window_height.saturating_sub(Self::MAX_LENGTH_OFFSET_OF_RAIN),
                 )
             })
             .collect();
