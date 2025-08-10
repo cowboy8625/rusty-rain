@@ -16,7 +16,7 @@ use std::io::{stdout, BufWriter, Stdout, Write};
 use std::time::{Duration, Instant};
 
 const MAXSPEED: u64 = 0;
-const MINSPEED: u64 = 400;
+const MINSPEED: u64 = 500;
 const POLL_INTERVAL: Duration = Duration::from_millis(50);
 
 const AUTHOR: &str = "
@@ -247,8 +247,8 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             let start_idx = self.starts[i];
             let window_len = self.windows[i];
 
-            // Remove trailing character if rain is longer than window
-            if pos >= window_len {
+            let is_tail_visible = pos >= window_len;
+            if is_tail_visible {
                 let tail_y = pos - window_len;
                 let idx = tail_y * self.width + i;
 
@@ -260,8 +260,8 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                 self.screen_buffer[idx] = Cell::default();
             }
 
-            // If head is below the screen, just advance position
-            if pos > self.height {
+            let is_head_below_the_screen = pos > self.height;
+            if is_head_below_the_screen {
                 self.positions[i] += 1;
                 continue;
             }
@@ -291,27 +291,56 @@ impl<const LENGTH: usize> Rain<LENGTH> {
     }
 
     fn draw_frame(&mut self, w: &mut BufWriter<Stdout>) -> std::io::Result<()> {
-        let group_width = self.group.width() as usize;
-        for y in 0..self.height {
-            for x in 0..self.width {
-                let idx = y * self.width + x;
-                if self.screen_buffer[idx] == self.previous_screen_buffer[idx] {
-                    continue;
-                }
-                let cell = &self.screen_buffer[idx];
-                let x = x * group_width;
-                queue!(
-                    w,
-                    cursor::MoveTo(x as u16, y as u16),
-                    SetForegroundColor(cell.color),
-                    if cell.is_visible() {
-                        Print(cell.char.to_string())
-                    } else {
-                        Print(" ".repeat(group_width))
-                    },
-                )?;
-                self.previous_screen_buffer[idx] = self.screen_buffer[idx];
+        let total_cells = self.width * self.height;
+        let mut redraw_screen = false;
+
+        for (i, (a, b)) in self
+            .screen_buffer
+            .iter()
+            .zip(&self.previous_screen_buffer)
+            .enumerate()
+        {
+            if a != b {
+                self.queue.push(i);
             }
+            let is_50_percent_or_more_changed = self.queue.len() > total_cells / 2;
+            if is_50_percent_or_more_changed {
+                redraw_screen = true;
+                break;
+            }
+        }
+
+        if redraw_screen {
+            execute!(w, cursor::MoveTo(0, 0))?;
+            let screen = self
+                .screen_buffer
+                .iter()
+                .map(|c| format!("{}", c))
+                .collect::<String>();
+            execute!(w, Print(screen))?;
+            self.queue.clear();
+            return Ok(());
+        }
+
+        let group_width = self.group.width() as usize;
+
+        for idx in self.queue.drain(..) {
+            let cell = &self.screen_buffer[idx];
+            let x = (idx % self.width) * group_width;
+            let y = idx / self.width;
+
+            queue!(
+                w,
+                cursor::MoveTo(x as u16, y as u16),
+                SetForegroundColor(cell.color),
+                if cell.is_visible() {
+                    Print(cell.char.to_string())
+                } else {
+                    Print(" ".repeat(group_width))
+                },
+            )?;
+
+            self.previous_screen_buffer[idx] = *cell;
         }
 
         Ok(())
