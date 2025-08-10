@@ -12,7 +12,7 @@ use crossterm::{
     terminal,
 };
 use direction::Direction;
-use std::io::{stdout, BufWriter, Stdout, Write};
+use std::io::{BufWriter, Stdout, Write, stdout};
 use std::time::{Duration, Instant};
 
 const MAXSPEED: u64 = 0;
@@ -98,12 +98,23 @@ impl Default for Cell {
 
 impl std::fmt::Display for Cell {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}{}",
-            crossterm::style::SetForegroundColor(self.color),
-            self.char
-        )
+        // FIXME: adjust for wide characters
+        let c = if self.char == ' ' {
+            "  ".to_string()
+        } else {
+            self.char.to_string()
+        };
+
+        if cfg!(test) {
+            write!(f, "{c}")
+        } else {
+            write!(
+                f,
+                "{}{}",
+                crossterm::style::SetForegroundColor(self.color),
+                c,
+            )
+        }
     }
 }
 
@@ -152,12 +163,8 @@ struct Rain<const LENGTH: usize> {
 impl<const LENGTH: usize> Rain<LENGTH> {
     const MIN_LENGTH_OF_RAIN: usize = 4;
     const MAX_LENGTH_OFFSET_OF_RAIN: usize = 4;
-    fn new(mut width: usize, mut height: usize, settings: &cli::Cli) -> Self {
-        if matches!(settings.direction, Direction::Up | Direction::Down) {
-            width /= settings.chars.width() as usize;
-        } else if matches!(settings.direction, Direction::Left | Direction::Right) {
-            height /= settings.chars.width() as usize;
-        }
+    fn new(mut width: usize, height: usize, settings: &cli::Cli) -> Self {
+        width /= settings.chars.width() as usize;
 
         let mut rng = Random::default();
         let chars_u32 = settings.chars.as_vec_u32();
@@ -176,6 +183,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             Direction::Up | Direction::Down => height,
             Direction::Left | Direction::Right => width,
         };
+
         let windows: Vec<usize> = (0..width)
             .map(|_| {
                 rng.random_range(
@@ -230,7 +238,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
         }
     }
 
-    #[inline]
+    #[inline(always)]
     fn reset_time(&mut self, i: usize) {
         let (start, duration) = &mut self.time[i];
         *start = Instant::now();
@@ -238,19 +246,19 @@ impl<const LENGTH: usize> Rain<LENGTH> {
         *duration = Duration::from_millis(milli_seconds);
     }
 
-    #[inline]
+    #[inline(always)]
     fn reset_start(&mut self, i: usize) {
         self.starts[i] = self.rng.random_range(0..self.chars.len());
     }
 
-    #[inline]
+    #[inline(always)]
     fn reset_window(&mut self, i: usize) {
         self.windows[i] = self.rng.random_range(
             Self::MIN_LENGTH_OF_RAIN..self.height.saturating_sub(Self::MAX_LENGTH_OFFSET_OF_RAIN),
         );
     }
 
-    #[inline]
+    #[inline(always)]
     fn reset_position(&mut self, i: usize) {
         self.positions[i] = 0;
     }
@@ -278,7 +286,6 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                 }
             };
 
-            // 1. Tail cleanup
             let is_tail_visible = pos >= window_len;
             if is_tail_visible {
                 match direction {
@@ -321,7 +328,6 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                 }
             }
 
-            // 2. Head beyond screen check
             let is_head_out_of_bounds = match direction {
                 Direction::Down => pos > self.height,
                 Direction::Up => pos > self.height,
@@ -333,7 +339,6 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                 continue;
             }
 
-            // 3. Draw visible portion
             let visible_len = (pos + 1).min(window_len);
             for offset in 0..visible_len {
                 let (x, y) = match direction {
@@ -381,7 +386,15 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             }
         }
 
-        if redraw_screen {
+        if redraw_screen && matches!(self.directions[0], Direction::Left | Direction::Right) {
+            for (y, chunk) in self.screen_buffer.chunks(self.width).enumerate() {
+                let screen = chunk.iter().map(ToString::to_string).collect::<String>();
+                queue!(w, cursor::MoveTo(0, y as u16), Print(screen))?;
+
+                self.queue.clear();
+                return Ok(());
+            }
+        } else if redraw_screen && matches!(self.directions[0], Direction::Up | Direction::Down) {
             execute!(w, cursor::MoveTo(0, 0))?;
             let screen = self
                 .screen_buffer
@@ -389,6 +402,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                 .map(|c| format!("{c}"))
                 .collect::<String>();
             execute!(w, Print(screen))?;
+
             self.queue.clear();
             return Ok(());
         }
