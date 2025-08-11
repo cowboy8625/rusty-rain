@@ -141,7 +141,7 @@ impl Characters {
         }
     }
 
-    pub fn width(&self) -> u16 {
+    pub const fn width(&self) -> u16 {
         use Characters::*;
         match self {
             Alphalow | Alphaup | AlphaNum | Bin | Dominosv | Num | Jap => CharWidth::Single as u16,

@@ -1,17 +1,15 @@
 mod characters;
 mod cli;
-mod direction;
 #[cfg(test)]
 mod test;
 
 use characters::Characters;
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use crossterm::{
     cursor, event, execute, queue,
     style::{Color, Print, SetForegroundColor},
     terminal,
 };
-use direction::Direction;
 use std::io::{BufWriter, Stdout, Write, stdout};
 use std::time::{Duration, Instant};
 
@@ -85,6 +83,19 @@ impl Cell {
     fn is_visible(&self) -> bool {
         self.char != ' '
     }
+
+    fn display(&self, width: usize) -> String {
+        let c = if width >= 2 && !self.is_visible() {
+            " ".repeat(width)
+        } else {
+            self.char.to_string()
+        };
+        if cfg!(test) {
+            c
+        } else {
+            format!("{}{}", crossterm::style::SetForegroundColor(self.color), c)
+        }
+    }
 }
 
 impl Default for Cell {
@@ -96,24 +107,21 @@ impl Default for Cell {
     }
 }
 
-impl std::fmt::Display for Cell {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        // FIXME: adjust for wide characters
-        let c = if self.char == ' ' {
-            "  ".to_string()
-        } else {
-            self.char.to_string()
-        };
+#[derive(Debug, ValueEnum, Clone, Copy, PartialEq, Eq)]
+pub enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}
 
-        if cfg!(test) {
-            write!(f, "{c}")
-        } else {
-            write!(
-                f,
-                "{}{}",
-                crossterm::style::SetForegroundColor(self.color),
-                c,
-            )
+impl std::fmt::Display for Direction {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Up => write!(f, "Up"),
+            Self::Down => write!(f, "down"),
+            Self::Left => write!(f, "Left"),
+            Self::Right => write!(f, "Right"),
         }
     }
 }
@@ -133,7 +141,11 @@ struct Rain<const LENGTH: usize> {
     /// Current positions of the rain falling
     positions: Vec<usize>,
     /// Color of the rain body
-    body_colors: Vec<Color>,
+    /// In the case that shading the second value is the precompiled list of colors
+    ///               Base             Shaded
+    body_colors: Vec<(Color, Option<Vec<Color>>)>,
+    /// Shading of the rain
+    shading: bool,
     /// Color of the rain head
     head_colors: Vec<Color>,
     /// Direction of the rain
@@ -206,27 +218,41 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             })
             .collect();
 
+        let body_colors = if settings.shade {
+            let base_color: Color = settings.rain_color().into();
+            (0..width)
+                .map(|i| {
+                    let window = windows[i].saturating_sub(1);
+                    let colors = gen_shade_color(base_color, window as u8);
+                    (base_color, Some(colors))
+                })
+                .collect::<Vec<_>>()
+        } else {
+            vec![(settings.rain_color().into(), None); width]
+        };
+
         Self {
-            rng,
-            body_colors: vec![settings.rain_color().into(); width],
+            shading: settings.shade,
+            body_colors,
             chars,
             directions: vec![settings.direction; width],
+            group: settings.chars,
             head_colors: vec![settings.head_color().into(); width],
             height,
             positions: vec![0; width],
             previous_screen_buffer: vec![Cell::default(); width * height],
             queue: Vec::with_capacity(width),
+            rng,
             screen_buffer: vec![Cell::default(); width * height],
-            starts,
-            group: settings.chars,
             speed,
+            starts,
             time,
             width,
             windows,
         }
     }
 
-    #[inline]
+    #[inline(always)]
     fn update(&mut self) {
         for i in 0..self.width {
             let (start, duration) = self.time[i];
@@ -263,11 +289,23 @@ impl<const LENGTH: usize> Rain<LENGTH> {
         self.positions[i] = 0;
     }
 
+    #[inline(always)]
+    fn reset_body_colors(&mut self, i: usize) {
+        if !self.shading {
+            return;
+        }
+        let base_color: Color = self.body_colors[i].0;
+        let window = self.windows[i].saturating_sub(1);
+        let colors = gen_shade_color(base_color, window as u8);
+        self.body_colors[i] = (base_color, Some(colors));
+    }
+
     fn reset(&mut self, i: usize) {
         self.reset_time(i);
         self.reset_start(i);
         self.reset_window(i);
         self.reset_position(i);
+        self.reset_body_colors(i);
     }
 
     fn update_screen_buffer(&mut self) -> std::io::Result<()> {
@@ -277,8 +315,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             let window_len = self.windows[i];
             let direction = self.directions[i];
 
-            // Helper closure: compute buffer index from x,y safely
-            let idx = |x: usize, y: usize| -> Option<usize> {
+            let get_index = |x: usize, y: usize| -> Option<usize> {
                 if x < self.width && y < self.height {
                     Some(y * self.width + x)
                 } else {
@@ -286,45 +323,37 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                 }
             };
 
+            let finished = match direction {
+                Direction::Down | Direction::Up => pos > (self.height + window_len),
+                Direction::Right | Direction::Left => pos > (self.width + window_len),
+            };
+            if finished {
+                self.reset(i);
+                continue;
+            }
+
             let is_tail_visible = pos >= window_len;
             if is_tail_visible {
-                match direction {
+                let buf_idx = match direction {
                     Direction::Down => {
                         let tail_y = pos - window_len;
-                        if let Some(buf_idx) = idx(i, tail_y) {
-                            self.screen_buffer[buf_idx] = Cell::default();
-                        } else {
-                            self.reset(i);
-                            continue;
-                        }
+                        get_index(i, tail_y)
                     }
                     Direction::Up => {
                         let tail_y = self.height.saturating_sub(pos - window_len + 1);
-                        if let Some(buf_idx) = idx(i, tail_y) {
-                            self.screen_buffer[buf_idx] = Cell::default();
-                        } else {
-                            self.reset(i);
-                            continue;
-                        }
+                        get_index(i, tail_y)
                     }
                     Direction::Right => {
                         let tail_x = pos - window_len;
-                        if let Some(buf_idx) = idx(tail_x, i) {
-                            self.screen_buffer[buf_idx] = Cell::default();
-                        } else {
-                            self.reset(i);
-                            continue;
-                        }
+                        get_index(tail_x, i)
                     }
                     Direction::Left => {
                         let tail_x = self.width.saturating_sub(pos - window_len + 1);
-                        if let Some(buf_idx) = idx(tail_x, i) {
-                            self.screen_buffer[buf_idx] = Cell::default();
-                        } else {
-                            self.reset(i);
-                            continue;
-                        }
+                        get_index(tail_x, i)
                     }
+                };
+                if let Some(buf_idx) = buf_idx {
+                    self.screen_buffer[buf_idx] = Cell::default();
                 }
             }
 
@@ -348,13 +377,15 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                     Direction::Left => (self.width.saturating_sub(pos - offset + 1), i),
                 };
 
-                if let Some(buf_idx) = idx(x, y) {
+                if let Some(buf_idx) = get_index(x, y) {
                     let char_idx = (start_idx + pos - offset) % self.chars.len();
                     let c = self.chars[char_idx];
                     let color = if offset == 0 {
                         self.head_colors[i]
+                    } else if let Some(fade) = &self.body_colors[i].1 {
+                        fade[(fade.len() - (visible_len - 1)) + (offset - 1)]
                     } else {
-                        self.body_colors[i]
+                        self.body_colors[i].0
                     };
                     self.screen_buffer[buf_idx] = Cell::new(c).color(color);
                 }
@@ -387,19 +418,25 @@ impl<const LENGTH: usize> Rain<LENGTH> {
         }
 
         if redraw_screen && matches!(self.directions[0], Direction::Left | Direction::Right) {
+            let char_width = self.group.width() as usize;
             for (y, chunk) in self.screen_buffer.chunks(self.width).enumerate() {
-                let screen = chunk.iter().map(ToString::to_string).collect::<String>();
+                let screen = chunk
+                    .iter()
+                    .map(|c| c.display(char_width))
+                    .collect::<String>();
                 queue!(w, cursor::MoveTo(0, y as u16), Print(screen))?;
 
                 self.queue.clear();
-                return Ok(());
             }
-        } else if redraw_screen && matches!(self.directions[0], Direction::Up | Direction::Down) {
+
+            return Ok(());
+        } else if redraw_screen {
             execute!(w, cursor::MoveTo(0, 0))?;
+            let char_width = self.group.width() as usize;
             let screen = self
                 .screen_buffer
                 .iter()
-                .map(|c| format!("{c}"))
+                .map(|c| c.display(char_width))
                 .collect::<String>();
             execute!(w, Print(screen))?;
 
@@ -414,16 +451,21 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             let x = (idx % self.width) * group_width;
             let y = idx / self.width;
 
-            queue!(
-                w,
-                cursor::MoveTo(x as u16, y as u16),
-                SetForegroundColor(cell.color),
-                if cell.is_visible() {
-                    Print(cell.char.to_string())
-                } else {
+            if cell.is_visible() {
+                queue!(
+                    w,
+                    cursor::MoveTo(x as u16, y as u16),
+                    SetForegroundColor(cell.color),
+                    Print(cell.char)
+                )?;
+            } else {
+                queue!(
+                    w,
+                    cursor::MoveTo(x as u16, y as u16),
+                    SetForegroundColor(cell.color),
                     Print(" ".repeat(group_width))
-                },
-            )?;
+                )?;
+            }
 
             self.previous_screen_buffer[idx] = *cell;
         }
@@ -457,7 +499,9 @@ impl App {
                     event::Event::Key(key) if Self::is_exit_key(&key) => {
                         is_running = false;
                     }
-                    event::Event::Resize(_, _) => {
+                    event::Event::Resize(w, h) => {
+                        // TODO: make a method that handle resizing so we dont regenerate the rain
+                        rain = Rain::<1024>::new(w as usize, h as usize, &self.settings);
                         queue!(self.stdout, terminal::Clear(terminal::ClearType::All))?;
                     }
                     _ => {}
@@ -474,7 +518,7 @@ impl App {
         Ok(())
     }
 
-    #[inline]
+    #[inline(always)]
     fn setup_terminal(&mut self) -> std::io::Result<()> {
         terminal::enable_raw_mode()?;
         execute!(self.stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
@@ -506,6 +550,22 @@ impl Drop for App {
             .expect("failed to leave alternate screen");
         terminal::disable_raw_mode().expect("failed to disable raw mode");
     }
+}
+
+/// Generates a vector of Colors that fade to black over the length of the column.
+fn gen_shade_color(bc: Color, length: u8) -> Vec<Color> {
+    let mut colors = Vec::with_capacity(length as usize);
+    let Color::Rgb { r, g, b } = bc else {
+        return colors;
+    };
+    let nr = r / length;
+    let ng = g / length;
+    let nb = b / length;
+    for i in 0..length {
+        colors.push((nr * i, ng * i, nb * i).into());
+    }
+    colors.reverse();
+    colors
 }
 
 fn main() -> std::io::Result<()> {
