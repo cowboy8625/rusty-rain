@@ -10,7 +10,7 @@ use crossterm::{
     style::{Color, Print, SetForegroundColor},
     terminal,
 };
-use std::io::{BufWriter, Stdout, Write, stdout};
+use std::io::{stdout, BufWriter, Stdout, Write};
 use std::time::{Duration, Instant};
 
 const MAXSPEED: u64 = 0;
@@ -332,48 +332,30 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                 continue;
             }
 
-            let is_tail_visible = pos >= window_len;
-            if is_tail_visible {
+            if pos >= window_len {
                 let buf_idx = match direction {
-                    Direction::Down => {
-                        let tail_y = pos - window_len;
-                        get_index(i, tail_y)
-                    }
+                    Direction::Down => get_index(i, pos - window_len),
                     Direction::Up => {
                         let tail_y = self.height.saturating_sub(pos - window_len + 1);
                         get_index(i, tail_y)
                     }
-                    Direction::Right => {
-                        let tail_x = pos - window_len;
-                        get_index(tail_x, i)
-                    }
+                    Direction::Right => get_index(pos - window_len, i),
                     Direction::Left => {
                         let tail_x = self.width.saturating_sub(pos - window_len + 1);
                         get_index(tail_x, i)
                     }
                 };
-                if let Some(buf_idx) = buf_idx {
-                    self.screen_buffer[buf_idx] = Cell::default();
+                if let Some(idx) = buf_idx {
+                    self.screen_buffer[idx] = Cell::default();
                 }
-            }
-
-            let is_head_out_of_bounds = match direction {
-                Direction::Down => pos > self.height,
-                Direction::Up => pos > self.height,
-                Direction::Right => pos > self.width,
-                Direction::Left => pos > self.width,
-            };
-            if is_head_out_of_bounds {
-                self.positions[i] += 1;
-                continue;
             }
 
             let visible_len = (pos + 1).min(window_len);
             for offset in 0..visible_len {
                 let (x, y) = match direction {
-                    Direction::Down => (i, pos - offset),
+                    Direction::Down => (i, pos.saturating_sub(offset)),
                     Direction::Up => (i, self.height.saturating_sub(pos - offset + 1)),
-                    Direction::Right => (pos - offset, i),
+                    Direction::Right => (pos.saturating_sub(offset), i),
                     Direction::Left => (self.width.saturating_sub(pos - offset + 1), i),
                 };
 
@@ -383,7 +365,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
                     let color = if offset == 0 {
                         self.head_colors[i]
                     } else if let Some(fade) = &self.body_colors[i].1 {
-                        fade[(fade.len() - (visible_len - 1)) + (offset - 1)]
+                        fade[offset - 1]
                     } else {
                         self.body_colors[i].0
                     };

@@ -1,4 +1,4 @@
-use super::{Parser, Rain, cli::Cli};
+use super::{cli::Cli, Parser, Rain};
 use std::fmt::Write;
 
 struct SnapshotOptions {
@@ -27,7 +27,7 @@ fn display<const N: usize>(id: usize, window: &mut String, rain: &Rain<N>) {
     let width = rain.width;
     let height = rain.height;
     let char_width = rain.group.width() as usize;
-    let id_str = format!("{:02X}", id); // hex with leading zero if needed
+    let id_str = format!("{:02X}", id);
     write!(
         window,
         "{:-^width$}\n",
@@ -77,43 +77,52 @@ fn set_up_snapshot(options: SnapshotOptions) {
     insta::assert_snapshot!(label, window);
 }
 
-#[test]
-fn test_screen_buffer() {
-    set_up_snapshot(SnapshotOptions {
-        label: "screen_buffer".to_string(),
-        ..Default::default()
-    });
+macro_rules! snapshot {
+    ($name:ident) => {
+        #[test]
+        fn $name() {
+            set_up_snapshot(SnapshotOptions {
+                label: stringify!($name).replace("test_", "").to_string(),
+                ..Default::default()
+            });
+        }
+    };
+    ($name:ident, $cycles:expr,$width:expr, $height:expr, $direction:expr, $chars:expr) => {
+        #[test]
+        fn $name() {
+            set_up_snapshot(SnapshotOptions {
+                label: stringify!($name).replace("test_", "").to_string(),
+                cycles: $cycles,
+                width: $width,
+                height: $height,
+                direction: $direction,
+                chars: $chars,
+            });
+        }
+    };
 }
 
-#[test]
-fn test_screen_buffer_direction_right_emoji_moon_double_width() {
-    set_up_snapshot(SnapshotOptions {
-        label: "screen_buffer_direction_right_emoji_moon_double_width".to_string(),
-        cycles: 50,
-        width: 32,
-        height: 10,
-        direction: super::Direction::Right,
-        chars: super::Characters::Moon,
-        ..Default::default()
-    });
-}
-
-#[test]
-fn test_screen_buffer_direction_left_emoji_crab_double_width() {
-    set_up_snapshot(SnapshotOptions {
-        label: "test_screen_buffer_direction_left_emoji_crab_double_width".to_string(),
-        cycles: 50,
-        width: 32,
-        height: 10,
-        direction: super::Direction::Left,
-        chars: super::Characters::Crab,
-        ..Default::default()
-    });
-}
+snapshot!(test_screen_buffer);
+snapshot!(
+    test_screen_buffer_direction_right_emoji_moon_double_width,
+    50,
+    32,
+    10,
+    super::Direction::Right,
+    super::Characters::Moon
+);
+snapshot!(
+    test_screen_buffer_direction_left_emoji_crab_double_width,
+    50,
+    32,
+    10,
+    super::Direction::Left,
+    super::Characters::Crab
+);
 
 #[test]
 fn test_gen_shade_color() {
-    use super::{Color, gen_shade_color};
+    use super::{gen_shade_color, Color};
     use pretty_assertions::assert_eq;
     let bc = Color::Rgb { r: 0, g: 255, b: 0 };
     let length = 10;
