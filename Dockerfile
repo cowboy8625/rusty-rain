@@ -1,4 +1,4 @@
-FROM rust:1.82 AS build
+FROM rust:1.88 AS build
 
 RUN cargo install rusty-rain
 
