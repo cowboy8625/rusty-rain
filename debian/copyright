@@ -1,0 +1,9 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: rusty-rain
+Source: https://github.com/cowboy8625/rusty-rain
+
+Files: *
+Copyright: 2022-2025 cowboy8625 <cowboy8625@protonmail.com>
+License: Apache-2.0
+ On Debian systems, the complete text of the Apache 2.0 License
+ can be found in "/usr/share/common-licenses/Apache-2.0".

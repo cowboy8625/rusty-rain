@@ -1,6 +1,9 @@
 [alias]
 snapshot = "insta test --review"
+build-deb = "deb --target=x86_64-unknown-linux-musl"
+build-deb-32 = "deb --target=i686-unknown-linux-gnu"
 build-linux = "build --release --target=x86_64-unknown-linux-musl"
+build-linux-32 = "build --release --target=i686-unknown-linux-gnu"
 build-win = "build --release --target=x86_64-pc-windows-gnu"
 build-mac = "build --release --target=x86_64-apple-darwin"
 build-mac-arm = "build --release --target=aarch64-apple-darwin"

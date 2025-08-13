@@ -1,0 +1,32 @@
+rusty-rain (0.4.0-1) unstable; urgency=medium
+
+  * Mostly rewritten code for better readability and performance.
+  * Removed itertools dependency; replaced zip! macro with .zip().
+  * Fixes:
+    - Emojis not working with left and right directions (issue #18).
+    - Reduced draw calls (issue #22).
+    - Reduced CPU usage (issue #21).
+
+ -- cowboy8625 <cowboy8625@protonmail.com>  Mon, 04 Aug 2025 12:00:00 +0000
+
+rusty-rain (0.3.7-1) unstable; urgency=medium
+
+  * Replaced ezemoji crate by absorbing its functionality.
+  * Added quit with 'q' feature (thanks to hasecilu) (PR #27).
+  * Fixed random number generation thread panic (issue #25).
+
+ -- cowboy8625 <cowboy8625@protonmail.com>  Sun, 22 Sep 2024 12:00:00 +0000
+
+rusty-rain (0.3.6-1) unstable; urgency=medium
+
+  * Fixed crash when screen was 130+ in size with horizontal direction (issue #19).
+
+ -- cowboy8625 <cowboy8625@protonmail.com>  Sun, 22 May 2022 12:00:00 +0000
+
+rusty-rain (0.3.5-1) unstable; urgency=medium
+
+  * Added:
+    - Direction was added to rain (issue #15).
+    - Cyan color added for head and tail colors.
+
+ -- cowboy8625 <cowboy8625@protonmail.com>  Tue, 15 Feb 2022 12:00:00 +0000
