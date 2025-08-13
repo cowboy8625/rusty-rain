@@ -1,0 +1,20 @@
+Rusty Rain is a cross-platform terminal program that simulates the classic
+matrix rain effect, enhanced with emoji support. It runs efficiently on
+Windows, macOS, and Linux, providing a visually appealing and customizable
+animation in your terminal.
+
+Users can configure the rain characters, colors, directions, and speed using
+various command line options. Supported character sets include alphabets,
+numbers, emojis, playing cards, and more.
+
+Installation is simple using Cargo or Docker, and the program exits cleanly with
+ESC or Ctrl+C.
+
+Ideal for terminal enthusiasts looking to add a dynamic visual element or for
+those who enjoy classic matrix rain aesthetics with modern twists.
+
+For detailed usage instructions and options, please refer to the project
+documentation or run `rusty-rain --help`.
+
+If you encounter bugs or performance issues, contributions and issue reports are
+welcome

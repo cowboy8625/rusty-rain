@@ -3,7 +3,7 @@ name = "rusty-rain"
 version = "0.4.0"
 authors = ["cowboy8625 <https://github.com/cowboy8625>"]
 edition = "2024"
-description = "A cross platform CMatrix like program."
+description = "Cross platform CMatrix like program."
 readme = "README.md"
 repository = "https://github.com/cowboy8625/rusty-rain"
 # homepage = "https://rusty-rain.xyz"
@@ -28,10 +28,13 @@ opt-level = 3
 
 [package.metadata.deb]
 maintainer = "cowboy8625 <cowboy8625@protonmail.com>"
+extended-description-file = "debian/description"
 priority = "optional"
 section = "utils"
-depends = ""
+depends = []
+license-file = ["debian/copyright"]
+changelog = "debian/changelog"
 assets = [
     ["target/release/rusty-rain", "usr/bin/", "755"],
-    ["rusty-rain.1", "usr/share/man/man1/", "644"]
+    ["debian/rusty-rain.1", "usr/share/man/man1/", "644"]
 ]
