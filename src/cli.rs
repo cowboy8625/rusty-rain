@@ -1,6 +1,6 @@
-use super::{Direction, AUTHOR, MAXSPEED, MINSPEED};
+use super::{AUTHOR, Direction, MAXSPEED, MINSPEED};
 use crate::characters::Characters;
-use clap::{crate_description, crate_name, crate_version, Parser};
+use clap::{Parser, crate_description, crate_name, crate_version};
 
 const HELP_DIRECTION: &str = "Set the direction of the Rain.
 Default is set to down/south

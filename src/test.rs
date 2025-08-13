@@ -1,4 +1,4 @@
-use super::{cli::Cli, Parser, Rain};
+use super::{Parser, Rain, cli::Cli};
 use std::fmt::Write;
 
 struct SnapshotOptions {
@@ -122,7 +122,7 @@ snapshot!(
 
 #[test]
 fn test_gen_shade_color() {
-    use super::{gen_shade_color, Color};
+    use super::{Color, gen_shade_color};
     use pretty_assertions::assert_eq;
     let bc = Color::Rgb { r: 0, g: 255, b: 0 };
     let length = 10;

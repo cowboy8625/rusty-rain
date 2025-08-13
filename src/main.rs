@@ -10,7 +10,7 @@ use crossterm::{
     style::{Color, Print, SetForegroundColor},
     terminal,
 };
-use std::io::{stdout, BufWriter, Stdout, Write};
+use std::io::{BufWriter, Stdout, Write, stdout};
 use std::time::{Duration, Instant};
 
 const MAXSPEED: u64 = 0;
