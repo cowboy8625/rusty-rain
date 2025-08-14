@@ -41,10 +41,10 @@ impl FromStr for CharGroupKind {
 const HELP_DIRECTION: &str = "Set the direction of the Rain.
 Default is set to down/south
 OPTIONS:
-    up, north,
-    down, south,
-    left, west,
-    right, east
+    up or north,
+    down or south,
+    left or west,
+    right or east
 ";
 
 const HELP_COLORS: &str = "Set color of Rain with color string name or tuple
@@ -107,7 +107,7 @@ pub struct Cli {
     pub color: String,
     #[arg(short = 'H', long, help = HELP_HEAD, default_value_t = String::from("white"))]
     pub head: String,
-    #[arg(short, long, help = HELP_DIRECTION, default_value_t = Direction::Down)]
+    #[arg(short, long, help = HELP_DIRECTION, default_value = "south")]
     pub direction: Direction,
     #[arg(short = 'S', long, default_value_t = format!("{MAXSPEED},{MINSPEED}"))]
     pub speed: String,
