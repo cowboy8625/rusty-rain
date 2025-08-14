@@ -27,7 +27,7 @@
 | -------------- | ------------------------------------------------------------------------------------------- |
 | Cargo (stable) | `cargo install rusty-rain`                                                                  |
 | Cargo (latest) | `cargo install --git https://github.com/cowboy8625/rusty-rain.git`                          |
-| eget           | `eget cowboy8625/rusty-rain`                                                                |
+| eget           | `[eget](https://github.com/zyedidia/eget) cowboy8625/rusty-rain`                            |
 | Docker (build) | `docker build -t rusty-rain . && docker run --rm -it rusty-rain alpha-num -s`               |
 | Docker (pull)  | `docker run --rm -it ghcr.io/cowboy8625/rusty-rain:latest -c alpha-num -s`                  |
 | Debian Package | curl -sSL https://raw.githubusercontent.com/cowboy8625/rusty-rain/master/install.sh \| bash |
@@ -45,7 +45,7 @@ Press **`ESC`**, **`Ctrl + C`**, or **`q`** to quit.
 
 ---
 
-## 🎨 Fun Examples
+## 🎨 Examples
 
 ```bash
 # Japanese characters, teal rain, white head, flowing left
