@@ -5,5 +5,6 @@ dod.rs
 *.lock
 *.txt
 *.sh
+!install.sh
 *.svg
 *.data
