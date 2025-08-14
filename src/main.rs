@@ -8,8 +8,11 @@ use crossterm::{
     style::{Color, Print, SetForegroundColor},
     terminal,
 };
-use std::io::{BufWriter, Stdout, Write, stdout};
 use std::time::{Duration, Instant};
+use std::{
+    io::{BufWriter, Stdout, Write, stdout},
+    str::FromStr,
+};
 
 const MAXSPEED: u64 = 0;
 const MINSPEED: u64 = 200;
@@ -107,7 +110,7 @@ impl Default for Cell {
     }
 }
 
-#[derive(Debug, ValueEnum, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Direction {
     Up,
     Down,
@@ -115,13 +118,19 @@ pub enum Direction {
     Right,
 }
 
-impl std::fmt::Display for Direction {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Up => write!(f, "Up"),
-            Self::Down => write!(f, "down"),
-            Self::Left => write!(f, "Left"),
-            Self::Right => write!(f, "Right"),
+impl FromStr for Direction {
+    type Err = String;
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        match value.to_lowercase().as_str() {
+            "up" => Ok(Self::Up),
+            "down" => Ok(Self::Down),
+            "left" => Ok(Self::Left),
+            "right" => Ok(Self::Right),
+            "north" => Ok(Self::Up),
+            "south" => Ok(Self::Down),
+            "west" => Ok(Self::Left),
+            "east" => Ok(Self::Right),
+            _ => Err(format!("Invalid direction: {}", value)),
         }
     }
 }
