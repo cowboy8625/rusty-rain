@@ -1,4 +1,7 @@
+use crate::cli::CharGroupKind;
+
 use super::{Parser, Rain, cli::Cli};
+use ezemoji::CharGroup;
 use std::fmt::Write;
 
 struct SnapshotOptions {
@@ -7,7 +10,7 @@ struct SnapshotOptions {
     width: usize,
     height: usize,
     direction: super::Direction,
-    chars: super::Characters,
+    group: CharGroup,
 }
 
 impl Default for SnapshotOptions {
@@ -18,7 +21,7 @@ impl Default for SnapshotOptions {
             width: 40,
             height: 20,
             direction: super::Direction::Down,
-            chars: super::Characters::Bin,
+            group: CharGroup::BIN,
         }
     }
 }
@@ -26,7 +29,7 @@ impl Default for SnapshotOptions {
 fn display<const N: usize>(id: usize, window: &mut String, rain: &Rain<N>) {
     let width = rain.width;
     let height = rain.height;
-    let char_width = rain.group.width() as usize;
+    let char_width = rain.group.0.width() as usize;
     let id_str = format!("{:02X}", id);
     write!(
         window,
@@ -59,11 +62,11 @@ fn set_up_snapshot(options: SnapshotOptions) {
         cycles,
         width,
         height,
-        chars,
+        group,
         direction,
     } = options;
     let mut cli = Cli::parse();
-    cli.chars = chars;
+    cli.group = CharGroupKind(group);
     cli.direction = direction;
     let mut rain = Rain::<1024>::new(width, height, &cli);
     let mut window = String::new();
@@ -87,7 +90,7 @@ macro_rules! snapshot {
             });
         }
     };
-    ($name:ident, $cycles:expr,$width:expr, $height:expr, $direction:expr, $chars:expr) => {
+    ($name:ident, $cycles:expr,$width:expr, $height:expr, $direction:expr, $group:expr) => {
         #[test]
         fn $name() {
             set_up_snapshot(SnapshotOptions {
@@ -96,7 +99,7 @@ macro_rules! snapshot {
                 width: $width,
                 height: $height,
                 direction: $direction,
-                chars: $chars,
+                group: $group,
             });
         }
     };
@@ -109,7 +112,7 @@ snapshot!(
     32,
     10,
     super::Direction::Right,
-    super::Characters::Moon
+    CharGroup::MOON
 );
 snapshot!(
     test_screen_buffer_direction_left_emoji_crab_double_width,
@@ -117,7 +120,7 @@ snapshot!(
     32,
     10,
     super::Direction::Left,
-    super::Characters::Crab
+    CharGroup::CRAB
 );
 
 #[test]
