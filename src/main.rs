@@ -1,9 +1,7 @@
-mod characters;
 mod cli;
 #[cfg(test)]
 mod test;
 
-use characters::Characters;
 use clap::{Parser, ValueEnum};
 use crossterm::{
     cursor, event, execute, queue,
@@ -29,6 +27,8 @@ use rand::Rng;
 
 #[cfg(test)]
 use rand::SeedableRng;
+
+use crate::cli::CharGroupKind;
 
 /// rand crate wrapper for testing.
 /// being able to have deterministic tests is important
@@ -127,7 +127,7 @@ impl std::fmt::Display for Direction {
 }
 
 #[derive(Debug)]
-struct Rain<const LENGTH: usize> {
+struct Rain<'group, const LENGTH: usize> {
     /// Random number generator wrapper for testing purposes
     rng: Random,
     /// Characters to use for the rain
@@ -156,8 +156,8 @@ struct Rain<const LENGTH: usize> {
     queue: Vec<usize>,
     /// Speed of the rain
     speed: std::ops::Range<u64>,
-    /// Group of characters defined by a array of u64 values
-    group: Characters,
+    /// Group of characters defined by a slice &'static [u32]
+    group: &'group CharGroupKind,
     /// Width of the terminal
     /// NOTE: This value is not a true width of the terminal but size in visible characters
     /// 🌕 is a single character but takes up 2 columns and so the width value would count this as
@@ -172,14 +172,14 @@ struct Rain<const LENGTH: usize> {
     previous_screen_buffer: Vec<Cell>,
 }
 
-impl<const LENGTH: usize> Rain<LENGTH> {
+impl<'group, const LENGTH: usize> Rain<'group, LENGTH> {
     const MIN_LENGTH_OF_RAIN: usize = 4;
     const MAX_LENGTH_OFFSET_OF_RAIN: usize = 4;
-    fn new(mut width: usize, height: usize, settings: &cli::Cli) -> Self {
-        width /= settings.chars.width() as usize;
+    fn new(mut width: usize, height: usize, settings: &'group cli::Cli) -> Self {
+        width /= settings.group.0.width() as usize;
 
         let mut rng = Random::default();
-        let chars_u32 = settings.chars.as_vec_u32();
+        let chars_u32 = settings.group.0.as_slice_u32();
         let chars: [char; LENGTH] = std::array::from_fn(|_| {
             chars_u32
                 .get(rng.random_range(0..chars_u32.len()))
@@ -236,7 +236,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             body_colors,
             chars,
             directions: vec![settings.direction; width],
-            group: settings.chars,
+            group: &settings.group,
             head_colors: vec![settings.head_color().into(); width],
             height,
             positions: vec![0; width],
@@ -400,7 +400,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
         }
 
         if redraw_screen && matches!(self.directions[0], Direction::Left | Direction::Right) {
-            let char_width = self.group.width() as usize;
+            let char_width = self.group.0.width() as usize;
             for (y, chunk) in self.screen_buffer.chunks(self.width).enumerate() {
                 let screen = chunk
                     .iter()
@@ -414,7 +414,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             return Ok(());
         } else if redraw_screen {
             execute!(w, cursor::MoveTo(0, 0))?;
-            let char_width = self.group.width() as usize;
+            let char_width = self.group.0.width() as usize;
             let screen = self
                 .screen_buffer
                 .iter()
@@ -426,7 +426,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             return Ok(());
         }
 
-        let group_width = self.group.width() as usize;
+        let group_width = self.group.0.width() as usize;
 
         for idx in self.queue.drain(..) {
             let cell = &self.screen_buffer[idx];
@@ -458,20 +458,20 @@ impl<const LENGTH: usize> Rain<LENGTH> {
 
 struct App {
     stdout: BufWriter<Stdout>,
-    settings: cli::Cli,
+}
+
+impl Default for App {
+    fn default() -> Self {
+        Self {
+            stdout: BufWriter::with_capacity(640_000, stdout()),
+        }
+    }
 }
 
 impl App {
-    fn new(settings: cli::Cli) -> Self {
-        Self {
-            stdout: BufWriter::with_capacity(640_000, stdout()),
-            settings,
-        }
-    }
-
-    fn run(&mut self) -> std::io::Result<()> {
+    fn run(&mut self, settings: cli::Cli) -> std::io::Result<()> {
         let (w, h) = terminal::size()?;
-        let mut rain = Rain::<1024>::new(w as usize, h as usize, &self.settings);
+        let mut rain = Rain::<1024>::new(w as usize, h as usize, &settings);
         self.setup_terminal()?;
 
         let mut is_running = true;
@@ -483,7 +483,7 @@ impl App {
                     }
                     event::Event::Resize(w, h) => {
                         // TODO: make a method that handle resizing so we dont regenerate the rain
-                        rain = Rain::<1024>::new(w as usize, h as usize, &self.settings);
+                        rain = Rain::<1024>::new(w as usize, h as usize, &settings);
                         queue!(self.stdout, terminal::Clear(terminal::ClearType::All))?;
                     }
                     _ => {}
@@ -552,5 +552,5 @@ fn gen_shade_color(bc: Color, length: u8) -> Vec<Color> {
 
 fn main() -> std::io::Result<()> {
     let settings = cli::Cli::parse();
-    App::new(settings).run()
+    App::default().run(settings)
 }
