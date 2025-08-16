@@ -564,11 +564,18 @@ fn main() -> std::io::Result<()> {
     let settings = cli::Cli::parse();
 
     if settings.display_group {
-        let extra_width = match settings.group.0.name {
-            ezemoji::GroupKind::Custom("OpenSource") => true,
-            ezemoji::GroupKind::Custom("ProgrammingLanguages") => true,
-            _ => false,
-        };
+        // These two groups don't render right if they dont have enough space.
+        // From what I have found Unicode characters with
+        // U+FE0E = text style (forces small).
+        // U+FE0F = emoji style (forces larger).
+        // but for something in the opensource group char if there is an space next to the char it will
+        // visibly expand.
+        // example:   .
+        let extra_width = matches!(
+            settings.group.0.name,
+            ezemoji::GroupKind::Custom("OpenSource")
+                | ezemoji::GroupKind::Custom("ProgrammingLanguages")
+        );
         for char in settings.group.0.iter() {
             print!("{char}");
             if extra_width {
