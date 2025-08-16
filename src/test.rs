@@ -1,4 +1,4 @@
-use crate::cli::CharGroupKind;
+use crate::cli::Grouping;
 
 use super::{Parser, Rain, cli::Cli};
 use ezemoji::CharGroup;
@@ -29,13 +29,12 @@ impl Default for SnapshotOptions {
 fn display<const N: usize>(id: usize, window: &mut String, rain: &Rain<N>) {
     let width = rain.width;
     let height = rain.height;
-    let char_width = rain.group.0.width() as usize;
     let id_str = format!("{:02X}", id);
     write!(
         window,
         "{:-^width$}\n",
         id_str,
-        width = width * char_width + 5
+        width = width * rain.char_width + 5
     )
     .unwrap();
     for (i, chunk) in rain.screen_buffer.chunks(width).enumerate() {
@@ -45,7 +44,7 @@ fn display<const N: usize>(id: usize, window: &mut String, rain: &Rain<N>) {
             "{}|",
             &chunk
                 .iter()
-                .map(|c| c.display(char_width))
+                .map(|c| c.display(rain.char_width))
                 .collect::<String>()
         )
         .unwrap();
@@ -66,7 +65,7 @@ fn set_up_snapshot(options: SnapshotOptions) {
         direction,
     } = options;
     let mut cli = Cli::parse();
-    cli.group = CharGroupKind(group);
+    cli.group = Grouping::from(group);
     cli.direction = direction;
     let mut rain = Rain::<1024>::new(width, height, &cli);
     let mut window = String::new();

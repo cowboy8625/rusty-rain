@@ -8,11 +8,17 @@ use crossterm::{
     style::{Color, Print, SetForegroundColor},
     terminal,
 };
-use std::time::{Duration, Instant};
+use rand::Rng;
 use std::{
     io::{BufWriter, Stdout, Write, stdout},
     str::FromStr,
+    time::{Duration, Instant},
 };
+
+#[cfg(test)]
+use rand::SeedableRng;
+
+use crate::cli::Grouping;
 
 const MAXSPEED: u64 = 0;
 const MINSPEED: u64 = 200;
@@ -25,13 +31,6 @@ const AUTHOR: &str = "
 ▝▀ ▝▀  ▘▘ ▀▀ ▝▀ ▗▄▘▝▀ ▝▀ ▀▀▘▝▀
 Email: cowboy8625@protonmail.com
 ";
-
-use rand::Rng;
-
-#[cfg(test)]
-use rand::SeedableRng;
-
-use crate::cli::CharGroupKind;
 
 /// rand crate wrapper for testing.
 /// being able to have deterministic tests is important
@@ -136,7 +135,7 @@ impl FromStr for Direction {
 }
 
 #[derive(Debug)]
-struct Rain<'group, const LENGTH: usize> {
+struct Rain<const LENGTH: usize> {
     /// Random number generator wrapper for testing purposes
     rng: Random,
     /// Characters to use for the rain
@@ -165,8 +164,8 @@ struct Rain<'group, const LENGTH: usize> {
     queue: Vec<usize>,
     /// Speed of the rain
     speed: std::ops::Range<u64>,
-    /// Group of characters defined by a slice &'static [u32]
-    group: &'group CharGroupKind,
+    /// Character width
+    char_width: usize,
     /// Width of the terminal
     /// NOTE: This value is not a true width of the terminal but size in visible characters
     /// 🌕 is a single character but takes up 2 columns and so the width value would count this as
@@ -181,18 +180,17 @@ struct Rain<'group, const LENGTH: usize> {
     previous_screen_buffer: Vec<Cell>,
 }
 
-impl<'group, const LENGTH: usize> Rain<'group, LENGTH> {
+impl<const LENGTH: usize> Rain<LENGTH> {
     const MIN_LENGTH_OF_RAIN: usize = 4;
     const MAX_LENGTH_OFFSET_OF_RAIN: usize = 4;
-    fn new(mut width: usize, height: usize, settings: &'group cli::Cli) -> Self {
-        width /= settings.group.0.width() as usize;
+    fn new(mut width: usize, height: usize, settings: &cli::Cli) -> Self {
+        width /= settings.group.width() as usize;
 
         let mut rng = Random::default();
-        let char_length = settings.group.0.len();
+        let char_length = settings.group.len();
         let chars: [char; LENGTH] = std::array::from_fn(|_| {
             settings
                 .group
-                .0
                 .nth_char(rng.random_range(0..char_length))
                 .unwrap_or('#') // fallback character
         });
@@ -246,7 +244,7 @@ impl<'group, const LENGTH: usize> Rain<'group, LENGTH> {
             body_colors,
             chars,
             directions: vec![settings.direction; width],
-            group: &settings.group,
+            char_width: settings.group.width() as usize,
             head_colors: vec![settings.head_color().into(); width],
             height,
             positions: vec![0; width],
@@ -410,11 +408,10 @@ impl<'group, const LENGTH: usize> Rain<'group, LENGTH> {
         }
 
         if redraw_screen && matches!(self.directions[0], Direction::Left | Direction::Right) {
-            let char_width = self.group.0.width() as usize;
             for (y, chunk) in self.screen_buffer.chunks(self.width).enumerate() {
                 let screen = chunk
                     .iter()
-                    .map(|c| c.display(char_width))
+                    .map(|c| c.display(self.char_width))
                     .collect::<String>();
                 queue!(w, cursor::MoveTo(0, y as u16), Print(screen))?;
 
@@ -424,11 +421,10 @@ impl<'group, const LENGTH: usize> Rain<'group, LENGTH> {
             return Ok(());
         } else if redraw_screen {
             execute!(w, cursor::MoveTo(0, 0))?;
-            let char_width = self.group.0.width() as usize;
             let screen = self
                 .screen_buffer
                 .iter()
-                .map(|c| c.display(char_width))
+                .map(|c| c.display(self.char_width))
                 .collect::<String>();
             execute!(w, Print(screen))?;
 
@@ -436,11 +432,9 @@ impl<'group, const LENGTH: usize> Rain<'group, LENGTH> {
             return Ok(());
         }
 
-        let group_width = self.group.0.width() as usize;
-
         for idx in self.queue.drain(..) {
             let cell = &self.screen_buffer[idx];
-            let x = (idx % self.width) * group_width;
+            let x = (idx % self.width) * self.char_width;
             let y = idx / self.width;
 
             if cell.is_visible() {
@@ -455,7 +449,7 @@ impl<'group, const LENGTH: usize> Rain<'group, LENGTH> {
                     w,
                     cursor::MoveTo(x as u16, y as u16),
                     SetForegroundColor(cell.color),
-                    Print(" ".repeat(group_width))
+                    Print(" ".repeat(self.char_width))
                 )?;
             }
 
@@ -572,14 +566,25 @@ fn main() -> std::io::Result<()> {
         // visibly expand.
         // example:   .
         let extra_width = matches!(
-            settings.group.0.name,
+            settings.group.name(),
             ezemoji::GroupKind::Custom("OpenSource")
                 | ezemoji::GroupKind::Custom("ProgrammingLanguages")
         );
-        for char in settings.group.0.iter() {
-            print!("{char}");
-            if extra_width {
-                print!(" ");
+        match settings.group {
+            Grouping::EzEmoji(group) => {
+                for char in group.iter() {
+                    print!("{char}");
+                    if extra_width {
+                        print!(" ");
+                    }
+                }
+            }
+            Grouping::Custom(group) => {
+                for range in group.range.iter() {
+                    for cp in range.clone() {
+                        print!("{}", std::char::from_u32(cp).unwrap_or('🤦'));
+                    }
+                }
             }
         }
         return Ok(());

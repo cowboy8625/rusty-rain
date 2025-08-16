@@ -16,6 +16,8 @@ clap = { version = "4.5.43", features = ["cargo", "derive"] }
 crossterm = "0.29.0"
 rand = "0.9.2"
 ezemoji = "2.0.0"
+toml = "0.9.5"
+serde = { version = "1.0.219", features = ["derive"] }
 
 [dev-dependencies]
 pretty_assertions = "1.4.1"

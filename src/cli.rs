@@ -1,21 +1,157 @@
 use super::{AUTHOR, Direction, MAXSPEED, MINSPEED};
 use clap::{Parser, crate_description, crate_name, crate_version};
 use ezemoji::{CharGroup, CharWidth, GroupKind, MultiRange};
+use serde::{Deserialize, Deserializer, Serialize};
+use std::path::PathBuf;
+
 use std::str::FromStr;
 
-#[derive(Debug, Clone)]
-pub struct CharGroupKind(pub CharGroup);
+#[derive(Debug, Deserialize)]
+struct RangeDef {
+    start: u32,
+    end: u32,
+}
 
-impl FromStr for CharGroupKind {
+impl From<RangeDef> for std::ops::Range<u32> {
+    fn from(r: RangeDef) -> Self {
+        r.start..r.end
+    }
+}
+
+fn deserialize_ranges<'de, D>(deserializer: D) -> Result<Vec<std::ops::Range<u32>>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let defs: Vec<RangeDef> = Vec::deserialize(deserializer)?;
+    Ok(defs.into_iter().map(|r| r.into()).collect())
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Group {
+    #[serde(deserialize_with = "deserialize_ranges")]
+    pub range: Vec<std::ops::Range<u32>>,
+    pub width: u8,
+}
+
+impl Group {
+    pub fn width(&self) -> u8 {
+        self.width
+    }
+
+    pub fn len(&self) -> usize {
+        self.range.iter().map(|r| (r.end - r.start) as usize).sum()
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Default)]
+pub struct Config {
+    pub groups: std::collections::BTreeMap<String, Group>,
+}
+
+pub fn load_config() -> Option<Config> {
+    #[cfg(windows)]
+    let config_path = {
+        let appdata = std::env::var("APPDATA").unwrap();
+        PathBuf::from(appdata)
+            .join("rusty-rain")
+            .join("config.toml")
+    };
+
+    #[cfg(unix)]
+    let config_path = {
+        let home = std::env::var("HOME").unwrap();
+        PathBuf::from(home)
+            .join(".config")
+            .join("rusty-rain")
+            .join("config.toml")
+    };
+
+    if !config_path.exists() {
+        return None;
+    }
+
+    let string_config = std::fs::read_to_string(&config_path).unwrap_or_default();
+    let config: Config = match toml::from_str(&string_config) {
+        Ok(config) => config,
+        Err(err) => {
+            eprintln!("failed to parse config: {err}");
+            return None;
+        }
+    };
+
+    Some(config)
+}
+
+#[derive(Debug, Clone)]
+pub enum Grouping {
+    EzEmoji(CharGroup),
+    Custom(Group),
+}
+
+impl Grouping {
+    pub fn name(&self) -> GroupKind {
+        match self {
+            Grouping::EzEmoji(group) => group.name,
+            Grouping::Custom(_) => GroupKind::Custom("custom"),
+        }
+    }
+
+    pub fn width(&self) -> u8 {
+        match self {
+            Grouping::EzEmoji(group) => group.width(),
+            Grouping::Custom(group) => group.width(),
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        match self {
+            Grouping::EzEmoji(group) => group.len,
+            Grouping::Custom(group) => group.len(),
+        }
+    }
+
+    pub fn nth_char(&self, index: usize) -> Option<char> {
+        match self {
+            Grouping::EzEmoji(group) => group.nth_char(index),
+            Grouping::Custom(group) => {
+                let index = index as u32;
+                let mut i = 0u32;
+                for range in group.range.iter() {
+                    let step = range.end - range.start;
+                    if index >= i && index < i + step {
+                        let offset = index - i;
+                        return char::from_u32(range.start + offset);
+                    }
+                    i += step;
+                }
+                None
+            }
+        }
+    }
+}
+
+impl From<CharGroup> for Grouping {
+    fn from(value: CharGroup) -> Self {
+        Grouping::EzEmoji(value)
+    }
+}
+
+impl From<Group> for Grouping {
+    fn from(value: Group) -> Self {
+        Grouping::Custom(value)
+    }
+}
+
+impl FromStr for Grouping {
     type Err = String;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s.to_lowercase().as_str() {
-            // Idea was brought up to use these nerd fonts icons by
+            // Idea was brought up to use these chars together by
             // [tonogdlp](https://github.com/tonogdlp) in PR
             // https://github.com/cowboy8625/ezemoji/pull/4
             // Once merged into ezemoji we can remove this
-            "classic" => Ok(CharGroupKind(CharGroup::new(
+            "classic" => Ok(Grouping::from(CharGroup::new(
                 GroupKind::Custom("Classic"),
                 MultiRange::new(&[
                     ezemoji::JAP_RANGE,
@@ -35,7 +171,7 @@ impl FromStr for CharGroupKind {
             // [hasecilu](https://github.com/hasecilu) in PR
             // https://github.com/cowboy8625/ezemoji/pull/5
             // Once merged into ezemoji we can remove this
-            "opensource" => Ok(CharGroupKind(CharGroup::new(
+            "opensource" => Ok(Grouping::from(CharGroup::new(
                 GroupKind::Custom("OpenSource"),
                 MultiRange::new(&[
                     62208..62210,
@@ -61,7 +197,7 @@ impl FromStr for CharGroupKind {
             // [hasecilu](https://github.com/hasecilu) in PR
             // https://github.com/cowboy8625/ezemoji/pull/5
             // Once merged into ezemoji we can remove this
-            "pglangs" => Ok(CharGroupKind(CharGroup::new(
+            "pglangs" => Ok(Grouping::from(CharGroup::new(
                 GroupKind::Custom("ProgrammingLanguages"),
                 MultiRange::new(&[
                     // From all Nerd Fonts
@@ -114,7 +250,20 @@ impl FromStr for CharGroupKind {
                 ]),
                 CharWidth::Double,
             ))),
-            name => Ok(CharGroupKind(CharGroup::from_str(name)?)),
+            name => match CharGroup::from_str(name) {
+                Ok(group) => Ok(Grouping::from(group)),
+                Err(_) => {
+                    let Some(config) = load_config() else {
+                        return Err("group not found".to_string());
+                    };
+
+                    if let Some(group) = config.groups.get(name) {
+                        Ok(Grouping::from(group.clone()))
+                    } else {
+                        Err("group not found".to_string())
+                    }
+                }
+            },
         }
     }
 }
@@ -186,7 +335,7 @@ pub struct Cli {
     #[arg(short, long, default_value_t = false)]
     pub shade: bool,
     #[arg(short, long, help = HELP_CHARS, default_value = "bin")]
-    pub group: CharGroupKind,
+    pub group: Grouping,
     #[arg(short = 'C', long, help = HELP_COLORS, default_value_t = String::from("green"))]
     pub color: String,
     #[arg(short = 'H', long, help = HELP_HEAD, default_value_t = String::from("white"))]
