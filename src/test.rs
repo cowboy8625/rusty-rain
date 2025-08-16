@@ -122,6 +122,14 @@ snapshot!(
     super::Direction::Left,
     CharGroup::CRAB
 );
+snapshot!(
+    test_large_letters,
+    50,
+    32,
+    10,
+    super::Direction::Down,
+    CharGroup::LARGELETTERS
+);
 
 #[test]
 fn test_gen_shade_color() {
