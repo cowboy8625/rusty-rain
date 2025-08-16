@@ -3,6 +3,7 @@ use clap::{Parser, crate_description, crate_name, crate_version};
 use ezemoji::{CharGroup, CharWidth, GroupKind, MultiRange};
 use serde::{Deserialize, Deserializer, Serialize};
 use std::path::PathBuf;
+
 use std::str::FromStr;
 
 #[derive(Debug, Deserialize)]

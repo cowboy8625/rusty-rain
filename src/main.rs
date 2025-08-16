@@ -587,7 +587,6 @@ fn main() -> std::io::Result<()> {
                 }
             }
         }
-
         return Ok(());
     }
 
