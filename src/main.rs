@@ -2,7 +2,7 @@ mod cli;
 #[cfg(test)]
 mod test;
 
-use clap::{Parser, ValueEnum};
+use clap::Parser;
 use crossterm::{
     cursor, event, execute, queue,
     style::{Color, Print, SetForegroundColor},
@@ -130,7 +130,7 @@ impl FromStr for Direction {
             "south" => Ok(Self::Down),
             "west" => Ok(Self::Left),
             "east" => Ok(Self::Right),
-            _ => Err(format!("Invalid direction: {}", value)),
+            _ => Err(format!("Invalid direction: {value}")),
         }
     }
 }
@@ -188,11 +188,12 @@ impl<'group, const LENGTH: usize> Rain<'group, LENGTH> {
         width /= settings.group.0.width() as usize;
 
         let mut rng = Random::default();
-        let chars_u32 = settings.group.0.as_slice_u32();
+        let char_length = settings.group.0.len();
         let chars: [char; LENGTH] = std::array::from_fn(|_| {
-            chars_u32
-                .get(rng.random_range(0..chars_u32.len()))
-                .and_then(|&c| char::from_u32(c))
+            settings
+                .group
+                .0
+                .nth_char(rng.random_range(0..char_length))
                 .unwrap_or('#') // fallback character
         });
 
@@ -561,5 +562,21 @@ fn gen_shade_color(bc: Color, length: u8) -> Vec<Color> {
 
 fn main() -> std::io::Result<()> {
     let settings = cli::Cli::parse();
+
+    if settings.display_group {
+        let extra_width = match settings.group.0.name {
+            ezemoji::GroupKind::Custom("OpenSource") => true,
+            ezemoji::GroupKind::Custom("ProgrammingLanguages") => true,
+            _ => false,
+        };
+        for char in settings.group.0.iter() {
+            print!("{char}");
+            if extra_width {
+                print!(" ");
+            }
+        }
+        return Ok(());
+    }
+
     App::default().run(settings)
 }
