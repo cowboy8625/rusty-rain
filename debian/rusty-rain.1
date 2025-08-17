@@ -14,35 +14,14 @@ supports many fun visual styles.
 .BR \-s ", " \-\-shade
 Enable shaded rain effect.
 .TP
-.BR \-c ", " \-\-chars " \fICHARS\fR"
+.BR \-g ", " \-\-group " \fICHARS\fR"
 Set what kind of characters are printed as rain.
 .br
 Available values:
-    all, alphalow, alphaup, alpha-num, arrow, bin, cards, clock,
-    crab, dominosh, dominosv, earth, emojis, jap, large-letters,
-    moon, num, numbered-balls, numbered-cubes, plants, smile, shapes
-.br
-Default: \fIbin\fR
-.TP
-.BR \-C ", " \-\-color " \fICOLOR\fR"
-Set color of rain using a color name or RGB tuple.
-.br
-Available names: white, red, blue, green
-.br
-Tuple format: \fIr,g,b\fR
-.br
-Default: \fIgreen\fR
-.TP
-.BR \-H ", " \-\-head " \fICOLOR\fR"
-Set the color of the first character in each rain drop.
-.br
-Available names: white, red, blue, green
-.br
-Tuple format: \fIr,g,b\fR
-.br
-Default: \fIwhite\fR
-.TP
-.BR \-d ", " \-\-direction " \fIDIRECTION\fR"
+    all, alphalow, alphaup, arrow, bin, cards, classic, clock, crab,
+    dominosh, dominosv, earth, emojis, jap, large-letters, moon, num,
+    numbered-balls, numbered-cubes, open-source, pglangs, plants,
+    shapes, smile
 Set the direction of the rain.
 .br
 Available values: up, down, left, right
@@ -55,6 +34,10 @@ Default: \fIdown\fR
 Set the rain speed in milliseconds. May be a single value or a range.
 .br
 Default: \fI40,200\fR
+.br
+.TP
+.B \-D ", " \-\-display\-group
+Display Char Group
 .TP
 .BR \-h ", " \-\-help
 Display help message and exit.

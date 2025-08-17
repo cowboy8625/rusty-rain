@@ -301,6 +301,7 @@ OPTIONS:
     arrow          - Arrow Emojis or Fancy Characters
     bin            - All Ones and Zeros
     cards          - Playing Cards
+    classic        - closer to what the default look is for cmatrix
     clock          - 🕑
     crab           - 🦀
     dominosh       - 🀽

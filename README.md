@@ -83,6 +83,7 @@ Options:
               arrow          - Arrow Emojis or Fancy Characters
               bin            - All Ones and Zeros
               cards          - Playing Cards
+              classic        - closer to what the default look is for cmatrix
               clock          - 🕑
               crab           - 🦀
               dominosh       - 🀽
@@ -95,9 +96,11 @@ Options:
               num            - Good ol fashion Numbers
               numbered-balls - These are like pool balls
               numbered-cubes - These are like the pool balls but just cubes
+              open-source    - Open Source icon emojis
+              pglangs        - These are programming language icons emojis
               plants         - Plants of sorts
-              smile          - 😃
               shapes         - Squares and Circles of a few colors
+              smile          - 😃
 
 
           [default: bin]
@@ -121,7 +124,8 @@ Options:
               red,
               blue,
               green,
-              r,g,b
+              r,g,b,
+              #RRGGBB
 
 
           [default: white]
@@ -141,6 +145,9 @@ Options:
   -S, --speed <SPEED>
           [default: 0,200]
 
+  -D, --display-group
+          Display Char Group
+
   -h, --help
           Print help (see a summary with '-h')
 
@@ -150,7 +157,28 @@ Options:
 
 </details>
 
----
+<details>
+<summary>Config Options</summary>
+
+```toml
+# windows path %APPDATA%\\rusty-rain\\config.toml
+# linux   path ~/.config/rusty-rain/config.toml
+# mac    path ~/.config/rusty-rain/config.toml
+speed = "0,200"
+[groups.neovim]
+range = [
+  { start = 62319, end = 62320 },
+]
+width = 2
+
+[groups.rust]
+range = [
+  { start = 59304, end = 59305 },
+]
+width = 2
+```
+
+## </details>
 
 ## 🛠 Contributing
 

@@ -1,3 +1,24 @@
+rusty-rain (0.5.0-1) unstable; urgency=medium
+
+  * Removed character grouping large-letters (issue #36)
+
+  * Added:
+    - Ezemoji dependency for all the characters grouping handling.
+    - Cli color option now supports hex color codes.
+    - New character grouping opensource
+    - New character grouping classic
+    - New character grouping pglangs (programming languages)
+    - New character grouping letterd-cubes
+    - New Config file for character grouping and setting default args
+
+  * Changed:
+    - CLI option --characters/-c renamed to --group/-g
+
+  * Fixes:
+   - Fixed issue #36 large letter emojis merged into a flags
+
+ -- cowboy8625 <cowboy8625@protonmail.com>  Mon, 04 Aug 2025 12:00:00 +0000
+
 rusty-rain (0.4.0-1) unstable; urgency=medium
 
   * Mostly rewritten code for better readability and performance.
