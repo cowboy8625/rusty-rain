@@ -160,9 +160,7 @@ Options:
 <details>
 <summary>Config Options</summary>
 
-> [!note]
-> Things in config will override CLI options.
-> This probably will change in the future.
+> [!note] Things in config will override CLI options. This probably will change in the future.
 
 ```toml
 # windows path %APPDATA%\\rusty-rain\\config.toml
