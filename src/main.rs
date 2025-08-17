@@ -8,6 +8,7 @@ use crossterm::{
     style::{Color, Print, SetForegroundColor},
     terminal,
 };
+use ezemoji::CharGroup;
 use rand::Rng;
 use std::{
     io::{BufWriter, Stdout, Write, stdout},
@@ -109,7 +110,7 @@ impl Default for Cell {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum Direction {
     Up,
     Down,
@@ -554,8 +555,49 @@ fn gen_shade_color(bc: Color, length: u8) -> Vec<Color> {
     colors
 }
 
+fn update_settings_with_config(settings: &mut cli::Cli) {
+    let Some(config) = cli::load_config() else {
+        return;
+    };
+    if let Some(shade) = config.shade {
+        settings.shade = shade;
+    }
+    if let Some(color) = config.color {
+        settings.color = color;
+    }
+    if let Some(head) = config.head {
+        settings.head = head;
+    }
+    if let Some(direction) = config.direction {
+        settings.direction = direction;
+    }
+    if let Some(speed) = config.speed {
+        settings.speed = speed;
+    }
+    if let Some(display_group) = config.display_group {
+        settings.display_group = display_group;
+    }
+    let Some(name) = config.group else {
+        return;
+    };
+    match CharGroup::from_str(name.as_str()) {
+        Ok(group) => {
+            settings.group = Grouping::from(group);
+        }
+        Err(_) => {
+            if let Some(group) = config.custom.get(name.as_str()) {
+                settings.group = Grouping::from(group.clone());
+                return;
+            }
+            eprintln!("group not found {name}");
+        }
+    }
+}
+
 fn main() -> std::io::Result<()> {
-    let settings = cli::Cli::parse();
+    let mut settings = cli::Cli::parse();
+
+    update_settings_with_config(&mut settings);
 
     if settings.display_group {
         // These two groups don't render right if they dont have enough space.

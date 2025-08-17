@@ -45,7 +45,14 @@ impl Group {
 
 #[derive(Debug, Serialize, Deserialize, Default)]
 pub struct Config {
-    pub groups: std::collections::BTreeMap<String, Group>,
+    pub shade: Option<bool>,
+    pub color: Option<String>,
+    pub head: Option<String>,
+    pub direction: Option<Direction>,
+    pub speed: Option<String>,
+    pub display_group: Option<bool>,
+    pub group: Option<String>,
+    pub custom: std::collections::BTreeMap<String, Group>,
 }
 
 pub fn load_config() -> Option<Config> {
@@ -257,7 +264,7 @@ impl FromStr for Grouping {
                         return Err("group not found".to_string());
                     };
 
-                    if let Some(group) = config.groups.get(name) {
+                    if let Some(group) = config.custom.get(name) {
                         Ok(Grouping::from(group.clone()))
                     } else {
                         Err("group not found".to_string())
