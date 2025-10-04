@@ -5,7 +5,7 @@ mod test;
 use clap::Parser;
 use crossterm::{
     cursor, event, execute, queue,
-    style::{Color, Print, SetForegroundColor},
+    style::{Color, Print, SetBackgroundColor, SetForegroundColor},
     terminal,
 };
 use ezemoji::CharGroup;
@@ -477,7 +477,7 @@ impl App {
     fn run(&mut self, settings: cli::Cli) -> std::io::Result<()> {
         let (w, h) = terminal::size()?;
         let mut rain = Rain::<1024>::new(w as usize, h as usize, &settings);
-        self.setup_terminal()?;
+        self.setup_terminal(&settings)?;
 
         let mut is_running = true;
         while is_running {
@@ -506,9 +506,18 @@ impl App {
     }
 
     #[inline(always)]
-    fn setup_terminal(&mut self) -> std::io::Result<()> {
+    fn setup_terminal(&mut self, settings: &cli::Cli) -> std::io::Result<()> {
         terminal::enable_raw_mode()?;
         execute!(self.stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
+
+        // SetBackgroundColor() should only be called if settings.bg_color is Some().
+        // settings.bg_color will only be Some() if user has passed in a -B flag.
+        if settings.bg_color.is_some()
+            && let Some(col) = settings.rain_bg_color()
+        {
+            execute!(self.stdout, SetBackgroundColor(col.into()))?
+        }
+
         Ok(())
     }
 

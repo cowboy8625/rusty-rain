@@ -293,6 +293,15 @@ OPTIONS:
     r,g,b
 ";
 
+const HELP_BG_COLORS: &str = "Set background color of Rain with color string name or tuple
+OPTIONS:
+    white,
+    red,
+    blue,
+    green,
+    r,g,b
+";
+
 const HELP_CHARS: &str = "Set what kind of characters are printed as rain.
 OPTIONS:
     all            - This shows most of the Character Groups all at once.
@@ -346,6 +355,8 @@ pub struct Cli {
     pub group: Grouping,
     #[arg(short = 'C', long, help = HELP_COLORS, default_value_t = String::from("green"))]
     pub color: String,
+    #[arg(short = 'B', long, help = HELP_BG_COLORS)]
+    pub bg_color: Option<String>,
     #[arg(short = 'H', long, help = HELP_HEAD, default_value_t = String::from("white"))]
     pub head: String,
     #[arg(short, long, help = HELP_DIRECTION, default_value = "south")]
@@ -364,6 +375,11 @@ pub struct Cli {
 impl Cli {
     pub fn rain_color(&self) -> (u8, u8, u8) {
         into_color(&self.color)
+    }
+
+    pub fn rain_bg_color(&self) -> Option<(u8, u8, u8)> {
+        // Convert color from Option<String> to Option<u8,u8,u8>.
+        self.bg_color.as_ref().map(|col| into_color(col.as_str()))
     }
     pub fn head_color(&self) -> (u8, u8, u8) {
         into_color(&self.head)
