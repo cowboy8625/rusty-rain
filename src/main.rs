@@ -6,7 +6,7 @@ use clap::Parser;
 use crossterm::{
     cursor, event, execute, queue,
     style::{Color, Print, SetBackgroundColor, SetForegroundColor},
-    terminal,
+    terminal::{self, Clear, ClearType},
 };
 use ezemoji::CharGroup;
 use rand::Rng;
@@ -510,12 +510,12 @@ impl App {
         terminal::enable_raw_mode()?;
         execute!(self.stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
 
-        // SetBackgroundColor() should only be called if settings.bg_color is Some().
-        // settings.bg_color will only be Some() if user has passed in a -B flag.
-        if settings.bg_color.is_some()
-            && let Some(col) = settings.rain_bg_color()
-        {
-            execute!(self.stdout, SetBackgroundColor(col.into()))?
+        if let Some(col) = settings.rain_bg_color() {
+            execute!(
+                self.stdout,
+                SetBackgroundColor(col.into()),
+                Clear(ClearType::All),
+            )?
         }
 
         Ok(())

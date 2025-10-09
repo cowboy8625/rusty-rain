@@ -378,7 +378,6 @@ impl Cli {
     }
 
     pub fn rain_bg_color(&self) -> Option<(u8, u8, u8)> {
-        // Convert color from Option<String> to Option<u8,u8,u8>.
         self.bg_color.as_ref().map(|col| into_color(col.as_str()))
     }
     pub fn head_color(&self) -> (u8, u8, u8) {
