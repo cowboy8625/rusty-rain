@@ -5,8 +5,8 @@ mod test;
 use clap::Parser;
 use crossterm::{
     cursor, event, execute, queue,
-    style::{Color, Print, SetForegroundColor},
-    terminal,
+    style::{Color, Print, SetBackgroundColor, SetForegroundColor},
+    terminal::{self, Clear, ClearType},
 };
 use ezemoji::CharGroup;
 use rand::Rng;
@@ -477,7 +477,7 @@ impl App {
     fn run(&mut self, settings: cli::Cli) -> std::io::Result<()> {
         let (w, h) = terminal::size()?;
         let mut rain = Rain::<1024>::new(w as usize, h as usize, &settings);
-        self.setup_terminal()?;
+        self.setup_terminal(&settings)?;
 
         let mut is_running = true;
         while is_running {
@@ -506,9 +506,18 @@ impl App {
     }
 
     #[inline(always)]
-    fn setup_terminal(&mut self) -> std::io::Result<()> {
+    fn setup_terminal(&mut self, settings: &cli::Cli) -> std::io::Result<()> {
         terminal::enable_raw_mode()?;
         execute!(self.stdout, terminal::EnterAlternateScreen, cursor::Hide)?;
+
+        if let Some(col) = settings.rain_bg_color() {
+            execute!(
+                self.stdout,
+                SetBackgroundColor(col.into()),
+                Clear(ClearType::All),
+            )?
+        }
+
         Ok(())
     }
 
