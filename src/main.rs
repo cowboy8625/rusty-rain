@@ -155,6 +155,8 @@ struct Rain<const LENGTH: usize> {
     body_colors: Vec<(Color, Option<Vec<Color>>)>,
     /// Shading of the rain
     shading: bool,
+    /// Color to fade into when shading is enabled
+    shade_gradient: Color,
     /// Color of the rain head
     head_colors: Vec<Color>,
     /// Direction of the rain
@@ -227,12 +229,13 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             })
             .collect();
 
+        let shade_color: Color = settings.shade_gradient_color().into();
         let body_colors = if settings.shade {
             let base_color: Color = settings.rain_color().into();
             (0..width)
                 .map(|i| {
                     let window = windows[i].saturating_sub(1);
-                    let colors = gen_shade_color(base_color, window as u8);
+                    let colors = gen_shade_color(base_color, shade_color, window as u8);
                     (base_color, Some(colors))
                 })
                 .collect::<Vec<_>>()
@@ -242,6 +245,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
 
         Self {
             shading: settings.shade,
+            shade_gradient: shade_color,
             body_colors,
             chars,
             directions: vec![settings.direction; width],
@@ -305,7 +309,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
         }
         let base_color: Color = self.body_colors[i].0;
         let window = self.windows[i].saturating_sub(1);
-        let colors = gen_shade_color(base_color, window as u8);
+        let colors = gen_shade_color(base_color, self.shade_gradient, window as u8);
         self.body_colors[i] = (base_color, Some(colors));
     }
 
@@ -549,16 +553,33 @@ impl Drop for App {
 }
 
 /// Generates a vector of Colors that fade to black over the length of the column.
-fn gen_shade_color(bc: Color, length: u8) -> Vec<Color> {
+fn gen_shade_color(bc: Color, shade_color: Color, length: u8) -> Vec<Color> {
     let mut colors = Vec::with_capacity(length as usize);
     let Color::Rgb { r, g, b } = bc else {
+        return colors;
+    };
+    let Color::Rgb {
+        r: shade_r,
+        g: shade_g,
+        b: shade_b,
+    } = shade_color
+    else {
         return colors;
     };
     let nr = r / length;
     let ng = g / length;
     let nb = b / length;
+    let fade_r = shade_r / length;
+    let fade_g = shade_g / length;
+    let fade_b = shade_b / length;
+
     for i in 0..length {
-        colors.push((nr * i, ng * i, nb * i).into());
+        let mix = (
+            ((nr as f32 * i as f32) + (fade_r as f32 * (length as f32 - i as f32))) as u8,
+            ((ng as f32 * i as f32) + (fade_g as f32 * (length as f32 - i as f32))) as u8,
+            ((nb as f32 * i as f32) + (fade_b as f32 * (length as f32 - i as f32))) as u8,
+        );
+        colors.push(mix.into());
     }
     colors.reverse();
     colors

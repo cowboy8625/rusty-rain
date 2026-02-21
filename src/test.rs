@@ -134,10 +134,11 @@ snapshot!(
 fn test_gen_shade_color() {
     use super::{Color, gen_shade_color};
     use pretty_assertions::assert_eq;
+    const TRUE_BLACK: Color = Color::Rgb { r: 0, g: 0, b: 0 };
     let bc = Color::Rgb { r: 0, g: 255, b: 0 };
     let length = 10;
 
-    let colors = gen_shade_color(bc, length);
+    let colors = gen_shade_color(bc, TRUE_BLACK, length);
 
     assert_eq!(colors.len(), length as usize);
     assert_eq!(colors.first(), Some(&Color::Rgb { r: 0, g: 225, b: 0 }));
