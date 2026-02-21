@@ -566,18 +566,15 @@ fn gen_shade_color(bc: Color, shade_color: Color, length: u8) -> Vec<Color> {
     else {
         return colors;
     };
-    let nr = r / length;
-    let ng = g / length;
-    let nb = b / length;
-    let fade_r = shade_r / length;
-    let fade_g = shade_g / length;
-    let fade_b = shade_b / length;
 
     for i in 0..length {
         let mix = (
-            ((nr as f32 * i as f32) + (fade_r as f32 * (length as f32 - i as f32))) as u8,
-            ((ng as f32 * i as f32) + (fade_g as f32 * (length as f32 - i as f32))) as u8,
-            ((nb as f32 * i as f32) + (fade_b as f32 * (length as f32 - i as f32))) as u8,
+            ((r as f32 * (i as f32 / length as f32))
+                + (shade_r as f32 * ((length - i) as f32 / length as f32))) as u8,
+            ((g as f32 * (i as f32 / length as f32))
+                + (shade_g as f32 * ((length - i) as f32 / length as f32))) as u8,
+            ((b as f32 * (i as f32 / length as f32))
+                + (shade_b as f32 * ((length - i) as f32 / length as f32))) as u8,
         );
         colors.push(mix.into());
     }
