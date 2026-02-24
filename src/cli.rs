@@ -302,14 +302,14 @@ OPTIONS:
     r,g,b
 ";
 
-const HELP_SHADE_GRADIENT_COLORS: &str =
-    "Set shade gradient color of Rain with color string name or tuple
+const HELP_SHADE_GRADIENT_COLORS: &str = "Set shade gradient color of Rain.
 OPTIONS:
     white,
     red,
     blue,
     green,
-    r,g,b
+    r,g,b,
+    #RRGGBB
 ";
 
 const HELP_CHARS: &str = "Set what kind of characters are printed as rain.
