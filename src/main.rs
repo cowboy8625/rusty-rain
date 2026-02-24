@@ -552,31 +552,35 @@ impl Drop for App {
     }
 }
 
-/// Generates a vector of Colors that fade to black over the length of the column.
-fn gen_shade_color(bc: Color, shade_color: Color, length: u8) -> Vec<Color> {
-    let mut colors = Vec::with_capacity(length as usize);
-    let Color::Rgb { r, g, b } = bc else {
-        return colors;
-    };
-    let Color::Rgb {
-        r: shade_r,
-        g: shade_g,
-        b: shade_b,
-    } = shade_color
+/// Generates a vector of Colors that fade to `black` over the length of the column.
+fn gen_shade_color(base: Color, shade: Color, length: u8) -> Vec<Color> {
+    let (
+        Color::Rgb {
+            r: br,
+            g: bg,
+            b: bb,
+        },
+        Color::Rgb {
+            r: sr,
+            g: sg,
+            b: sb,
+        },
+    ) = (base, shade)
     else {
-        return colors;
+        return Vec::new();
     };
 
+    let mut colors = Vec::with_capacity(length as usize);
+
     for i in 0..length {
-        let mix = (
-            ((r as f32 * (i as f32 / length as f32))
-                + (shade_r as f32 * ((length - i) as f32 / length as f32))) as u8,
-            ((g as f32 * (i as f32 / length as f32))
-                + (shade_g as f32 * ((length - i) as f32 / length as f32))) as u8,
-            ((b as f32 * (i as f32 / length as f32))
-                + (shade_b as f32 * ((length - i) as f32 / length as f32))) as u8,
-        );
-        colors.push(mix.into());
+        let t = i as f32 / length as f32;
+        let s = 1.0 - t;
+
+        let r = ((br as f32 * t) + (sr as f32 * s)) as u8;
+        let g = ((bg as f32 * t) + (sg as f32 * s)) as u8;
+        let b = ((bb as f32 * t) + (sb as f32 * s)) as u8;
+
+        colors.push(Color::Rgb { r, g, b });
     }
     colors.reverse();
     colors
