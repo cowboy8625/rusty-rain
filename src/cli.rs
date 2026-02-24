@@ -47,6 +47,7 @@ impl Group {
 pub struct Config {
     pub shade: Option<bool>,
     pub color: Option<String>,
+    pub shade_gradient: Option<String>,
     pub head: Option<String>,
     pub direction: Option<Direction>,
     pub speed: Option<String>,

@@ -596,6 +596,9 @@ fn update_settings_with_config(settings: &mut cli::Cli) {
     if let Some(color) = config.color {
         settings.color = color;
     }
+    if let Some(shade_gradient) = config.shade_gradient {
+        settings.shade_gradient = shade_gradient;
+    }
     if let Some(head) = config.head {
         settings.head = head;
     }
