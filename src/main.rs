@@ -155,6 +155,8 @@ struct Rain<const LENGTH: usize> {
     body_colors: Vec<(Color, Option<Vec<Color>>)>,
     /// Shading of the rain
     shading: bool,
+    /// Color to fade into when shading is enabled
+    shade_gradient: Color,
     /// Color of the rain head
     head_colors: Vec<Color>,
     /// Direction of the rain
@@ -227,12 +229,13 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             })
             .collect();
 
+        let shade_color: Color = settings.shade_gradient_color().into();
         let body_colors = if settings.shade {
             let base_color: Color = settings.rain_color().into();
             (0..width)
                 .map(|i| {
                     let window = windows[i].saturating_sub(1);
-                    let colors = gen_shade_color(base_color, window as u8);
+                    let colors = gen_shade_color(base_color, shade_color, window as u8);
                     (base_color, Some(colors))
                 })
                 .collect::<Vec<_>>()
@@ -242,6 +245,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
 
         Self {
             shading: settings.shade,
+            shade_gradient: shade_color,
             body_colors,
             chars,
             directions: vec![settings.direction; width],
@@ -305,7 +309,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
         }
         let base_color: Color = self.body_colors[i].0;
         let window = self.windows[i].saturating_sub(1);
-        let colors = gen_shade_color(base_color, window as u8);
+        let colors = gen_shade_color(base_color, self.shade_gradient, window as u8);
         self.body_colors[i] = (base_color, Some(colors));
     }
 
@@ -548,17 +552,35 @@ impl Drop for App {
     }
 }
 
-/// Generates a vector of Colors that fade to black over the length of the column.
-fn gen_shade_color(bc: Color, length: u8) -> Vec<Color> {
-    let mut colors = Vec::with_capacity(length as usize);
-    let Color::Rgb { r, g, b } = bc else {
-        return colors;
+/// Generates a vector of Colors that fade to `black` over the length of the column.
+fn gen_shade_color(base: Color, shade: Color, length: u8) -> Vec<Color> {
+    let (
+        Color::Rgb {
+            r: br,
+            g: bg,
+            b: bb,
+        },
+        Color::Rgb {
+            r: sr,
+            g: sg,
+            b: sb,
+        },
+    ) = (base, shade)
+    else {
+        return Vec::new();
     };
-    let nr = r / length;
-    let ng = g / length;
-    let nb = b / length;
+
+    let mut colors = Vec::with_capacity(length as usize);
+
     for i in 0..length {
-        colors.push((nr * i, ng * i, nb * i).into());
+        let t = i as f32 / length as f32;
+        let s = 1.0 - t;
+
+        let r = ((br as f32 * t) + (sr as f32 * s)) as u8;
+        let g = ((bg as f32 * t) + (sg as f32 * s)) as u8;
+        let b = ((bb as f32 * t) + (sb as f32 * s)) as u8;
+
+        colors.push(Color::Rgb { r, g, b });
     }
     colors.reverse();
     colors
@@ -573,6 +595,9 @@ fn update_settings_with_config(settings: &mut cli::Cli) {
     }
     if let Some(color) = config.color {
         settings.color = color;
+    }
+    if let Some(shade_gradient) = config.shade_gradient {
+        settings.shade_gradient = shade_gradient;
     }
     if let Some(head) = config.head {
         settings.head = head;

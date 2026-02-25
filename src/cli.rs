@@ -47,6 +47,7 @@ impl Group {
 pub struct Config {
     pub shade: Option<bool>,
     pub color: Option<String>,
+    pub shade_gradient: Option<String>,
     pub head: Option<String>,
     pub direction: Option<Direction>,
     pub speed: Option<String>,
@@ -302,6 +303,16 @@ OPTIONS:
     r,g,b
 ";
 
+const HELP_SHADE_GRADIENT_COLORS: &str = "Set shade gradient color of Rain.
+OPTIONS:
+    white,
+    red,
+    blue,
+    green,
+    r,g,b,
+    #RRGGBB
+";
+
 const HELP_CHARS: &str = "Set what kind of characters are printed as rain.
 OPTIONS:
     all            - This shows most of the Character Groups all at once.
@@ -357,6 +368,8 @@ pub struct Cli {
     pub color: String,
     #[arg(short = 'B', long, help = HELP_BG_COLORS)]
     pub bg_color: Option<String>,
+    #[arg(short = 'G', long, help = HELP_SHADE_GRADIENT_COLORS, default_value_t = String::from("#000000"))]
+    pub shade_gradient: String,
     #[arg(short = 'H', long, help = HELP_HEAD, default_value_t = String::from("white"))]
     pub head: String,
     #[arg(short, long, help = HELP_DIRECTION, default_value = "south")]
@@ -382,6 +395,10 @@ impl Cli {
     }
     pub fn head_color(&self) -> (u8, u8, u8) {
         into_color(&self.head)
+    }
+
+    pub fn shade_gradient_color(&self) -> (u8, u8, u8) {
+        into_color(&self.shade_gradient)
     }
 
     pub fn speed(&self) -> (u64, u64) {

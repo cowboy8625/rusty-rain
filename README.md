@@ -118,6 +118,29 @@ Options:
 
           [default: green]
 
+  -B, --bg-color <BG_COLOR>
+          Set background color of Rain with color string name or tuple
+          OPTIONS:
+              white,
+              red,
+              blue,
+              green,
+              r,g,b
+
+
+  -G, --shade-gradient <SHADE_GRADIENT>
+          Set shade gradient color of Rain.
+          OPTIONS:
+              white,
+              red,
+              blue,
+              green,
+              r,g,b,
+              #RRGGBB
+
+
+          [default: #000000]
+
   -H, --head <HEAD>
           Set the color of the first char in Rain.
           OPTIONS:
