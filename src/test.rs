@@ -2,6 +2,7 @@ use crate::cli::Grouping;
 
 use super::{Parser, Rain, cli::Cli};
 use ezemoji::CharGroup;
+use pretty_assertions::assert_eq;
 use std::fmt::Write;
 
 struct SnapshotOptions {
@@ -141,6 +142,17 @@ fn test_gen_shade_color() {
     let colors = gen_shade_color(bc, TRUE_BLACK, length);
 
     assert_eq!(colors.len(), length as usize);
-    assert_eq!(colors.first(), Some(&Color::Rgb { r: 0, g: 225, b: 0 }));
+    assert_eq!(colors.first(), Some(&Color::Rgb { r: 0, g: 255, b: 0 }));
     assert_eq!(colors.last(), Some(&Color::Rgb { r: 0, g: 0, b: 0 }));
+}
+
+#[test]
+fn test_random_range() {
+    use super::Random;
+    let mut random = Random::default();
+    assert_eq!(random.random_range(0..10), 1);
+    assert_eq!(random.random_range(0..10), 5);
+    assert_eq!(random.random_range(0..10), 2);
+    assert_eq!(random.random_range(0..10), 5);
+    assert_eq!(random.random_range(0..10), 8);
 }
