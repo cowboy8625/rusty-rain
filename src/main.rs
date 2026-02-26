@@ -9,7 +9,7 @@ use crossterm::{
     terminal::{self, Clear, ClearType},
 };
 use ezemoji::CharGroup;
-use rand::Rng;
+use rand::RngExt;
 use std::{
     io::{BufWriter, Stdout, Write, stdout},
     str::FromStr,
