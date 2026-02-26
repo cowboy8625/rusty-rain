@@ -571,18 +571,20 @@ fn gen_shade_color(base: Color, shade: Color, length: u8) -> Vec<Color> {
     };
 
     let mut colors = Vec::with_capacity(length as usize);
+    let br = br as f32;
+    let bg = bg as f32;
+    let bb = bb as f32;
+    let sr = sr as f32;
+    let sg = sg as f32;
+    let sb = sb as f32;
 
     for i in 0..length {
-        let t = i as f32 / length as f32;
-        let s = 1.0 - t;
-
-        let r = ((br as f32 * t) + (sr as f32 * s)) as u8;
-        let g = ((bg as f32 * t) + (sg as f32 * s)) as u8;
-        let b = ((bb as f32 * t) + (sb as f32 * s)) as u8;
-
+        let t = i as f32 / (length - 1) as f32;
+        let r = ((br * (1.0 - t)) + (sr * t)) as u8;
+        let g = ((bg * (1.0 - t)) + (sg * t)) as u8;
+        let b = ((bb * (1.0 - t)) + (sb * t)) as u8;
         colors.push(Color::Rgb { r, g, b });
     }
-    colors.reverse();
     colors
 }
 
