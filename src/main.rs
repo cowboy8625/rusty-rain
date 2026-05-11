@@ -11,7 +11,7 @@ use crossterm::{
 
 use ezemoji::CharGroup;
 
-use rand::Rng;
+use rand::RngExt;
 #[cfg(test)]
 use rand::SeedableRng;
 
