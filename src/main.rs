@@ -8,16 +8,18 @@ use crossterm::{
     style::{Color, Print, SetBackgroundColor, SetForegroundColor},
     terminal::{self, Clear, ClearType},
 };
+
 use ezemoji::CharGroup;
+
 use rand::RngExt;
+#[cfg(test)]
+use rand::SeedableRng;
+
 use std::{
     io::{BufWriter, Stdout, Write, stdout},
     str::FromStr,
     time::{Duration, Instant},
 };
-
-#[cfg(test)]
-use rand::SeedableRng;
 
 use crate::cli::Grouping;
 
@@ -61,6 +63,22 @@ impl Random {
         R: rand::distr::uniform::SampleRange<T>,
     {
         self.rng.random_range(range)
+    }
+}
+
+trait Clock: std::fmt::Debug {
+    fn now(&self) -> Instant;
+
+    #[cfg(test)]
+    fn advance(&mut self, _: Duration) {}
+}
+
+#[derive(Debug)]
+struct SystemClock;
+
+impl Clock for SystemClock {
+    fn now(&self) -> Instant {
+        Instant::now()
     }
 }
 
@@ -139,6 +157,8 @@ impl FromStr for Direction {
 struct Rain<const LENGTH: usize> {
     /// Random number generator wrapper for testing purposes
     rng: Random,
+    /// A configurable Clock interface to help control time while in a test env
+    clock: Box<dyn Clock>,
     /// Characters to use for the rain
     chars: [char; LENGTH],
     /// Starting positions of the rain within the chars array
@@ -186,7 +206,12 @@ struct Rain<const LENGTH: usize> {
 impl<const LENGTH: usize> Rain<LENGTH> {
     const MIN_LENGTH_OF_RAIN: usize = 4;
     const MAX_LENGTH_OFFSET_OF_RAIN: usize = 4;
-    fn new(mut width: usize, height: usize, settings: &cli::Cli) -> Self {
+    fn new(
+        mut width: usize,
+        height: usize,
+        settings: &cli::Cli,
+        clock: impl Clock + 'static,
+    ) -> Self {
         width /= settings.group.width() as usize;
 
         let mut rng = Random::default();
@@ -217,7 +242,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
             .collect();
 
         let speed = settings.speed_range();
-        let now = Instant::now();
+        let now = clock.now();
         let time: Vec<(Instant, Duration)> = (0..width)
             .map(|_| {
                 let milli_seconds = rng.random_range(speed.start..speed.end);
@@ -244,6 +269,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
         };
 
         Self {
+            clock: Box::new(clock),
             shading: settings.shade,
             shade_gradient: shade_color,
             body_colors,
@@ -267,12 +293,13 @@ impl<const LENGTH: usize> Rain<LENGTH> {
 
     #[inline(always)]
     fn update(&mut self) {
+        let now = self.clock.now();
         for i in 0..self.width {
             let (start, duration) = self.time[i];
-            if start.elapsed() > duration {
+            if now.duration_since(start) > duration {
                 self.queue.push(i);
                 let (start, _) = &mut self.time[i];
-                *start = Instant::now();
+                *start = now;
             }
         }
     }
@@ -280,7 +307,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
     #[inline(always)]
     fn reset_time(&mut self, i: usize) {
         let (start, duration) = &mut self.time[i];
-        *start = Instant::now();
+        *start = self.clock.now();
         let milli_seconds = self.rng.random_range(self.speed.start..self.speed.end);
         *duration = Duration::from_millis(milli_seconds);
     }
@@ -480,7 +507,7 @@ impl Default for App {
 impl App {
     fn run(&mut self, settings: cli::Cli) -> std::io::Result<()> {
         let (w, h) = terminal::size()?;
-        let mut rain = Rain::<1024>::new(w as usize, h as usize, &settings);
+        let mut rain = Rain::<1024>::new(w as usize, h as usize, &settings, SystemClock);
         self.setup_terminal(&settings)?;
 
         let mut is_running = true;
@@ -492,7 +519,7 @@ impl App {
                     }
                     event::Event::Resize(w, h) => {
                         // TODO: make a method that handle resizing so we dont regenerate the rain
-                        rain = Rain::<1024>::new(w as usize, h as usize, &settings);
+                        rain = Rain::<1024>::new(w as usize, h as usize, &settings, SystemClock);
                         queue!(self.stdout, terminal::Clear(terminal::ClearType::All))?;
                     }
                     _ => {}
@@ -571,18 +598,20 @@ fn gen_shade_color(base: Color, shade: Color, length: u8) -> Vec<Color> {
     };
 
     let mut colors = Vec::with_capacity(length as usize);
+    let br = br as f32;
+    let bg = bg as f32;
+    let bb = bb as f32;
+    let sr = sr as f32;
+    let sg = sg as f32;
+    let sb = sb as f32;
 
     for i in 0..length {
-        let t = i as f32 / length as f32;
-        let s = 1.0 - t;
-
-        let r = ((br as f32 * t) + (sr as f32 * s)) as u8;
-        let g = ((bg as f32 * t) + (sg as f32 * s)) as u8;
-        let b = ((bb as f32 * t) + (sb as f32 * s)) as u8;
-
+        let t = i as f32 / (length - 1) as f32;
+        let r = ((br * (1.0 - t)) + (sr * t)) as u8;
+        let g = ((bg * (1.0 - t)) + (sg * t)) as u8;
+        let b = ((bb * (1.0 - t)) + (sb * t)) as u8;
         colors.push(Color::Rgb { r, g, b });
     }
-    colors.reverse();
     colors
 }
 

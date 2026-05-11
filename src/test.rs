@@ -1,8 +1,35 @@
-use crate::cli::Grouping;
+use crate::{Clock, cli::Grouping};
 
 use super::{Parser, Rain, cli::Cli};
 use ezemoji::CharGroup;
-use std::fmt::Write;
+use pretty_assertions::assert_eq;
+use std::{
+    fmt::Write,
+    time::{Duration, Instant},
+};
+
+#[derive(Debug)]
+struct TestClock {
+    now: Instant,
+}
+
+impl Default for TestClock {
+    fn default() -> Self {
+        Self {
+            now: Instant::now(),
+        }
+    }
+}
+
+impl Clock for TestClock {
+    fn now(&self) -> std::time::Instant {
+        self.now
+    }
+
+    fn advance(&mut self, duration: Duration) {
+        self.now += duration
+    }
+}
 
 struct SnapshotOptions {
     label: String,
@@ -67,14 +94,14 @@ fn set_up_snapshot(options: SnapshotOptions) {
     let mut cli = Cli::parse();
     cli.group = Grouping::from(group);
     cli.direction = direction;
-    let mut rain = Rain::<1024>::new(width, height, &cli);
+    let mut rain = Rain::<1024>::new(width, height, &cli, TestClock::default());
     let mut window = String::new();
     for id in 0..cycles {
         rain.update();
         rain.update_screen_buffer().unwrap();
         display(id, &mut window, &rain);
 
-        std::thread::sleep(std::time::Duration::from_millis(100));
+        rain.clock.advance(Duration::from_millis(100));
     }
     insta::assert_snapshot!(label, window);
 }
@@ -141,6 +168,17 @@ fn test_gen_shade_color() {
     let colors = gen_shade_color(bc, TRUE_BLACK, length);
 
     assert_eq!(colors.len(), length as usize);
-    assert_eq!(colors.first(), Some(&Color::Rgb { r: 0, g: 225, b: 0 }));
+    assert_eq!(colors.first(), Some(&Color::Rgb { r: 0, g: 255, b: 0 }));
     assert_eq!(colors.last(), Some(&Color::Rgb { r: 0, g: 0, b: 0 }));
+}
+
+#[test]
+fn test_random_range() {
+    use super::Random;
+    let mut random = Random::default();
+    assert_eq!(random.random_range(0..10), 1);
+    assert_eq!(random.random_range(0..10), 5);
+    assert_eq!(random.random_range(0..10), 2);
+    assert_eq!(random.random_range(0..10), 5);
+    assert_eq!(random.random_range(0..10), 8);
 }
