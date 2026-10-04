@@ -349,7 +349,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
     }
 
     fn update_screen_buffer(&mut self) -> std::io::Result<()> {
-        for i in self.queue.drain(..).collect::<Vec<usize>>() {
+        for i in std::mem::take(&mut self.queue) {
             let pos = self.positions[i];
             let start_idx = self.starts[i];
             let window_len = self.windows[i];
