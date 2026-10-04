@@ -1,3 +1,17 @@
+rusty-rain (0.5.1-1) unstable; urgency=medium
+
+  * Added:
+    - Added feature to set bg_color using -B flag.
+
+  * Changed:
+    - update readme for winget install instructions
+    - feat: Add shade gradient color configuration
+    - update rand
+    - update test
+    - Fixed typo in command open-source.
+    - ci release
+    - Fix clippy error/warning
+
 rusty-rain (0.5.0-1) unstable; urgency=medium
 
   * Removed character grouping large-letters (issue #36)
