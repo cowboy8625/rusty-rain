@@ -179,7 +179,7 @@ impl FromStr for Grouping {
             // [hasecilu](https://github.com/hasecilu) in PR
             // https://github.com/cowboy8625/ezemoji/pull/5
             // Once merged into ezemoji we can remove this
-            "opensource" => Ok(Grouping::from(CharGroup::new(
+            "open-source" => Ok(Grouping::from(CharGroup::new(
                 GroupKind::Custom("OpenSource"),
                 MultiRange::new(&[
                     62208..62210,
