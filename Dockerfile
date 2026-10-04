@@ -1,6 +1,8 @@
 FROM rust:1.88 AS build
 
-RUN cargo install rusty-rain
+WORKDIR /src
+COPY . .
+RUN cargo install --path .
 
 FROM debian:bookworm-slim
 

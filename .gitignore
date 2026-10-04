@@ -1,6 +1,6 @@
 /target
-/Cargo.lock
 /graphs
+.DS_Store
 dod.rs
 *.lock
 *.txt
