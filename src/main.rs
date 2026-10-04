@@ -349,7 +349,7 @@ impl<const LENGTH: usize> Rain<LENGTH> {
     }
 
     fn update_screen_buffer(&mut self) -> std::io::Result<()> {
-        for i in self.queue.drain(..).collect::<Vec<usize>>() {
+        for i in std::mem::take(&mut self.queue) {
             let pos = self.positions[i];
             let start_idx = self.starts[i];
             let window_len = self.windows[i];
@@ -667,7 +667,7 @@ fn main() -> std::io::Result<()> {
         // From what I have found Unicode characters with
         // U+FE0E = text style (forces small).
         // U+FE0F = emoji style (forces larger).
-        // but for something in the opensource group char if there is an space next to the char it will
+        // but for something in the open-source group char if there is an space next to the char it will
         // visibly expand.
         // example:   .
         let extra_width = matches!(
